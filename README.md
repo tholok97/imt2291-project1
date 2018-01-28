@@ -7,7 +7,7 @@ Husk å velge å beholde rettigheter fra det originale repositoriet når dere op
 Her skriver dere inn navnene til de som er deltakere på gruppen
 
 # Oppgaveteksten # 
-Oppgaveteksten ligger i Wikien til det originale repositoriet.
+Oppgaveteksten ligger i [Wikien til det originale repositoriet](https://bitbucket.org/okolloen/imt2291-project1-spring2018/wiki/).
 
 # Rapporten #
 Rapporten til prosjektet legger dere i Wikien til deres egen fork av repositoriet.
