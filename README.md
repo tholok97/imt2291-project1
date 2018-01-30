@@ -17,3 +17,14 @@ Oppgaveteksten ligger i [Wikien til det originale repositoriet](https://bitbucke
 # Rapporten #
 
 Rapporten til prosjektet legger dere i Wikien til deres egen fork av repositoriet.
+
+*(Original readme from Øivind above)*
+
+---
+
+*(Our readme below)*
+
+# Remember
+
+* All db connections should go through DB.php
+* We write sql in the relevant classes (User-related sql inside User.php etc.)
