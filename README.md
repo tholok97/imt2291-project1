@@ -28,3 +28,6 @@ Rapporten til prosjektet legger dere i Wikien til deres egen fork av repositorie
 
 * All db connections should go through DB.php
 * We write sql in the relevant classes (User-related sql inside User.php etc.)
+* Code should be **tested** and have `/**`-style comments where relevant
+* File issues before embarking on larger tasks
+* Make one branch per issue you're working on (?)
