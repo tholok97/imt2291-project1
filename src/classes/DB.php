@@ -2,7 +2,7 @@
 
 class DB {
   private static $db=null;
-  private $dsn = 'mysql:dbname=www_lab0123_users;host=127.0.0.1';
+  private $dsn = 'mysql:dbname=imt2282_project1;host=localhost';
   private $user = 'root';
   private $password = '';
   private $dbh = null;
@@ -18,7 +18,7 @@ class DB {
     }
   }
 
-  public static function getDBConnection($dsn = 'mysql:dbname=www_lab0123_users;host=localhost') {
+  public static function getDBConnection($dsn = 'mysql:dbname=imt2282_project1;host=localhost') {
       if (DB::$db==null) {
         DB::$db = new self($dsn);
       }
