@@ -21,7 +21,7 @@ Wants_privilege (uid, privilege_level)
 PRIMARY KEY uid
 FOREIGN KEY uid REFERENCES User.uid
 
-Video (vid, title, description, thumbnail, uid, topic, course_code, timestamp, view_count)
+Video (vid, title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size)
 PRIMARY KEY vid
 FOREIGN KEY uid REFERENCES User.uid
 
