@@ -31,3 +31,37 @@ Rapporten til prosjektet legger dere i Wikien til deres egen fork av repositorie
 * Code should be **tested** and have `/**`-style comments where relevant
 * File issues before embarking on larger tasks
 * Make one branch per issue you're working on (?)
+
+# Install
+
+* Place this repository a place where your webserver can see it (htdocs for example)
+* Run `composer install` to install dependencies of project
+* Add a `config.php` file to the root directory of the project. It is used to provide environment-dependant constants. It should look like this:
+
+        
+```php
+<?php
+
+/**
+ * Environment-dependant constants.
+ */
+
+class Constants {
+
+    /**
+     * DB constants. Used when connecting to database. Change to make php use 
+     * different website (put in your own db details)
+     */
+    const $DB_DSN = 'mysql:dbname=imt2291_project1;host=127.0.0.1';
+    const $DB_USER = 'root';
+    const $DB_PASSWORD = 'veldigsikkertpassord';
+
+    /**
+     * Db constants for use during testing. Same as above but SHOULD POINT TO 
+     * A DIFFERENT DATABASE. One that is disposable
+     */
+    const $DB_TEST_DSN = 'mysql:dbname=imt2291_project1_test;host=127.0.0.1';
+    const $DB_TEST_USER = 'root';
+    const $DB_TEST_PASSWORD = 'veldigsikkertpassord';
+}
+```
