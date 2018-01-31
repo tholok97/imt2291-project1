@@ -17,18 +17,33 @@ FOREIGN KEY <columnname> REFERENCES <tablename>.<columnname>
 User (uid, username, firstname, lastname, password_hash, privilege_level)
 PRIMARY KEY uid
 
-Video (vid, title, description, thumbnail, rating, uid, topic, course_code, timestamp)
+Wants_privilege (uid, privilege_level)
+PRIMARY KEY uid
+FOREIGN KEY uid REFERENCES User.uid
+
+Video (vid, title, description, thumbnail, uid, topic, course_code, timestamp, view_count)
 PRIMARY KEY vid
 FOREIGN KEY uid REFERENCES User.uid
 
 Playlist (pid, title, description, thumbnail)
 PRIMARY KEY pid
 
+Maintains (pid, uid)
+PRIMARY KEY pid, uid
+FOREIGN KEY pid REFERENCES Playlist.pid
+FOREIGN KEY uid REFERENCES User.uid
+
 Comment (cid, vid, uid, text, timestamp)
 PRIMARY KEY cid
 FOREIGN KEY vid REFERENCES Video.vid
+FOREIGN KEY uid REFERENCES User.uid
 
-In_playlist (vid, pid)
+Rated (vid, uid, rating)
+PRIMARY vid, uid
+FOREIGN KEY vid REFERENCES Video.vid
+FOREIGN KEY uid REFERENCES User.uid
+
+In_playlist (vid, pid, position)
 PRIMARY KEY vid, pid
 FOREIGN KEY vid REFERENCES Video.vid
 FOREIGN KEY pid REFERENCES Playlist.pid
@@ -43,7 +58,7 @@ FOREIGN KEY pid REFERENCES Playlist.pid
 
 * Only one lecturer uploads a video
 * Multiple lecturers can contribute to the same playlist, in which case they will all have maintenance rights to it
-    * You have maintenance rights IF: You have a video that is in the playlist. Can use joins to find this out.
+    * Maintenance rights are given when the playlist is created
 * The only thing differentiating the different user types in the db is their privelege level (admin doesn't store more info than a student)
     * Privilege level is stored as an int 0, 1 or 2 *(?)*
 * Thumbnails are stored directly in the database as small images
