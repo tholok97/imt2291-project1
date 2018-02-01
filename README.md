@@ -1,4 +1,4 @@
-*(Ã˜ivind's original readme is in <./docs/original_readme.md>*
+*([Øivind's original readme](./docs/original_readme.md)*
 
 # Project 1 in imt2291 - Web Technology
 
@@ -8,7 +8,7 @@
 
 * Yngve Hestem
 * Kristian Sigtbakken Holm
-* Thomas LÃ¸kkeborg
+* Thomas Løkkeborg
 
 ## Install
 
