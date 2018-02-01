@@ -1,0 +1,6 @@
+# Turn on rewrite engine
+RewriteEngine On
+
+# Transform any address that looks like ".../anything" into 
+# ".../index.php?page=anything"
+RewriteRule ^/?([a-zA-Z_]+)$ index.php?page=$1 [L]
