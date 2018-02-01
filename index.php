@@ -7,7 +7,15 @@
 
 // If page is unset show index page
 if (!isset($_GET['page'])) {
-    echo 'Index page';
+    echo '
+        <p>Index page</p>
+        <ul>
+            <li><a href="./admin">Goto admin page</a></li>
+            <li><a href="./videos">Goto videos page</a></li>
+            <li><a href="./lecturer">Goto lecturer page</a></li>
+            <li><a href="./playlists">Goto playlist page</a></li>
+        </ul>
+    ';
     exit();
 }
 
