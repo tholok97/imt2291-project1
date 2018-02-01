@@ -1,4 +1,4 @@
-*([Øivind's original readme](./docs/original_readme.md)*
+*([Øivind's original readme](./docs/original_readme.md))*
 
 # Project 1 in imt2291 - Web Technology
 
