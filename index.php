@@ -1,10 +1,13 @@
 <?
 
-require_once 'vendor/autoload.php';
+require_once dirname(__FILE__) . '/vendor/autoload.php';
+require_once dirname(__FILE__) . '/src/classes/UserManager.php';
 /*
  * Entry-point to the entire site. Users are shown the sites they want using 
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
  */
+
+session_start();
 
 
 // loader used to fetch files for twig
@@ -26,9 +29,32 @@ $twig_file_to_render = null;
  */
 $twig_arguments = array();
 
-// If page is unset show index page, if it is set load correct page based on it
-if (!isset($_GET['page'])) {
 
+
+/**
+ * used to check status of user logged-in-ed-ness
+ */
+$userManager = new UserManager(DB::getDBConnection());
+
+
+
+// The ye old huge if-else of stuff..
+
+if (!isset($_SESSION['uid'])) {
+
+    // user is not logged in -> send to login page
+    $twig_file_to_render = 'login.twig';
+
+    // TODO: show "please login first" message?
+
+} else if (!$userManager->isValidUser($_SESSION['uid'])) {
+
+    // NOT VALID USER -> bad... show anti-hacker message?
+    $twig_file_to_render = 'login.twig';
+
+} else if (!isset($_GET['page'])) {
+
+    // If page is unset show index page, if it is set load correct page based on it
     $twig_file_to_render = 'index.twig';
 
 } else {
@@ -46,6 +72,10 @@ if (!isset($_GET['page'])) {
     case 'videos':
         $twig_file_to_render = 'debug.twig';
         $twig_arguments = array('message' => 'vidoes page');
+        break;
+    case 'logout':
+        unset($_SESSION['uid']);
+        $twig_file_to_render = 'login.twig';
         break;
     default:
         $twig_file_to_render = 'notfound.twig';
