@@ -1,7 +1,11 @@
 # Ignore temp directories
 bin/*
 build/*
+
+# ignore environment specific stuff
 vendor/
+config.php
+
 
 # Ignore any build-files still roaming around
 *.exe
