@@ -83,6 +83,8 @@ if ($page == 'register') {
         $twig_arguments = array('message' => 'DEBUG: vidoes page');
         break;
     case 'logout':
+
+        // unset session uid to indicate logged out
         unset($_SESSION['uid']);
         $twig_file_to_render = 'login.twig';
         break;
