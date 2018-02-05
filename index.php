@@ -1,5 +1,7 @@
 <?
 
+session_start();
+
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/src/classes/UserManager.php';
 /*
@@ -7,7 +9,6 @@ require_once dirname(__FILE__) . '/src/classes/UserManager.php';
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
  */
 
-session_start();
 
 
 // loader used to fetch files for twig
@@ -47,10 +48,10 @@ if (!isset($_SESSION['uid'])) {
 
     // TODO: show "please login first" message?
 
-} else if (!$userManager->isValidUser($_SESSION['uid'])) {
+/*} else if (!$userManager->isValidUser($_SESSION['uid'])) {
 
     // NOT VALID USER -> bad... show anti-hacker message?
-    $twig_file_to_render = 'login.twig';
+$twig_file_to_render = 'login.twig';*/
 
 } else if (!isset($_GET['page'])) {
 

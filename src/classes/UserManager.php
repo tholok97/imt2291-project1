@@ -18,41 +18,6 @@ class UserManager {
         $this->dbh = $dbh;
     }
 
-    /**
-     * is this a valid user?
-     *
-     * @param int $uid 
-     *
-     * @return assosiative with ['status'], ['message'], ['valid']
-     */
-    public function isValidUser($uid) {
-        
-        // prepare ret
-        $ret['status'] = 'fail';
-        $ret['valid'] = null;
-        $ret['message'] = '';
-
-        // try and check if valid
-        try {
-
-            $stmt = $this->dbh->prepare('SELECT * FROM user WHERE user.uid = :uid');
-            $stmt->bindParam('uid', $uid);
-            $ok = $stmt->execute();
-
-            if (!$ok) {
-                $ret[':message'] = 'PDO didn\'t execute right';
-            } else {
-                $ret['status'] = 'ok';
-                $ret[':valid'] = ($stmt->fetchAll().length() > 0);
-            }
-
-        } catch (PDOException $ex) {
-            $ret['message'] = 'PDO exception: ' . $ex->getMessage();
-        }
-
-        return $ret;
-    }
-
 
     /**
      * Try and login
@@ -70,79 +35,34 @@ class UserManager {
         $ret['uid'] = null;
         $ret['message'] = '';
 
-        // try and check if valid user
         try {
 
-            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $this->dbh->prepare('SELECT * FROM User WHERE username=:username');
 
-            //print_r($hash);
+            $stmt->bindParam(':username', $username);
 
-            $stmt = $this->dbh->prepare('SELECT * FROM User WHERE User.username = :username AND User.password_hash = :hash');
+            if ($stmt->execute()) {
 
-            $stmt->bindValue(':username', $username, PDO::PARAM_STR);
-            $stmt->bindValue(':hash', $hash, PDO::PARAM_STR);
+                foreach ($stmt->fetchAll() as $row) {
 
-            print_r($stmt);
-
-
-            if (!$stmt->execute()) {
-                $ret['message'] = 'PDO didn\'t execute right';
-            } else {
-
-                $rows = $stmt->fetchAll();
-
-                // if user exists ->  YAY
-                if (count($rows) > 0) {
-
-                    $ret['status'] = 'ok';
-                    $ret['uid'] = $rows[0]['uid'];
+                    if (password_verify($password, $row['password_hash'])) {
+                        $ret['status'] = 'ok';
+                        $ret['uid'] = $row['uid'];
+                    }
                 }
+
+                if ($ret['status'] != 'ok') {
+                    $ret['messsage'] = 'No user with given username had that password';
+                }
+            } else {
+                $ret['message'] = "select didn't execute right";
             }
 
         } catch (PDOException $ex) {
-
+            $ret['status'] = 'fail';
             $ret['message'] = $ex->getMessage();
         }
 
         return $ret;
-    }
-
-    /**
-     * Adds a user to the system.
-     *
-     * @param User $user User to be added to the system
-     * @param string $password The password to give the user
-     *
-     * @return TODO
-     */
-    public function addUser($user, $password) {
-
-        // TODO
-    }
-
-    /**
-     * Gets a user from the system based on uid
-     *
-     * @param int $uid The id of the user
-     *
-     * @return TODO
-     */
-    public function getUser($uid) {
-
-        // TODO
-    }
-
-    /**
-     * Removes a user from the system based on uid
-     *
-     * * Should remove all rows associated with that user also
-     *
-     * @param int $uid The id of the user
-     *
-     * @return TODO
-     */
-    public function removeUser($uid) {
-        
-        // TODO
     }
 }
