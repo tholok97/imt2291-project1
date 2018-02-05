@@ -58,10 +58,10 @@ if ($page == 'register') {
 
     // TODO: show "please login first" message?
 
-/*} else if (!$userManager->isValidUser($_SESSION['uid'])) {
+} else if (!$userManager->isValidUser($_SESSION['uid'])) {
 
     // NOT VALID USER -> bad... show anti-hacker message?
-$twig_file_to_render = 'login.twig';*/
+    $twig_file_to_render = 'login.twig';
 
 } else if (!isset($_GET['page'])) {
 
@@ -72,14 +72,15 @@ $twig_file_to_render = 'login.twig';*/
 
 
     // Switch on page (DEBUG: just indicate that it's working)
+    
     switch ($page) {
     case 'admin':
         $twig_file_to_render = 'debug.twig';
-        $twig_arguments = array('message' => 'admin page');
+        $twig_arguments = array('message' => 'DEBUG: admin page');
         break;
     case 'videos':
         $twig_file_to_render = 'debug.twig';
-        $twig_arguments = array('message' => 'vidoes page');
+        $twig_arguments = array('message' => 'DEBUG: vidoes page');
         break;
     case 'logout':
         unset($_SESSION['uid']);

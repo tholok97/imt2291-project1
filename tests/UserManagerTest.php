@@ -122,4 +122,55 @@ class UserManagerTest extends TestCase {
         );
     }
 
+    public function testIsValidUser() {
+
+        // test user data
+        $username = 'testuser';
+        $password = 'testpassword';
+
+        // generate hash
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        // insert testuser into database
+        $stmt = $this->dbh->prepare('
+            INSERT INTO User (username, firstname, lastname, password_hash, privilege_level)
+            VALUES (:username, "firstname", "lastname", :hash, 2)
+        ');
+
+        $stmt->bindParam(':username', $username);
+        $stmt->bindValue(':hash', $hash);
+
+        if (!$stmt->execute()) {
+            $this->fail("Couldn't insert test user");
+        }
+
+        if (!password_verify($password, $hash)) {
+            $this->fail("Password isn't right..");
+        }
+
+
+        // store uid
+        $uid = $this->dbh->lastInsertId();
+
+
+        // test that isValidUser gives true for our test user
+        $res = $this->userManager->isValidUser($uid);
+        $this->assertEquals(
+            true,
+            $res['valid'],
+            "id of inserted test user should be valid"
+        );
+        
+        
+        // test that isValidUser gives false for non-existant user
+        $res = $this->userManager->isValidUser(923923);
+        $this->assertEquals(
+            false,
+            $res['valid'],
+            "isValidUser should return false for non-valid uid"
+        );
+        
+    }
+
+
 }

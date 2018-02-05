@@ -66,6 +66,16 @@ class UserManager {
         return $ret;
     }
 
+
+
+    /**
+     * add given user with given password to db
+     *
+     * @param User $user 
+     * @param string $password
+     *
+     * @return assoc array with fields: status, message
+     */
     public function addUser($user, $password) {
         
         // prepare ret
@@ -130,4 +140,52 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
 
         return $ret;
     }
+
+
+
+    /**
+     * tests if given uid points to valid user
+     *
+     * @param @uid
+     *
+     * @return assosiative array that has fields: ['status'], ['valid'], 
+     *         ['message']
+     */
+    public function isValidUser($uid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['valid'] = null;
+        $ret['message'] = '';
+
+        // try and check db for uid
+        try {
+
+            $stmt = $this->dbh->prepare('
+                SELECT *
+                FROM User
+                WHERE uid = :uid
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+
+            if ($stmt->execute()) {
+                
+                if (count($stmt->fetchAll()) > 0) {
+                    $ret['valid'] = true; 
+                } else {
+                    $ret['valid'] = false;
+                }
+            } else {
+                $ret['message'] = "statement didn't execute right";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+
+    }
+
 }
