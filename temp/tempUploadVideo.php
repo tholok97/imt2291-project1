@@ -2,7 +2,7 @@
 <head></head>
 <body>
   <form method="post" enctype="multipart/form-data">
-    <label for="pickFile">Velg en fil</label><input type="file" name="fileToUpload" id="pickFile"><br>
+    <label for="pickFile">Velg en fil (anbefaler en MP4 fil med h.264-video og MP3- eller AAC-lyd for best kompabilitet)</label><input type="file" name="fileToUpload" id="pickFile"><br>
     <label for="title">Tittel</label><input type="text" name="title" id="title"><br>
     <label for="descr">Beskrivelse</label><input type="text" name="descr" id="descr"><br>
     <label for="user">User</label><input type="text" name="user" id="user"><br>

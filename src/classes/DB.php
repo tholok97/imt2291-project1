@@ -18,7 +18,7 @@ class DB {
     }
   }
 
-  public static function getDBConnection($dsn = 'mysql:dbname=imt2282_project1;host=localhost') {
+  public static function getDBConnection($dsn = 'mysql:dbname=imt2291_project1_db;host=localhost') {
       if (DB::$db==null) {
         DB::$db = new self($dsn);
       }

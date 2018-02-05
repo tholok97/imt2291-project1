@@ -40,7 +40,7 @@ class Video {
      * @param string $mime - the format the video is in
      * @param int $size 
      */
-    public __construct($vid, $title, $description, $url, $thumbnail, $uid, $topic, $course_code, $timestamp, $view_count, $rating, $mime, $size) {
+    public function __construct($vid, $title, $description, $url, $thumbnail, $uid, $topic, $course_code, $timestamp, $view_count, $rating, $mime, $size) {
         $this->vid = $vid;
         $this->title = $title;
         $this->description = $description;

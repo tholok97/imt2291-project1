@@ -2,9 +2,9 @@
 
 require_once 'DB.php';
 require_once 'Video.php';
-//require_once '../constants.php';
-//require_once '../../config.php';
-require_once basename(__FILE__) . '../functions/functions.php'; // Må rettes på!!!!!!
+require_once dirname(__FILE__) . '/../constants.php';
+require_once dirname(__FILE__) . '/../../config.php';
+require_once dirname(__FILE__) . '/../functions/functions.php';
 
 
 class VideoManager {
@@ -41,34 +41,42 @@ class VideoManager {
         }
 
         // If not someone who is trying to hack us.
-        if (is_uploaded_file($videoRef['tmp_name'])) {
+        //if (is_uploaded_file($_FILES['fileToUpload']['tmp_name'])) {
             // If file size not too big.
             if($videoRef['size'] < 5000000 /*Some number*/) {
-                $thumbnail = getThumbnail($videoRef);
+                $title = htmlspecialchars($title);
+                $description = htmlspecialchars($description);
+                $thumbnail = getThumbnail($videoRef);               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
+                $uid = htmlspecialchars($uid);
+                $topic = htmlspecialchars($topic);
+                $course_code = htmlspecialchars($course_code);
+                $timestamp = setTimestamp();
+                $views = 0;
                 $sql = "INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size) VALUES (:title, :description, :thumbnail, :uid, :topic, :course_code, :timestamp, :view_count, :mime, :size)";
                 $sth = $this->db->prepare ($sql);
-                $sth->bindParam(':title', htmlspecialchars($title));
-                $sth->bindParam(':description', htmlspecialchars($description));
+                $sth->bindParam(':title', $title);
+                $sth->bindParam(':description', $description);
                 $sth->bindParam(':thumbnail', $thumbnail);
-                $sth->bindParam(':uid', htmlspecialchars($uid));
-                $sth->bindParam(':topic', htmlspecialchars($topic));
-                $sth->bindParam(':course_code', htmlspecialchars($course_code));
-                $sth->bindParam(':timestamp', setTimestamp());          // Setting timestamp.
-                $sth->bindParam(':view_count', 0);                      // Zero-out view-count.
-                $sth->bindParam(':mime', $videoRef['type']);
-                $sth->bindParam(':size', $videoRef['size']);
-                $sth->execute ();
+                $sth->bindParam(':uid', $uid);
+                $sth->bindParam(':topic', $topic);
+                $sth->bindParam(':course_code', $course_code);
+                $sth->bindParam(':timestamp', $timestamp);                   // Setting timestamp.
+                $sth->bindParam(':view_count', $views);                      // Zero-out view-count.
+                $sth->bindParam(':mime', $_FILES['fileToUpload']['type']);
+                $sth->bindParam(':size', $_FILES['fileToUpload']['size']);
+                $sth->execute();
+                //print_r($sth->errorInfo());
                 if ($sth->rowCount()==1) {
-                    $id = $db->lastInsertId();
-                    if (!file_exists('uploadedFiles/'.$uid.'/videos')) {      // The user have not uploaded anything before.
-                      @mkdir('uploadedFiles/'.$uid.'/videos');
+                    $id = $this->db->lastInsertId();
+                    if (!file_exists(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos')) {      // The user have not uploaded anything before.
+                      mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos');
                     }
-                    if (@move_uploaded_file($_FILES['fileToUpload']['tmp_name'], "uploadedFiles/{$owner}/$id")) {
+                    if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos/'.$id)) {
                       $ret['status'] = 'ok';
                       $ret['vid'] = $id;
                     } else {
                       $sql = "delete from videos where id=$id";
-                      $db->exec($sql);
+                      $this->db->exec($sql);
                       $ret['errorMessage'] = "Klarte ikke å lagre filen.";
                     }
                   } else {
@@ -78,10 +86,10 @@ class VideoManager {
             else {
                 $ret['errorMessage'] = "Filen er for stor til å kunne lastes opp.";
             }
-        }
+        /*}
         else {
             $ret['errorMessage'] = "Vi lurer på om du hacker oss, ser ut som en ulovlig fil.";
-        }
+        }*/
 
         return $ret;
     }
@@ -97,9 +105,11 @@ class VideoManager {
     public function get($vid, $increaseViews = true) {
         $ret['status'] = 'fail';
         $ret['errorMessage'] = null;
+
+        $vid = htmlspecialchars($vid);  // Check that someone does not hack you.
         
-        // Check if a numeric id which is 0 or more.
-        if (!is_numeric(htmlspecialchars($vid)) || htmlspecialchars($vid) < 0) {
+        // Check if a numeric id is more than 0.
+        if (!is_numeric($vid) || $vid <= 0) {
             $ret['errorMessage'] = 'Fikk ingen korrekt video-id';
 			return $ret;
         }
@@ -110,13 +120,22 @@ class VideoManager {
             return $ret;
         }
 
-        $stmt = $this->db->query('SELECT v.*, AVG(r.rating) AS rating FROM video v LEFT JOIN rated r ON r.vid = v.vid WHERE v.vid=' . htmlspecialchars($vid) . ' GROUP BY vid');
+        $sth = $this->db->query('SELECT v.*, AVG(r.rating) AS rating FROM video v LEFT JOIN rated r ON r.vid = v.vid WHERE v.vid=' . $vid . ' GROUP BY vid');
 
+        $views;
         // While-loop will (hopefully) just go one time.
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+        while($row = $sth->fetch(PDO::FETCH_ASSOC))
         {
-            $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']),htmlspecialchars('uploadedFiles/'.$row['uid'].'/videos'.$row['vid']),/*htmlspecialchars(*/$row['thumbnail']/*)*/, htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), htmlspecialchars($row['view_count']), htmlspecialchars($row['rating']), htmlspecialchars($row['mime'], htmlspecialchars($row['size'])));
+            $views = htmlspecialchars($row['view_count']) + 1;
+            $ret['status'] = 'ok';
+            $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']), htmlspecialchars(/* Something here */'uploadedFiles/'.$row['uid'].'/videos/'.$row['vid']), /*htmlspecialchars(*/$row['thumbnail']/*)*/, htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), $views, htmlspecialchars($row['rating']), htmlspecialchars($row['mime']), htmlspecialchars($row['size']));
         }
+
+        $sql = "UPDATE video SET view_count = :view_count WHERE vid = :vid";
+        $sth = $this->db->prepare ($sql);
+        $sth->bindParam(':view_count', $views);
+        $sth->bindParam(':vid', $vid);
+        $sth->execute();
 
         return $ret;
     }
