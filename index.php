@@ -39,9 +39,19 @@ $userManager = new UserManager(DB::getDBConnection());
 
 
 
+
+// page stores parameter passed by GET. Contains an indication of what 
+// page to be shown
+$page = @$_GET['page'];
+
+
+
 // The ye old huge if-else of stuff..
 
-if (!isset($_SESSION['uid'])) {
+if ($page == 'register') {
+
+    $twig_file_to_render = 'register.twig';
+} else if (!isset($_SESSION['uid'])) {
 
     // user is not logged in -> send to login page
     $twig_file_to_render = 'login.twig';
@@ -60,9 +70,6 @@ $twig_file_to_render = 'login.twig';*/
 
 } else {
 
-    // page stores parameter passed by GET. Contains an indication of what 
-    // page to be shown
-    $page = $_GET['page'];
 
     // Switch on page (DEBUG: just indicate that it's working)
     switch ($page) {
