@@ -30,8 +30,7 @@ class User {
      * @param $lastname
      * @param $privilege_level
      */
-    public __construct($uid, $username, $firstname, $lastname, $privilege_level) {
-        $this->uid = $uid;
+    public function __construct($username, $firstname, $lastname, $privilege_level) {
         $this->username = $username;
         $this->firstname = $firstname;
         $this->lastname = $lastname;

@@ -65,4 +65,69 @@ class UserManager {
 
         return $ret;
     }
+
+    public function addUser($user, $password) {
+        
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = '';
+
+        // try and insert
+        try {
+
+
+            // FIRST check that username is unique
+            $stmt = $this->dbh->prepare('
+SELECT *
+FROM User
+WHERE username = :username
+            ');
+
+            $stmt->bindParam(':username', $user->username);
+
+            if ($stmt->execute()) {
+                if (count($stmt->fetchAll()) > 0) {
+                    $ret['message'] = "Duplicate username..."; 
+                    return $ret;
+                }
+            } else {
+                $ret['message'] = "couldn't assert that username is unique"; 
+                return $ret;
+            }
+
+
+
+
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+
+            $stmt = $this->dbh->prepare('
+INSERT INTO User (username, firstname, lastname, password_hash, privilege_level)
+VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
+            ');
+
+
+            $stmt->bindParam(':username', $user->username);
+            $stmt->bindParam(':firstname', $user->firstname);
+            $stmt->bindParam(':lastname', $user->lastname);
+            $stmt->bindParam(':password_hash', $hash);
+            $stmt->bindParam(':privilege_level', $user->privilege_level);
+
+            // try and execute 
+            if ($stmt->execute()) {
+
+                // success!
+                $ret['status'] = 'ok'; 
+            } else {
+
+                // fail...
+                $ret['message'] = "PDO didn't execute right";
+            }
+
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+    }
 }

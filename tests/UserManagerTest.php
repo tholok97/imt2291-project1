@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 
 require_once dirname(__FILE__) . '/../src/classes/DB.php';
 require_once dirname(__FILE__) . '/../src/classes/UserManager.php';
+require_once dirname(__FILE__) . '/../src/classes/User.php';
 
 class UserManagerTest extends TestCase {
 
@@ -29,10 +30,9 @@ class UserManagerTest extends TestCase {
     }
 
     protected function teardown() {
-       // if (!$this->dbh->query('DELETE FROM User')) {
-       //     $this->fail("Couldn't clean up database..");
-       // }
-
+        if (!$this->dbh->query('DELETE FROM User')) {
+            $this->fail("Couldn't clean up database..");
+        }
     }
 
     public function testLogin() {
@@ -70,6 +70,11 @@ class UserManagerTest extends TestCase {
             'login not ok for valid user'
         );
 
+        // assert that returned an uid
+        if (!isset($res['uid'])) {
+            $this->fail("Didn't get a uid from login function");
+        }
+
         // asssert that logging in with invalid password is unsuccessful
         $res = $this->userManager->login($username, "invalid");
         $this->assertEquals(
@@ -86,6 +91,35 @@ class UserManagerTest extends TestCase {
             'login not ok for valid user'
         );
 
+    }
+
+    public function testAddUser() {
+
+        // make test user
+        $user = new User(
+            'testuser', 
+            'firstname', 
+            'secondname', 
+            2
+        );
+
+        $password = 'testpassword';
+
+        // assert that adding new user goes well
+        $ret = $this->userManager->addUser($user, $password);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Couldn't add valid user :" . $ret['message']
+        );
+
+        // assert that adding same user again doesn't work goes well
+        $ret = $this->userManager->addUser($user, $password);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "shouldn't be able to add user twice (duplicate username)"
+        );
     }
 
 }
