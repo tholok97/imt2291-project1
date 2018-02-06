@@ -146,7 +146,7 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
     /**
      * tests if given uid points to valid user
      *
-     * @param @uid
+     * @param $uid
      *
      * @return assosiative array that has fields: ['status'], ['valid'], 
      *         ['message']
@@ -186,6 +186,59 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
 
         return $ret;
 
+    }
+
+    /*
+     * try to get uid of user with given username
+     *
+     * @param $username
+     *
+     * @return assoc array with fields: status, uid, message
+     */
+    public function getUID($username) {
+        
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['uid'] = null;
+        $ret['message'] = '';
+
+        // try and find user with given username, and return uid of this user
+        try {
+
+            $stmt = $this->dbh->prepare('
+                SELECT *
+                FROM User
+                WHERE username = :username
+            ');
+
+            $stmt->bindParam(':username', $username);
+
+            if ($stmt->execute()) {
+
+                $rows = $stmt->fetchAll();
+
+                // if one row returned -> OK, give uid
+                // if no row returned -> fail
+                // if more than one row returned -> fail, internal error?
+                if (count($rows) == 1) {
+                    $ret['uid'] = $rows[0]['uid'];
+                    $ret['status'] = 'ok';
+                } else if (count($rows) == 0) {
+                    $ret['message'] = "select returned nothing (doesn't exist?)";
+                    $ret['status'] = 'fail';
+                } else {
+                    $ret['message'] = "select returned more than one uid???!?!";
+                    $ret['status'] = 'fail';
+                }
+            } else {
+                $ret['message'] = "select didn't execute properly";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
     }
 
 }

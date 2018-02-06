@@ -206,8 +206,29 @@ class UserManagerTest extends TestCase {
 
 
 
-        // TODO
-        // TEST THAT GIVEN THE USERNAME THE GETUID FUNCTION RETURNS THE CORRECT UID  
+        // assert that getting uid of inserted user is ok
+        $res = $this->userManager->getUID($username);
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Getting uid of inserted user should be ok : " . $res['message']
+        );
+
+        // assert uid returned is the correct one
+        $this->assertEquals(
+            $uid,
+            $res['uid'],
+            "uid returned should be the same as the one we got when inserted with : " . 
+                    $res['message']
+        );
+
+        // assert that getting uid of non-existant user is fail
+        $res = $this->userManager->getUID("justrandomusername");
+        $this->assertEquals(
+            'fail',
+            $res['status'],
+            "getting uid of non-existant user should fail : " . $res['message']
+        );
     }
 
 
