@@ -5,6 +5,7 @@ build/*
 # ignore environment specific stuff
 vendor/
 config.php
+uploadedFiles/*
 
 
 # Ignore any build-files still roaming around
