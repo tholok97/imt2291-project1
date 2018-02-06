@@ -1,3 +1,4 @@
+
 # Ignore temp directories
 bin/*
 build/*
@@ -6,6 +7,9 @@ build/*
 vendor/
 config.php
 uploadedFiles/*
+
+# don't ignore gitkeep
+!.gitkeep
 
 
 # Ignore any build-files still roaming around
