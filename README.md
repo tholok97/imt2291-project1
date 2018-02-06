@@ -23,7 +23,7 @@ Documentation is found under docs/ in the root of the repository.
 ## Remember
 
 * All db connections should go through DB.php
-* We write sql in the relevant classes (User-related sql inside User.php etc.)
+* We write sql in the relevant classes (User-related sql inside UserManager.php etc.)
 * Code should be **tested** and have `/**`-style comments where relevant
 * File issues before embarking on larger tasks
 * Make one branch per issue you're working on (Unless it's a tiny issue)
