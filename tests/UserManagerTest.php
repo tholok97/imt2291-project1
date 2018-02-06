@@ -172,5 +172,43 @@ class UserManagerTest extends TestCase {
         
     }
 
+    public function testGetUid() {
+
+        // test user data
+        $username = 'testuser';
+        $password = 'testpassword';
+
+        // generate hash
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        // insert testuser into database
+        $stmt = $this->dbh->prepare('
+            INSERT INTO User (username, firstname, lastname, password_hash, privilege_level)
+            VALUES (:username, "firstname", "lastname", :hash, 2)
+        ');
+
+        $stmt->bindParam(':username', $username);
+        $stmt->bindValue(':hash', $hash);
+
+        if (!$stmt->execute()) {
+            $this->fail("Couldn't insert test user");
+        }
+
+        if (!password_verify($password, $hash)) {
+            $this->fail("Password isn't right..");
+        }
+
+
+        // store uid
+        $uid = $this->dbh->lastInsertId();
+
+
+
+
+
+        // TODO
+        // TEST THAT GIVEN THE USERNAME THE GETUID FUNCTION RETURNS THE CORRECT UID  
+    }
+
 
 }
