@@ -1,14 +1,19 @@
 <?php
 
+require_once dirname(__FILE__) . '/../../config.php';
+
 class DB {
   private static $db=null;
-  private $dsn = 'mysql:dbname=www_lab0123_users;host=127.0.0.1';
-  private $user = 'root';
-  private $password = '';
-  private $dbh = null;
+  private $dsn;
+  private $user;
+  private $password;
+  private $dbh;
 
-  private function __construct($dsn) {
+  private function __construct($dsn, $user, $password) {
     $this->dsn = $dsn;
+    $this->user = $user;
+    $this->password = $password;
+
     try {
         $this->dbh = new PDO($this->dsn, $this->user, $this->password);
     } catch (PDOException $e) {
@@ -18,9 +23,9 @@ class DB {
     }
   }
 
-  public static function getDBConnection($dsn = 'mysql:dbname=www_lab0123_users;host=localhost') {
+  public static function getDBConnection($dsn = Config::DB_DSN, $user = Config::DB_USER, $password = Config::DB_PASSWORD) {
       if (DB::$db==null) {
-        DB::$db = new self($dsn);
+        DB::$db = new self($dsn, $user, $password);
       }
       return DB::$db->dbh;
   }

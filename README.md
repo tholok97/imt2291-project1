@@ -16,6 +16,10 @@
 * Run `composer install` to install dependencies of project
 * Add a `config.php` file to the root directory of the project. It is used to provide environment-dependant constants. It should look like the file `config_example.php` in docs. One way to make it is to run the command `cp docs/config_example.php config.php`. Alter the `config.php` file to fit your environment.
 
+## Test
+
+Tests are placed under `tests/`. Run all tests with `./vendor/bin/phpunit tests/*`
+
 ## Documentation
 
 Documentation is found under docs/ in the root of the repository.
