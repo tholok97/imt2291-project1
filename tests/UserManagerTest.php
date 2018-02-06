@@ -30,7 +30,7 @@ class UserManagerTest extends TestCase {
     }
 
     protected function teardown() {
-        if (!$this->dbh->query('DELETE FROM User')) {
+        if (!$this->dbh->query('DELETE FROM user')) {
             $this->fail("Couldn't clean up database..");
         }
     }
@@ -46,7 +46,7 @@ class UserManagerTest extends TestCase {
 
         // insert testuser into database
         $stmt = $this->dbh->prepare('
-            INSERT INTO User (username, firstname, lastname, password_hash, privilege_level)
+            INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
             VALUES (:username, "firstname", "lastname", :hash, 2)
         ');
 
@@ -133,7 +133,7 @@ class UserManagerTest extends TestCase {
 
         // insert testuser into database
         $stmt = $this->dbh->prepare('
-            INSERT INTO User (username, firstname, lastname, password_hash, privilege_level)
+            INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
             VALUES (:username, "firstname", "lastname", :hash, 2)
         ');
 
@@ -183,7 +183,7 @@ class UserManagerTest extends TestCase {
 
         // insert testuser into database
         $stmt = $this->dbh->prepare('
-            INSERT INTO User (username, firstname, lastname, password_hash, privilege_level)
+            INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
             VALUES (:username, "firstname", "lastname", :hash, 2)
         ');
 
