@@ -69,7 +69,7 @@ class VideoManager {
                 if ($sth->rowCount()==1) {
                     $id = $this->db->lastInsertId();
                     if (!file_exists(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos')) {      // The user have not uploaded anything before.
-                      mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos', true);
+                      mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos', 0777, true);
                     }
                     if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos/'.$id)) {
                       $ret['status'] = 'ok';
