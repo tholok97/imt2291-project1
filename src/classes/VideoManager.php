@@ -143,19 +143,56 @@ class VideoManager {
     /**
      * Comment video.
      * 
-     * @param string A title.
-     * @param string A description.
-     * @param int The number of stars the user rate it to be.
+     * @param string The text which is the comment.
      * @param int The id to the user.
      * @param int The id to the video to comment on.
      * 
-     * @return array[] Returns an associative array with the fields 'status', 'id' and 'errorMessage (if error)'.
+     * @return array[] Returns an associative array with the fields 'status', 'cid' and 'errorMessage (if error)'.
      */
-    public function comment($title, $description, $userID, $videoID) {
+    public function comment($text, $uid, $vid) {
         $ret['status'] = 'fail';
-        $ret['id'] = null;
+        $ret['cid'] = null;
         $ret['errorMessage'] = null;
+
+        $text = htmlspecialchars($text);
+        $uid = htmlspecialchars($uid);
+        $vid = htmlspecialchars($vid);
+        $timestamp = setTimestamp();
+
+        // Check if video-id is numeric and more than 0.
+        if (!is_numeric($vid) || $vid <= 0) {
+            $ret['errorMessage'] = 'Fikk ingen korrekt video-id';
+			return $ret;
+        }
+
+        // Check if user-id is numeric and more than 0.
+        if (!is_numeric($uid) || $uid <= 0) {
+            $ret['errorMessage'] = 'Fikk ingen korrekt bruker-id';
+			return $ret;
+        }
         
+        // Check if connection to database was successfully established.
+        if ($this->db == null) {
+            $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
+            return $ret;
+        }
+
+        $sql = "INSERT INTO comment (vid, uid, text, timestamp) VALUES (:vid, :uid, :text, :timestamp)";
+        $sth = $this->db->prepare ($sql);
+        $sth->bindParam(':vid', $vid);
+        $sth->bindParam(':uid', $uid);
+        $sth->bindParam(':text', $text);
+        $sth->bindParam(':timestamp', $timestamp);
+        $sth->execute();
+
+        if ($sth->rowCount()==1) {
+            $ret['status'] = 'ok';
+            $ret['cid'] = $this->db->lastInsertId();
+        }
+        else {
+            $ret['errorMessage'] = 'Fikk ikke lagt til kommentar i databasen.';
+        }
+
         return $ret;
     }
 
@@ -168,6 +205,149 @@ class VideoManager {
      */
     public function getComments($vid) {
         $ret['status'] = 'fail';
-        $ret['errorMessage'] = null; 
+        $ret['errorMessage'] = null;
+
+        $vid = htmlspecialchars($vid);              // Be sure we are not hacked.
+
+        // Check if video-id is numeric and more than 0.
+        if (!is_numeric($vid) || $vid <= 0) {
+            $ret['errorMessage'] = 'Fikk ingen korrekt video-id';
+			return $ret;
+        }
+
+        // Check if connection to database was successfully established.
+        if ($this->db == null) {
+            $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
+            return $ret;
+        }
+
+        $sth = $this->db->query('SELECT cid, vid, uid, text, timestamp FROM comment WHERE vid=' . $vid);
+
+        $ret['status'] = 'ok';
+        $i = 0;
+
+        // Get all comments
+        while($row = $sth->fetch(PDO::FETCH_ASSOC))
+        {
+            $ret['comments'][$i]['cid'] = $row['cid'];
+            $ret['comments'][$i]['vid'] = $row['vid'];
+            $ret['comments'][$i]['uid'] = $row['uid'];
+            $ret['comments'][$i]['text'] = $row['text'];
+            $ret['comments'][$i]['timestamp'] = $row['timestamp'];
+            $i++;
+        }
+
+        return $ret;
     }
+
+    /**
+     * Rate video.
+     * 
+     * @param int The rating.
+     * @param int The id to the user.
+     * @param int The id to the video to rate.
+     * 
+     * @return array[] Returns an associative array with the fields 'status' and 'errorMessage' (if error).
+     */
+    public function addRating($rating, $uid, $vid) {
+        $ret['status'] = 'fail';
+        $ret['errorMessage'] = null;
+
+        $rating = htmlspecialchars($rating);
+        $uid = htmlspecialchars($uid);
+        $vid = htmlspecialchars($vid);
+
+        // Check if connection to database was successfully established.
+        if ($this->db == null) {
+            $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
+            return $ret;
+        }
+
+        $sql = "INSERT INTO rated (vid, uid, rating) VALUES (:vid, :uid, :rating)";
+        $sth = $this->db->prepare ($sql);
+        $sth->bindParam(':vid', $vid);
+        $sth->bindParam(':uid', $uid);
+        $sth->bindParam(':rating', $rating);
+        $sth->execute();
+
+        if ($sth->rowCount()==1) {
+            $ret['status'] = 'ok';
+            $ret['cid'] = $this->db->lastInsertId();
+        }
+        else {
+            $ret['errorMessage'] = 'Fikk ikke lagt til kommentar i databasen.';
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Search after videos.
+     * 
+     * @param string The search text.
+     * @param array[] An associative array with bool's to what to search through (example $options['title'] = true, $options['description'] = true, $options['timestamp'] = false).
+     * @param int The id to the video to rate.
+     * 
+     * @return array[] Returns an associative array with the fields 'status' and 'errorMessage' (if error) + a 'result'-field which is an associative array with the results with [0], [1], etc. for each result (see get(..) for more info).
+     */
+     public function search($searchText, $options = null) {
+        $ret['status'] = 'fail';
+        $ret['errorMessage'] = null;
+
+        // Check if connection to database was successfully established.
+        if ($this->db == null) {
+            $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
+            return $ret;
+        }
+        
+        $searchText = htmlspecialchars($searchText);
+        $sql;                                               // Set sql-variable ready.
+
+        // No options set, search through all meaningful columns.
+        if ($options = null) {
+            $sql = "SELECT vid FROM video WHERE title LIKE %" . $searchText . "% OR description LIKE %" . $searchText . "% OR topic LIKE %" . $searchText . "% OR course_code LIKE %" . $searchText . "% OR timestamp LIKE %" . $searchText . "%";
+         }
+         else {                                         // Some options most likely set
+             // Check that something is actually set, if not, give error.
+             if((isset($options['title']) && $options['title'] == true)
+             || (isset($options['description']) && $options['description'] == true)
+             || (isset($options['topic']) && $options['topic'] == true)
+             || (isset($options['course_code']) && $options['course_code'] == true)
+             || (isset($options['timestamp']) && $options['timestamp'] == true)) {
+                $sql = "SELECT vid FROM video WHERE";
+                if (isset($options['title']) && $options['title'] == true) {
+                    $sql = $sql . " title LIKE %" . $searchText . "%";
+                }
+                if (isset($options['description']) && $options['description'] == true) {
+                    $sql = $sql . " OR description LIKE %" . $searchText . "%";
+                }
+                if (isset($options['topic']) && $options['topic'] == true) {
+                    $sql = $sql . " OR topic LIKE %" . $searchText . "%";
+                }
+                if (isset($options['course_code']) && $options['course_code'] == true) {
+                    $sql = $sql . " OR course_code LIKE %" . $searchText . "%";
+                }
+                if (isset($options['timestamp']) && $options['timestamp'] == true) {
+                    $sql = $sql . " OR timestamp LIKE %" . $searchText . "%";
+                }
+             }
+             else {
+                 $ret['errorMessage'] = 'Ingen valg er satt, kan derfor ikke gi noen resultater.';
+                 return $ret;
+             }
+        }
+
+        $sth = $this->db->query($sql);
+        $i = 0;
+        
+        $ret['status'] = 'ok';
+
+        while($row = $sth->fetch(PDO::FETCH_ASSOC))
+        {
+             $ret['result'][$i] = $this->get(htmlspecialchars($row['vid']));
+             $i++;
+        }
+
+        return $ret;
+     }
 }
