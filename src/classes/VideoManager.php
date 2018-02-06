@@ -69,7 +69,7 @@ class VideoManager {
                 if ($sth->rowCount()==1) {
                     $id = $this->db->lastInsertId();
                     if (!file_exists(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos')) {      // The user have not uploaded anything before.
-                      mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos');
+                      mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos', true);
                     }
                     if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos/'.$id)) {
                       $ret['status'] = 'ok';
@@ -78,6 +78,10 @@ class VideoManager {
                       $sql = "delete from videos where id=$id";
                       $this->db->exec($sql);
                       $ret['errorMessage'] = "Klarte ikke å lagre filen.";
+                      $ret['uid'] = $uid;
+                      $ret['id'] = $id;
+                      $ret['file'] = $_FILES['fileToUpload']['tmp_name'];
+                      $ret['files'] = $_FILES;
                     }
                   } else {
                     $ret['errorMessage'] = "Klarte ikke å laste opp filen.";
