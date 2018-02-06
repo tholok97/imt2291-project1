@@ -15,6 +15,9 @@
 * Place this repository a place where your webserver can see it (htdocs for example)
 * Run `composer install` to install dependencies of project
 * Add a `config.php` file to the root directory of the project. It is used to provide environment-dependant constants. It should look like the file `config_example.php` in docs. One way to make it is to run the command `cp docs/config_example.php config.php`. Alter the `config.php` file to fit your environment.
+* The project needs write access to the `uploadedFiles` directory.
+    * **Linux / Mac OS**: `chown -R <apache2-user> uploadedFiles`. (In lampp the user is `daemon`)
+    * **Windows**: Dunno. Google it
 
 ## Test
 
