@@ -75,8 +75,8 @@ class VideoManager {
                       $ret['status'] = 'ok';
                       $ret['vid'] = $id;
                     } else {
-                      $sql = "delete from videos where id=$id";
-                      $this->db->exec($sql);
+                      $sql = "DELETE from videos where id=$id";
+                      $this->db->execute($sql);
                       $ret['errorMessage'] = "Klarte ikke å lagre filen.";
                       $ret['uid'] = $uid;
                       $ret['id'] = $id;
@@ -132,7 +132,7 @@ class VideoManager {
         {
             $views = htmlspecialchars($row['view_count']) + 1;
             $ret['status'] = 'ok';
-            $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']), htmlspecialchars(/* Something here */'uploadedFiles/'.$row['uid'].'/videos/'.$row['vid']), /*htmlspecialchars(*/$row['thumbnail']/*)*/, htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), $views, htmlspecialchars($row['rating']), htmlspecialchars($row['mime']), htmlspecialchars($row['size']));
+            $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']), htmlspecialchars('/uploadedFiles/'.$row['uid'].'/videos/'.$row['vid']), /*htmlspecialchars(*/$row['thumbnail']/*)*/, htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), $views, htmlspecialchars($row['rating']), htmlspecialchars($row['mime']), htmlspecialchars($row['size']));
         }
 
         $sql = "UPDATE video SET view_count = :view_count WHERE vid = :vid";
