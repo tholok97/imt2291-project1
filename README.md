@@ -1,8 +1,9 @@
-*([Øivind's original readme](./docs/original_readme.md))*
 
 # Project 1 in imt2291 - Web Technology
 
-[Link to project description](https://bitbucket.org/okolloen/imt2291-project1-spring2018/wiki/)
+* [Øivind's original readme](./docs/original_readme.md)
+* [Link to project description](https://bitbucket.org/okolloen/imt2291-project1-spring2018/wiki/)
+* Project should be running on <http://10.212.136.151> (IP is internal to NTNU's networks. You must be connected to a NTNU network to have access).
 
 ## Group members
 
