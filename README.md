@@ -26,6 +26,18 @@
     * **Linux / Mac OS**: `chown -R <apache2-user> uploadedFiles`. (In lampp the user is `daemon`)
     * **Windows**: Dunno. Google it
 
+## Dockeried instructions
+
+* Make sure docker, make and composer are installed properly
+* Spin up mariadb container with `docker run --name db -e MYSQL_ROOT_PASSWORD=secret923 -d mariadb:10.3.4`
+* Connect to mariadb container with `docker exec -it db bash`, log into the mysql cli with `mysql -u root -p`, create database for project `create database imt2291_project1_db` and copy-paste in contents of `docs/export.sql` (You should get a bunch of "Query OK"'s.
+* Make config.php file with `cp docs/config_example.php config.php`. Set host inside dsn to `db`, dbname to whateve you set the database name to and user and password to whatever you set those to.
+* Install composer dependencies with `composer install`
+* Build the docker image with `docker build -t imt2291project1image .`
+* Spin up www container with `docker run --link db -d --name www -v ${PWD}:/var/www/html -p 80:80 imt2291project1image`. This will spin up a container named "www" connected to your "db" mariadb container on port 80.
+
+**NOTE**: The Makefile has some shortcuts for the www container. Don't rely on it though, it uses my own namings for things.
+
 ## Test
 
 Tests are placed under `tests/`. Run all tests with `./vendor/bin/phpunit tests/*`
