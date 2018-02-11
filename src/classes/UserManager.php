@@ -335,4 +335,42 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
         return $ret;
     }
 
+    /**
+     * Register that user $uid wants privilege level $privilege_level
+     *
+     * @param $uid
+     * @param $privilege_level
+     *
+     * @return assoc array with fields: status, message
+     */
+    public function requestPrivilege($uid, $privilege_level) {
+        
+        // prepare ret value
+        $ret['status'] = 'fail';
+        $ret['message'] = '';
+
+
+        // try and update db
+        try {
+            
+            $stmt = $this->dbh->prepare('
+                INSERT INTO wants_privilege (uid, privilege_level) 
+                VALUES (:uid, :privilege_level)
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+            $stmt->bindParam(':privilege_level', $privilege_level);
+
+            if ($stmt->execute()) {
+                $ret['status'] = 'ok';
+            } else {
+                $ret['message'] = "Statement didn't exeute right : " . $stmt->errorCode();
+            }
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+    }
+
 }

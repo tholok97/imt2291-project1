@@ -30,6 +30,9 @@ class UserManagerTest extends TestCase {
     }
 
     protected function teardown() {
+        if (!$this->dbh->query('DELETE FROM wants_privilege')) {
+            $this->fail("Couldn't clean up database..");
+        }
         if (!$this->dbh->query('DELETE FROM user')) {
             $this->fail("Couldn't clean up database..");
         }
@@ -380,6 +383,64 @@ class UserManagerTest extends TestCase {
             'fail',
             $ret['status'],
             "Search with non-sensical field should give fail"
+        );
+
+    }
+
+
+    public function testWantsPrivilegeLevel() {
+        
+        // test user data
+        $username = 'testuser';
+        $password = 'testpassword';
+
+        // generate hash
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        // insert testuser into database
+        $stmt = $this->dbh->prepare('
+            INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+            VALUES (:username, "firstname", "lastname", :hash, 2)
+        ');
+
+        $stmt->bindParam(':username', $username);
+        $stmt->bindValue(':hash', $hash);
+
+        if (!$stmt->execute()) {
+            $this->fail("Couldn't insert test user");
+        }
+
+        if (!password_verify($password, $hash)) {
+            $this->fail("Password isn't right..");
+        }
+
+        // store uid
+        $uid = $this->dbh->lastInsertId();
+
+        
+
+        // assert that requesting privilege_level for valid user is successful
+        $ret = $this->userManager->requestPrivilege($uid, 1);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Requesting privlege level for valid user should be fine"
+        );
+
+        // assert that requesting privilege_level for invalid user fails
+        $ret = $this->userManager->requestPrivilege(-1, 1);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Requesting privlege level for invalid user should fail"
+        );
+
+        // assert that requesting invalid privilege level fails
+        $ret = $this->userManager->requestPrivilege($uid, 3);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Requesting invalid privilege_level should fail"
         );
 
     }
