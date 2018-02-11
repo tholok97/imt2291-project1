@@ -21,7 +21,6 @@ $ret = $userManager->addUser($user, $_POST['password']);
 // if success -> go to index
 // if not -> reload page
 if ($ret['status'] == 'ok') {
-    echo 'yay!';
     header('Location: ../');
     exit();
 } else {

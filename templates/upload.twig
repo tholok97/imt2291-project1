@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <ul>
+        <li><a href="./admin">Admin page</a></li>
+        <li><a href="./videos">Videos page</a></li>
+        <li><a href="./">Index page</a></li>
+        <li><a href="./upload">Upload page</a></li>
+        <li><a href="./logout">Logout</a></li>
+    </ul>
+    <h1>Upload page</h1>
+    <form action="./src/uploadFormHandler.php" method="post" enctype="multipart/form-data">
+        <label for="pickFile">Velg en fil (anbefaler en MP4 fil med h.264-video og MP3- eller AAC-lyd for best kompabilitet)</label><input type="file" name="fileToUpload" id="pickFile"><br>
+        <label for="title">Tittel</label><input type="text" name="title" id="title"><br>
+        <label for="descr">Beskrivelse</label><input type="text" name="descr" id="descr"><br>
+        <label for="topic">Topic</label><input type="text" name="topic" id="topic"><br>
+        <label for="course">Course code</label><input type="text" name="course" id="course"><br>
+        <input type="submit" name='submit' value="Lagre filen i databasen">
+    </form>
+</body>
+</html>

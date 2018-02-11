@@ -74,6 +74,9 @@ if ($page == 'register') {
     // Switch on page (DEBUG: just indicate that it's working)
     
     switch ($page) {
+    case 'upload':
+        $twig_file_to_render = 'upload.twig';
+        break;
     case 'admin':
         $twig_file_to_render = 'debug.twig';
         $twig_arguments = array('message' => 'DEBUG: admin page');
