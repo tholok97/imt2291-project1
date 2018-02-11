@@ -37,7 +37,7 @@ class UserManager {
 
         try {
 
-            $stmt = $this->dbh->prepare('SELECT * FROM User WHERE username=:username');
+            $stmt = $this->dbh->prepare('SELECT * FROM user WHERE username=:username');
 
             $stmt->bindParam(':username', $username);
 
@@ -89,7 +89,7 @@ class UserManager {
             // FIRST check that username is unique
             $stmt = $this->dbh->prepare('
 SELECT *
-FROM User
+FROM user
 WHERE username = :username
             ');
 
@@ -111,7 +111,7 @@ WHERE username = :username
             $hash = password_hash($password, PASSWORD_DEFAULT);
 
             $stmt = $this->dbh->prepare('
-INSERT INTO User (username, firstname, lastname, password_hash, privilege_level)
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
 VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
             ');
 
@@ -163,7 +163,7 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
 
             $stmt = $this->dbh->prepare('
                 SELECT *
-                FROM User
+                FROM user
                 WHERE uid = :uid
             ');
 
@@ -207,7 +207,7 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
 
             $stmt = $this->dbh->prepare('
                 SELECT *
-                FROM User
+                FROM user
                 WHERE username = :username
             ');
 

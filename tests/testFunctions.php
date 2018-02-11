@@ -15,14 +15,14 @@ function uploadVideoTestdata($title, $description, $uid, $topic, $course_code) {
     );
 
     // Check if connection to database was successfully established.
-    if ($this->db == null) {
+    if ($db == null) {
         $ret['errorMessage'] = 'Couldn\'t connect to database.';
         return $ret;
     }
 
     $title = htmlspecialchars($title);
     $description = htmlspecialchars($description);
-    $thumbnail = getThumbnail($videoRef);               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
+    $thumbnail = getThumbnail("...");               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
     $uid = htmlspecialchars($uid);
     $topic = htmlspecialchars($topic);
     $course_code = htmlspecialchars($course_code);
@@ -31,7 +31,7 @@ function uploadVideoTestdata($title, $description, $uid, $topic, $course_code) {
     $mime = "video/mp4";
     $size = 4837755;
     $sql = "INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size) VALUES (:title, :description, :thumbnail, :uid, :topic, :course_code, :timestamp, :view_count, :mime, :size)";
-    $sth = $this->db->prepare ($sql);
+    $sth = $db->prepare ($sql);
     $sth->bindParam(':title', $title);
     $sth->bindParam(':description', $description);
     $sth->bindParam(':thumbnail', $thumbnail);
@@ -45,9 +45,11 @@ function uploadVideoTestdata($title, $description, $uid, $topic, $course_code) {
     $sth->execute();
     //print_r($sth->errorInfo());
     if ($sth->rowCount()==1) {
-        
+        $ret['status'] = 'ok';
+        $ret['vid'] = $db->lastInsertId();
     }
     else {
         $ret['errorMessage'] = "Could not insert video-info in database";
     }
+    return $ret;
 }

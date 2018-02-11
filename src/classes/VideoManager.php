@@ -33,7 +33,7 @@ class VideoManager {
         $ret['status'] = 'fail';
         $ret['vid'] = null;
         $ret['errorMessage'] = null;
-        
+
         // Check if connection to database was successfully established.
         if ($this->db == null) {
             $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
@@ -42,54 +42,59 @@ class VideoManager {
 
         // If not someone who is trying to hack us.
         //if (is_uploaded_file($_FILES['fileToUpload']['tmp_name'])) {
-            // If file size not too big.
-            if($videoRef['size'] < 5000000 /*Some number*/) {
-                $title = htmlspecialchars($title);
-                $description = htmlspecialchars($description);
-                $thumbnail = getThumbnail($videoRef);               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
-                $uid = htmlspecialchars($uid);
-                $topic = htmlspecialchars($topic);
-                $course_code = htmlspecialchars($course_code);
-                $timestamp = setTimestamp();
-                $views = 0;
-                $sql = "INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size) VALUES (:title, :description, :thumbnail, :uid, :topic, :course_code, :timestamp, :view_count, :mime, :size)";
-                $sth = $this->db->prepare ($sql);
-                $sth->bindParam(':title', $title);
-                $sth->bindParam(':description', $description);
-                $sth->bindParam(':thumbnail', $thumbnail);
-                $sth->bindParam(':uid', $uid);
-                $sth->bindParam(':topic', $topic);
-                $sth->bindParam(':course_code', $course_code);
-                $sth->bindParam(':timestamp', $timestamp);                   // Setting timestamp.
-                $sth->bindParam(':view_count', $views);                      // Zero-out view-count.
-                $sth->bindParam(':mime', $_FILES['fileToUpload']['type']);
-                $sth->bindParam(':size', $_FILES['fileToUpload']['size']);
-                $sth->execute();
-                //print_r($sth->errorInfo());
-                if ($sth->rowCount()==1) {
-                    $id = $this->db->lastInsertId();
-                    if (!file_exists(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos')) {      // The user have not uploaded anything before.
-                      mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos', 0777, true);
-                    }
-                    if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos/'.$id)) {
-                      $ret['status'] = 'ok';
-                      $ret['vid'] = $id;
-                    } else {
-                      $sql = "DELETE from videos where id=$id";
-                      $this->db->execute($sql);
-                      $ret['errorMessage'] = "Klarte ikke å lagre filen.";
-                      $ret['uid'] = $uid;
-                      $ret['id'] = $id;
-                      $ret['file'] = $_FILES['fileToUpload']['tmp_name'];
-                      $ret['files'] = $_FILES;
-                    }
-                  } else {
-                    $ret['errorMessage'] = "Klarte ikke å laste opp filen.";
-                  }
+        // If file size not too big.
+        if($videoRef['size'] < 5000000 /*Some number*/) {
+            $title = htmlspecialchars($title);
+            $description = htmlspecialchars($description);
+            $thumbnail = getThumbnail($videoRef);               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
+            $uid = htmlspecialchars($uid);
+            $topic = htmlspecialchars($topic);
+            $course_code = htmlspecialchars($course_code);
+            $timestamp = setTimestamp();
+            $views = 0;
+            $sql = "INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size) VALUES (:title, :description, :thumbnail, :uid, :topic, :course_code, :timestamp, :view_count, :mime, :size)";
+            $sth = $this->db->prepare ($sql);
+            $sth->bindParam(':title', $title);
+            $sth->bindParam(':description', $description);
+            $sth->bindParam(':thumbnail', $thumbnail);
+            $sth->bindParam(':uid', $uid);
+            $sth->bindParam(':topic', $topic);
+            $sth->bindParam(':course_code', $course_code);
+            $sth->bindParam(':timestamp', $timestamp);                   // Setting timestamp.
+            $sth->bindParam(':view_count', $views);                      // Zero-out view-count.
+            $sth->bindParam(':mime', $_FILES['fileToUpload']['type']);
+            $sth->bindParam(':size', $_FILES['fileToUpload']['size']);
+            $sth->execute();
+            //print_r($sth->errorInfo());
+            if ($sth->rowCount()==1) {
+                $id = $this->db->lastInsertId();
+                if (!file_exists(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos')) {      // The user have not uploaded anything before.
+                    mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos', 0777, true);
+                }
+                if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos/'.$id)) {
+                    $ret['status'] = 'ok';
+                    $ret['vid'] = $id;
+                } else {
+
+                    print_r($sth->errorInfo());
+
+                    $sql = "delete from videos where id=$id";
+                    $this->db->execute($sql);
+                    $ret['errorMessage'] = "Klarte ikke å lagre filen.";
+                    $ret['uid'] = $uid;
+                    $ret['id'] = $id;
+                    $ret['file'] = $_FILES['fileToUpload']['tmp_name'];
+                    $ret['files'] = $_FILES;
+                }
+            } else {
+
+
+                $ret['errorMessage'] = "Klarte ikke å laste opp filen.";
             }
-            else {
-                $ret['errorMessage'] = "Filen er for stor til å kunne lastes opp.";
-            }
+        }
+        else {
+            $ret['errorMessage'] = "Filen er for stor til å kunne lastes opp.";
+        }
         /*}
         else {
             $ret['errorMessage'] = "Vi lurer på om du hacker oss, ser ut som en ulovlig fil.";
@@ -111,13 +116,13 @@ class VideoManager {
         $ret['errorMessage'] = null;
 
         $vid = htmlspecialchars($vid);  // Check that someone does not hack you.
-        
+
         // Check if a numeric id is more than 0.
         if (!is_numeric($vid) || $vid <= 0) {
             $ret['errorMessage'] = 'Fikk ingen korrekt video-id';
-			return $ret;
+            return $ret;
         }
-        
+
         // Check if connection to database was successfully established.
         if ($this->db == null) {
             $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
@@ -166,15 +171,15 @@ class VideoManager {
         // Check if video-id is numeric and more than 0.
         if (!is_numeric($vid) || $vid <= 0) {
             $ret['errorMessage'] = 'Fikk ingen korrekt video-id';
-			return $ret;
+            return $ret;
         }
 
         // Check if user-id is numeric and more than 0.
         if (!is_numeric($uid) || $uid <= 0) {
             $ret['errorMessage'] = 'Fikk ingen korrekt bruker-id';
-			return $ret;
+            return $ret;
         }
-        
+
         // Check if connection to database was successfully established.
         if ($this->db == null) {
             $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
@@ -216,7 +221,7 @@ class VideoManager {
         // Check if video-id is numeric and more than 0.
         if (!is_numeric($vid) || $vid <= 0) {
             $ret['errorMessage'] = 'Fikk ingen korrekt video-id';
-			return $ret;
+            return $ret;
         }
 
         // Check if connection to database was successfully established.
@@ -294,7 +299,7 @@ class VideoManager {
      * 
      * @return array[] Returns an associative array with the fields 'status' and 'errorMessage' (if error) + a 'result'-field which is an associative array with the results with [0], [1], etc. for each result (see get(..) for more info).
      */
-     public function search($searchText, $options = null) {
+    public function search($searchText, $options = null) {
         $ret['status'] = 'fail';
         $ret['errorMessage'] = null;
 
@@ -303,21 +308,21 @@ class VideoManager {
             $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
             return $ret;
         }
-        
+
         $searchText = htmlspecialchars($searchText);
         $sql;                                               // Set sql-variable ready.
 
         // No options set, search through all meaningful columns.
         if ($options = null) {
             $sql = "SELECT vid FROM video WHERE title LIKE %" . $searchText . "% OR description LIKE %" . $searchText . "% OR topic LIKE %" . $searchText . "% OR course_code LIKE %" . $searchText . "% OR timestamp LIKE %" . $searchText . "%";
-         }
-         else {                                         // Some options most likely set
-             // Check that something is actually set, if not, give error.
-             if((isset($options['title']) && $options['title'] == true)
-             || (isset($options['description']) && $options['description'] == true)
-             || (isset($options['topic']) && $options['topic'] == true)
-             || (isset($options['course_code']) && $options['course_code'] == true)
-             || (isset($options['timestamp']) && $options['timestamp'] == true)) {
+        }
+        else {                                         // Some options most likely set
+            // Check that something is actually set, if not, give error.
+            if((isset($options['title']) && $options['title'] == true)
+                || (isset($options['description']) && $options['description'] == true)
+                || (isset($options['topic']) && $options['topic'] == true)
+                || (isset($options['course_code']) && $options['course_code'] == true)
+                || (isset($options['timestamp']) && $options['timestamp'] == true)) {
                 $sql = "SELECT vid FROM video WHERE";
                 if (isset($options['title']) && $options['title'] == true) {
                     $sql = $sql . " title LIKE %" . $searchText . "%";
@@ -334,24 +339,24 @@ class VideoManager {
                 if (isset($options['timestamp']) && $options['timestamp'] == true) {
                     $sql = $sql . " OR timestamp LIKE %" . $searchText . "%";
                 }
-             }
-             else {
-                 $ret['errorMessage'] = 'Ingen valg er satt, kan derfor ikke gi noen resultater.';
-                 return $ret;
-             }
+            }
+            else {
+                $ret['errorMessage'] = 'Ingen valg er satt, kan derfor ikke gi noen resultater.';
+                return $ret;
+            }
         }
 
         $sth = $this->db->query($sql);
         $i = 0;
-        
+
         $ret['status'] = 'ok';
 
         while($row = $sth->fetch(PDO::FETCH_ASSOC))
         {
-             $ret['result'][$i] = $this->get(htmlspecialchars($row['vid']));
-             $i++;
+            $ret['result'][$i] = $this->get(htmlspecialchars($row['vid']));
+            $i++;
         }
 
         return $ret;
-     }
+    }
 }
