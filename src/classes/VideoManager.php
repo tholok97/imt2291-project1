@@ -139,7 +139,7 @@ class VideoManager {
         {
             $views = htmlspecialchars($row['view_count']) + 1;
             $ret['status'] = 'ok';
-            $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']), htmlspecialchars('/uploadedFiles/'.$row['uid'].'/videos/'.$row['vid']), /*htmlspecialchars($row['thumbnail']),*/ htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), $views, htmlspecialchars($row['mime']), htmlspecialchars($row['size']));
+            $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']), htmlspecialchars('uploadedFiles/'.$row['uid'].'/videos/'.$row['vid']), /*htmlspecialchars($row['thumbnail']),*/ htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), $views, htmlspecialchars($row['mime']), htmlspecialchars($row['size']));
         }
 
         $sql = "UPDATE video SET view_count = :view_count WHERE vid = :vid";
