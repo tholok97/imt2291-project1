@@ -16,7 +16,7 @@ if (isset($_POST['submit'])) {
     print_r($res);
 
     echo '<br><br><br><video width="320" height="240" controls>
-    <source src="' . $res['video']->url . '" type="' . $res['video']->mime . '">
+    <source src="..' . $res['video']->url . '" type="' . $res['video']->mime . '">
     Your browser does not support the video tag.
   </video>
   ';
