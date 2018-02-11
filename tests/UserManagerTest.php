@@ -234,22 +234,30 @@ class UserManagerTest extends TestCase {
     public function testSearch() {
 
         // array of test users
-        $testusersUsernames[0] = 't';
-        $testusersUsernames[1] = 'tom';
-        $testusersUsernames[2] = 'tomas';
+        $testusers[0]['username'] = 't';
+        $testusers[1]['username'] = 'tom';
+        $testusers[2]['username'] = 'tomas';
+        $testusers[0]['firstname'] = 'lokken';
+        $testusers[1]['firstname'] = 'lok';
+        $testusers[2]['firstname'] = 'x';
+        $testusers[0]['lastname'] = 'per';
+        $testusers[1]['lastname'] = 'errr';
+        $testusers[2]['lastname'] = 'pxx';
 
         $testusersUIDs = array();
 
         // insert users int db
-        for ($i = 0; $i < count($testusersUsernames); $i++) {
+        for ($i = 0; $i < count($testusers); $i++) {
 
             // insert testuser into database
             $stmt = $this->dbh->prepare('
                 INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
-                VALUES (:username, "firstname", "lastname", "hashhhh", 2)
+                VALUES (:username, :firstname, :lastname, "hashhhh", 2)
             ');
 
-            $stmt->bindParam(':username', $testusersUsernames[$i]);
+            $stmt->bindParam(':username', $testusers[$i]['username']);
+            $stmt->bindParam(':firstname', $testusers[$i]['firstname']);
+            $stmt->bindParam(':lastname', $testusers[$i]['lastname']);
 
             if (!$stmt->execute()) {
                 $this->fail("Couldn't insert test user");
@@ -260,7 +268,7 @@ class UserManagerTest extends TestCase {
         }
 
 
-        // assert that searh for returns all three of our users
+        // assert that searh for returns all three of our users (username serach)
         $ret = $this->userManager->search('t', 'username');
         $this->assertEquals(
             3,
@@ -276,10 +284,6 @@ class UserManagerTest extends TestCase {
         );
 
 
-
-
-
-
         // assert that search for om returns two users
         $ret = $this->userManager->search('om', 'username');
         $this->assertEquals(
@@ -287,7 +291,23 @@ class UserManagerTest extends TestCase {
             count($ret['uids']),
             "search for om should give two test users (gave ".count($ret['uids']).")"
         );
-    }
 
+
+        // assert that searching for firstname works
+        $ret = $this->userManager->search('lok', 'firstname');
+        $this->assertEquals(
+            2,
+            count($ret['uids']),
+            "Search should only return 2"
+        );
+
+        // assert that searching for lastname works
+        $ret = $this->userManager->search('er', 'lastname');
+        $this->assertEquals(
+            2,
+            count($ret['uids']),
+            "Search should only return 2"
+        );
+    }
 
 }
