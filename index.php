@@ -78,8 +78,16 @@ if ($page == 'register') {
         $twig_file_to_render = 'upload.twig';
         break;
     case 'admin':
-        $twig_file_to_render = 'debug.twig';
-        $twig_arguments = array('message' => 'DEBUG: admin page');
+        $twig_file_to_render = 'admin.twig';
+
+        // DEBUG: dummy wants privilege data
+        $wantsPrivilege[0]['uid'] = 13;
+        $wantsPrivilege[0]['privilege_level'] = 1;
+        $wantsPrivilege[1]['uid'] = 14;
+        $wantsPrivilege[1]['privilege_level'] = 2;
+
+        $twig_arguments = array('wantsPrivilege' => $wantsPrivilege);
+
         break;
     case 'videos':
         $twig_file_to_render = 'debug.twig';

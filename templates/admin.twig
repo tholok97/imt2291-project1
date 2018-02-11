@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <h1>Admin page</h1>
+    {% for request in wantsPrivilege %}
+
+    <b>{{request.uid}}</b> wants privilege {{request.privilege_level}} 
+    <form action="src/privilegeRequestHandler.php">
+        <input type="submit" value="Grant" />
+    </form>
+    
+    <br>
+
+    {% endfor %}
+</body>
+</html>
