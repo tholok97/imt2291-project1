@@ -258,7 +258,7 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
         // IMPORTANT: pdo doesn't accept column names as bindable parameters, 
         // so have to sanitize input manually:
         if (!in_array($searchwhere, ['username', 'firstname', 'lastname'])) {
-            $ret['message'] = "Searchwhere is not valid. is $testwhere (see doc string)";
+            $ret['message'] = "Searchwhere is not valid. is $searchwhere (see doc string)";
             return $ret;
         }
 
@@ -292,6 +292,62 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
         } catch (PDOException $ex) {
             $ret['message'] = $ex->getMessage();
         }
+
+
+        return $ret;
+    }
+
+    /**
+     * Search for $searchfor in all fields in $fields and returns uids
+     *
+     * @param $searchfor
+     * @param $fields array of fields to search (out of username, firstname, lastname)
+     *
+     * @return assoc array with fields: status, uids (array of uids), message
+     */
+    public function searchMultipleFields($searchfor, $fields) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['uids'] = array();
+        $ret['message'] = '';
+
+        // if no fields given, just return ok
+        if (count($fields) == 0) {
+            $ret['status'] = 'ok';
+        }
+
+        // search with all the specified fields
+        foreach($fields as $field) {
+
+            $result = $this->search($searchfor, $field);
+
+            if ($result['status'] == 'fail') {
+                $ret['status'] = 'fail';
+                $ret['message'] = "One of the searches failed with message: " . $result['message'];
+                return $ret;
+            }  else {
+                $ret['status'] = 'ok';
+                $ret['uids'] = array_merge($ret['uids'], $result['uids']);
+            }
+        }
+
+
+        /*
+        $searchFields = array();
+
+        if (usernameCheckbox == pressed) {
+            array_push($searchFields, 'username');
+        }
+
+        if (lastnameCheckbox == pressed) {
+            array_push($searchFields, 'lastname');
+        }
+
+
+        userManager->searchMultipleFields($whattosearchfor, $searchFields);
+         */
+
 
 
         return $ret;
