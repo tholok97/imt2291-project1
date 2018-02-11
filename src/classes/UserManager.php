@@ -431,4 +431,43 @@ class UserManager {
         return $ret;
     }
 
+    /**
+     * Return what users want what privileges
+     * @return assoc array with fields: status, 
+     * wants (assoc array with fields: uid, privilege), message
+     */
+    public function getWantsPrivilege() {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['wants'] = array();
+        $ret['message'] = '';
+
+        try {
+
+            $stmt = $this->dbh->prepare('
+                SELECT *
+                FROM wants_privilege
+            ');
+
+            if ($stmt->execute()) {
+
+                $ret['status'] = 'ok';
+                
+                foreach ($stmt->fetchAll() as $row) {
+                    array_push($ret['wants'], $row);
+                }
+            } else {
+                $ret['message'] = "Statement didn't exeute right : " . $stmt->errorCode();
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+    }
+
+
+
 }

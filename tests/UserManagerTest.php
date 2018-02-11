@@ -505,4 +505,42 @@ class UserManagerTest extends TestCase {
         );
     }
 
+    /**
+     * @depends testWantsPrivilegeLevel
+     * @depends testAddUser
+     */
+    public function testGetWantsPrivilege() {
+
+        $testuser = new User(
+            'test1',
+            'test2',
+            'test3',
+            0
+        );
+
+        $testpassword = '123';
+
+        // insert user
+        $ret_adduser = $this->userManager->addUser($testuser, $testpassword);
+
+        // request privilege 1
+        $ret_request = $this->userManager->requestPrivilege($ret_adduser['uid'], 1);
+
+
+        // assert that getting all requests returns this  testuser
+
+        $ret = $this->userManager->getWantsPrivilege();
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Getting all wants should be fine"
+        );
+
+        $this->assertEquals(
+            $ret_adduser['uid'],
+            $ret['wants'][0]['uid'],
+            "uid of first wants should be uid of test user"
+        );
+    }
+
 }
