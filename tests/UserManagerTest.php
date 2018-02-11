@@ -445,4 +445,64 @@ class UserManagerTest extends TestCase {
 
     }
 
+    public function testGetUser() {
+
+        // test user data
+        $username = 'testuser';
+        $password = 'testpassword';
+
+        // generate hash
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        // insert testuser into database
+        $stmt = $this->dbh->prepare('
+            INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+            VALUES (:username, "firstname", "lastname", :hash, 2)
+        ');
+
+        $stmt->bindParam(':username', $username);
+        $stmt->bindValue(':hash', $hash);
+
+        if (!$stmt->execute()) {
+            $this->fail("Couldn't insert test user");
+        }
+
+        if (!password_verify($password, $hash)) {
+            $this->fail("Password isn't right..");
+        }
+
+
+        // store uid
+        $uid = $this->dbh->lastInsertId();
+
+
+
+
+
+
+        // assert that testuser with valid uid gives corret user
+
+        $ret = $this->userManager->getUser($uid);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Getting uid of valid user should return ok : " . $ret['message']
+        );
+
+        $this->assertEquals(
+            $username,
+            $ret['user']->username,
+            "User returned should have correct username"
+        );
+
+
+        // assert that getting invalid user gives fail
+        $ret = $this->userManager->getUser(-1);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Getting invalid user should fail"
+        );
+    }
+
 }

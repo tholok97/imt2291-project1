@@ -376,4 +376,59 @@ class UserManager {
         return $ret;
     }
 
+    /**
+     * Return user with given $uid
+     * @param $uid
+     *
+     * @return assoc array with fields: status, user, message
+     */
+    public function getUser($uid) {
+
+        // parepare ret
+        $ret['status'] = 'fail';
+        $ret['user'] = null;
+        $ret['message'] = '';
+
+        try {
+            
+            $stmt = $this->dbh->prepare('
+                SELECT *
+                FROM user
+                WHERE uid = :uid
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+
+            if ($stmt->execute()) {
+
+                $rows = $stmt->fetchAll();
+
+                // success if more than one uid returned
+                if (count($rows) > 0) {
+                
+                    $ret['status'] = 'ok';
+
+                    $row = $rows[0];
+                    $ret['user'] = new User(
+                        $row['username'],
+                        $row['firstname'],
+                        $row['lastname'],
+                        $row['privilege_level']
+                    );
+                    $ret['user']->uid = $row['uid'];
+
+                } else {
+                    $ret['message'] = "No users with uid " . $uid;
+                }
+
+            } else {
+                $ret['message'] = "statememnt didn't execute right : " . $stmt->errorCode();
+            }
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+    }
+
 }
