@@ -129,7 +129,9 @@ class VideoManager {
             return $ret;
         }
 
-        $sth = $this->db->query('SELECT v.*, AVG(r.rating) AS rating FROM video v LEFT JOIN rated r ON r.vid = v.vid WHERE v.vid=' . $vid . ' GROUP BY vid');
+        $sth = $this->db->prepare('SELECT * FROM video WHERE vid = :vid GROUP BY vid');
+        $sth->bindParam(':vid', $vid);
+        $sth->execute();
 
         $views;
         // While-loop will (hopefully) just go one time.
@@ -137,7 +139,7 @@ class VideoManager {
         {
             $views = htmlspecialchars($row['view_count']) + 1;
             $ret['status'] = 'ok';
-            $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']), htmlspecialchars('/uploadedFiles/'.$row['uid'].'/videos/'.$row['vid']), /*htmlspecialchars(*/$row['thumbnail']/*)*/, htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), $views, htmlspecialchars($row['rating']), htmlspecialchars($row['mime']), htmlspecialchars($row['size']));
+            $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']), htmlspecialchars('/uploadedFiles/'.$row['uid'].'/videos/'.$row['vid']), /*htmlspecialchars($row['thumbnail']),*/ htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), $views, htmlspecialchars($row['mime']), htmlspecialchars($row['size']));
         }
 
         $sql = "UPDATE video SET view_count = :view_count WHERE vid = :vid";
@@ -230,8 +232,9 @@ class VideoManager {
             return $ret;
         }
 
-        $sth = $this->db->query('SELECT cid, vid, uid, text, timestamp FROM comment WHERE vid=' . $vid);
-
+        $sth = $this->db->prepare('SELECT cid, vid, uid, text, timestamp FROM comment WHERE vid = :vid');
+        $sth->bindParam(':vid', $vid);
+        $sth->execute();
         $ret['status'] = 'ok';
         $i = 0;
 
@@ -272,20 +275,28 @@ class VideoManager {
             return $ret;
         }
 
-        $sql = "INSERT INTO rated (vid, uid, rating) VALUES (:vid, :uid, :rating)";
-        $sth = $this->db->prepare ($sql);
-        $sth->bindParam(':vid', $vid);
-        $sth->bindParam(':uid', $uid);
-        $sth->bindParam(':rating', $rating);
-        $sth->execute();
+        $res = $this->getUserRating($uid, $vid);
 
-        if ($sth->rowCount()==1) {
-            $ret['status'] = 'ok';
-            $ret['cid'] = $this->db->lastInsertId();
+        if ($res['status'] != 'ok') {
+            $sql = "INSERT INTO rated (vid, uid, rating) VALUES (:vid, :uid, :rating)";
+            $sth = $this->db->prepare ($sql);
+            $sth->bindParam(':vid', $vid);
+            $sth->bindParam(':uid', $uid);
+            $sth->bindParam(':rating', $rating);
+            $sth->execute();
+    
+            if ($sth->rowCount()==1) {
+                $ret['status'] = 'ok';
+                $ret['cid'] = $this->db->lastInsertId();
+            }
+            else {
+                $ret['errorMessage'] = 'Fikk ikke lagt til rating i databasen.';
+            }
         }
         else {
-            $ret['errorMessage'] = 'Fikk ikke lagt til kommentar i databasen.';
+            $ret['errorMessage'] = 'Har allerede lagt til en rating. Rating er ' . $res['rating'];
         }
+        
 
         return $ret;
     }
@@ -325,19 +336,19 @@ class VideoManager {
                 || (isset($options['timestamp']) && $options['timestamp'] == true)) {
                 $sql = "SELECT vid FROM video WHERE";
                 if (isset($options['title']) && $options['title'] == true) {
-                    $sql = $sql . " title LIKE %" . $searchText . "%";
+                    $sql = $sql . " title LIKE %:text%";
                 }
                 if (isset($options['description']) && $options['description'] == true) {
-                    $sql = $sql . " OR description LIKE %" . $searchText . "%";
+                    $sql = $sql . " OR description LIKE %:text%";
                 }
                 if (isset($options['topic']) && $options['topic'] == true) {
-                    $sql = $sql . " OR topic LIKE %" . $searchText . "%";
+                    $sql = $sql . " OR topic LIKE %:text%";
                 }
                 if (isset($options['course_code']) && $options['course_code'] == true) {
-                    $sql = $sql . " OR course_code LIKE %" . $searchText . "%";
+                    $sql = $sql . " OR course_code LIKE %:text%";
                 }
                 if (isset($options['timestamp']) && $options['timestamp'] == true) {
-                    $sql = $sql . " OR timestamp LIKE %" . $searchText . "%";
+                    $sql = $sql . " OR timestamp LIKE %:text%";
                 }
             }
             else {
@@ -346,7 +357,10 @@ class VideoManager {
             }
         }
 
-        $sth = $this->db->query($sql);
+        $sth = $this->db->prepare($sql);
+        $sth->bindParam(':text', $searchText);
+        $sth->execute();
+
         $i = 0;
 
         $ret['status'] = 'ok';
@@ -357,6 +371,67 @@ class VideoManager {
             $i++;
         }
 
+        return $ret;
+    }
+
+    /**
+     * Get the average rating for a video.
+     * 
+     * @param int $vid is the id of the video to get average rating for.
+     * 
+     * @return array[] An associative array width the fields 'status' (as always 'ok' or 'fail'), and 'errorMessage' if 'status' is 'fail', and if 'status' is 'ok' a field 'rating'.
+     */
+    public function getRating($vid) {
+        $ret['status'] = 'fail';
+        $ret['rating'] = null;
+        $ret['errorMessage'] = "Vi fikk ikke noe resultat";
+
+        $vid = htmlspecialchars($vid);
+
+        $sql = "SELECT AVG(rating) AS rating FROM rated WHERE vid = :vid GROUP BY vid";
+
+        $sth = $this->db->prepare($sql);
+        $sth->bindParam(":vid", $vid);
+        $sth->execute();
+
+        while($row = $sth->fetch(PDO::FETCH_ASSOC))
+        {
+            $ret['status'] = 'ok';
+            $ret['rating'] = htmlspecialchars($row['rating']);
+        }
+        
+        return $ret;
+    }
+
+    /**
+     * Returns the user rating for a particular video.
+     * 
+     * @param int $uid is the id for the user to check.
+     * @param int $vid is the id to the video to check.
+     * 
+     * @return array[] An associative array with the fields 'status' (with 'ok' if it finds something and 'fail' if an error or if it doesn't find anything), 'errorMessage' if 'status' is 'fail' and 'rating' if 'status' is 'ok'.
+     */
+    public function getUserRating($uid, $vid) {
+        $ret['status'] = 'fail';
+        $ret['rating'] = null;
+        $ret['errorMessage'] = "Vi fikk ikke noe resultat";
+
+        $vid = htmlspecialchars($vid);
+        $uid = htmlspecialchars($uid);
+
+        $sql = "SELECT rating FROM rated WHERE vid = :vid AND uid = :uid";
+
+        $sth = $this->db->prepare($sql);
+        $sth->bindParam(":vid", $vid);
+        $sth->bindParam(":uid", $uid);
+        $sth->execute();
+
+        while($row = $sth->fetch(PDO::FETCH_ASSOC))
+        {
+            $ret['status'] = 'ok';
+            $ret['rating'] = htmlspecialchars($row['rating']);
+        }
+        
         return $ret;
     }
 }
