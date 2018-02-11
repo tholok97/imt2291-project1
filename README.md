@@ -1,8 +1,9 @@
-*([Øivind's original readme](./docs/original_readme.md))*
 
 # Project 1 in imt2291 - Web Technology
 
-[Link to project description](https://bitbucket.org/okolloen/imt2291-project1-spring2018/wiki/)
+* [Øivind's original readme](./docs/original_readme.md)
+* [Link to project description](https://bitbucket.org/okolloen/imt2291-project1-spring2018/wiki/)
+* Project should be running on <http://10.212.136.151> (IP is internal to NTNU's networks. You must be connected to a NTNU network to have access).
 
 ## Group members
 
@@ -14,7 +15,17 @@
 
 * Place this repository a place where your webserver can see it (htdocs for example)
 * Run `composer install` to install dependencies of project
+	* To install composer:
+
+		sudo apt update
+		sudo apt install composer
+		sudo apt install php7.0-mbstring
+		sudo apt install php7.0-xml
+	
 * Add a `config.php` file to the root directory of the project. It is used to provide environment-dependant constants. It should look like the file `config_example.php` in docs. One way to make it is to run the command `cp docs/config_example.php config.php`. Alter the `config.php` file to fit your environment.
+* The project needs write access to the `uploadedFiles` directory.
+    * **Linux / Mac OS**: `chown -R <apache2-user> uploadedFiles`. (In lampp the user is `daemon`)
+    * **Windows**: Dunno. Google it
 
 ## Test
 
