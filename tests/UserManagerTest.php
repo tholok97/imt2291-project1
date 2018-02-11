@@ -308,6 +308,80 @@ class UserManagerTest extends TestCase {
             count($ret['uids']),
             "Search should only return 2"
         );
+
+
+        // assert that giving invalid searchwhere fails
+        $ret = $this->userManager->search('er', 'drop tables');
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Invalid searchwhere should give fail"
+        );
+    }
+
+    public function testSearchMultipleFields() {
+
+        // array of test users
+        $testusers[0]['username'] = 't';
+        $testusers[1]['username'] = 'tom';
+        $testusers[2]['username'] = 'tomas';
+        $testusers[0]['firstname'] = 'lokken';
+        $testusers[1]['firstname'] = 'lok';
+        $testusers[2]['firstname'] = 'x';
+        $testusers[0]['lastname'] = 'per';
+        $testusers[1]['lastname'] = 'errr';
+        $testusers[2]['lastname'] = 'pxx';
+
+        $testusersUIDs = array();
+
+        // insert users int db
+        for ($i = 0; $i < count($testusers); $i++) {
+
+            // insert testuser into database
+            $stmt = $this->dbh->prepare('
+                INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+                VALUES (:username, :firstname, :lastname, "hashhhh", 2)
+            ');
+
+            $stmt->bindParam(':username', $testusers[$i]['username']);
+            $stmt->bindParam(':firstname', $testusers[$i]['firstname']);
+            $stmt->bindParam(':lastname', $testusers[$i]['lastname']);
+
+            if (!$stmt->execute()) {
+                $this->fail("Couldn't insert test user");
+            }
+
+            // store uid
+            array_push($testusersUIDs, $this->dbh->lastInsertId());
+        }
+
+
+        // assert that searching valid string in valid place is ok
+        $ret = $this->userManager->searchMultipleFields('o', array('firstname', 'lastname'));
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Searching for valid thing that is in one of given fields should ".
+            "be okay (gave message ".$ret['message'].")"
+        );
+
+
+        // assert that seraching for a valid username in lastnames gives no results
+        $ret = $this->userManager->searchMultipleFields('tomas', array('firstname', 'lastname'));
+        $this->assertEquals(
+            0,
+            count($ret['uids']),
+            "Searching string isn't in the given fields, should give 0 (is in the other though)"
+        );
+
+        // assert that searching with invalid field gives fail
+        $ret = $this->userManager->searchMultipleFields('tomas', array('firstname', 'invalid'));
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Search with non-sensical field should give fail"
+        );
+
     }
 
 }
