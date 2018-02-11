@@ -332,24 +332,6 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
             }
         }
 
-
-        /*
-        $searchFields = array();
-
-        if (usernameCheckbox == pressed) {
-            array_push($searchFields, 'username');
-        }
-
-        if (lastnameCheckbox == pressed) {
-            array_push($searchFields, 'lastname');
-        }
-
-
-        userManager->searchMultipleFields($whattosearchfor, $searchFields);
-         */
-
-
-
         return $ret;
     }
 
