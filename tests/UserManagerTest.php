@@ -231,7 +231,7 @@ class UserManagerTest extends TestCase {
         );
     }
 
-    public function testSearchUsername() {
+    public function testSearch() {
 
         // array of test users
         $testusersUsernames[0] = 't';
@@ -261,7 +261,7 @@ class UserManagerTest extends TestCase {
 
 
         // assert that searh for returns all three of our users
-        $ret = $this->userManager->searchUsername('t');
+        $ret = $this->userManager->search('t', 'username');
         $this->assertEquals(
             3,
             count($ret['uids']),
@@ -281,7 +281,7 @@ class UserManagerTest extends TestCase {
 
 
         // assert that search for om returns two users
-        $ret = $this->userManager->searchUsername('om');
+        $ret = $this->userManager->search('om', 'username');
         $this->assertEquals(
             2,
             count($ret['uids']),
