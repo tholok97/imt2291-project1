@@ -242,34 +242,43 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
     }
 
     /**
-     * Return array of uid's that are LIKE %inputusername%
-     * @param $username
+     * Return array of uid's that have a given field searchwere LIKE %searchfor%
+     * @param $searchfor what to search for
+     * @param $searchwhere should be one of username, firstname, lastname
      *
      * @return assoc array with fields: status, uids (array of uids), message
      */
-    public function searchUsername($username) {
+    public function search($searchfor, $searchwhere) {
 
         // prepare ret
         $ret['status'] = 'fail';
         $ret['uids'] = array();
         $ret['message'] = '';
 
+        // IMPORTANT: pdo doesn't accept column names as bindable parameters, 
+        // so have to sanitize input manually:
+        if (!in_array($searchwhere, ['username', 'firstname', 'lastname'])) {
+            $ret['message'] = "Searchwhere is not valid. is $testwhere (see doc string)";
+            return $ret;
+        }
+
 
         // try and fetch uid array
         try {
-            
-            $stmt = $this->dbh->prepare('
+
+            // NOTE: $searchwhere was sanitized above!! has to use it like this 
+            // because pdo doesn't accept column names as bindable paramters
+            $stmt = $this->dbh->prepare("
                 SELECT uid
                 FROM user
-                WHERE user.username LIKE :search
-            ');
+                WHERE $searchwhere LIKE :search
+            ");
 
-            $stmt->bindValue(':search', '%' . $username . '%');
+            $stmt->bindValue(':search', '%' . $searchfor . '%');
 
             if ($stmt->execute()) {
 
                 $ret['status'] = 'ok';
-
 
 
                 // for each hit, add to uids
