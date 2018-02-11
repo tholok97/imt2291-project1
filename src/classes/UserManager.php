@@ -241,4 +241,51 @@ VALUES (:username, :firstname, :lastname, :password_hash, :privilege_level)
         return $ret;
     }
 
+    /**
+     * Return array of uid's that are LIKE %inputusername%
+     * @param $username
+     *
+     * @return assoc array with fields: status, uids (array of uids), message
+     */
+    public function searchUsername($username) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['uids'] = array();
+        $ret['message'] = '';
+
+
+        // try and fetch uid array
+        try {
+            
+            $stmt = $this->dbh->prepare('
+                SELECT uid
+                FROM user
+                WHERE user.username LIKE :search
+            ');
+
+            $stmt->bindValue(':search', '%' . $username . '%');
+
+            if ($stmt->execute()) {
+
+                $ret['status'] = 'ok';
+
+
+
+                // for each hit, add to uids
+                foreach($stmt->fetchAll() as $row) {
+                    array_push($ret['uids'], $row['uid']);
+                }
+            } else {
+                $ret['message'] = 'statement didn\'t execute properly : ' . $stmt->errorCode();
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+
+        return $ret;
+    }
+
 }

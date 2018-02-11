@@ -231,5 +231,63 @@ class UserManagerTest extends TestCase {
         );
     }
 
+    public function testSearchUsername() {
+
+        // array of test users
+        $testusersUsernames[0] = 't';
+        $testusersUsernames[1] = 'tom';
+        $testusersUsernames[2] = 'tomas';
+
+        $testusersUIDs = array();
+
+        // insert users int db
+        for ($i = 0; $i < count($testusersUsernames); $i++) {
+
+            // insert testuser into database
+            $stmt = $this->dbh->prepare('
+                INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+                VALUES (:username, "firstname", "lastname", "hashhhh", 2)
+            ');
+
+            $stmt->bindParam(':username', $testusersUsernames[$i]);
+
+            if (!$stmt->execute()) {
+                $this->fail("Couldn't insert test user");
+            }
+
+            // store uid
+            array_push($testusersUIDs, $this->dbh->lastInsertId());
+        }
+
+
+        // assert that searh for returns all three of our users
+        $ret = $this->userManager->searchUsername('t');
+        $this->assertEquals(
+            3,
+            count($ret['uids']),
+            "search for t should give all three test users (gave ".count($ret['uids']).")"
+        );
+
+        // assert that the uids returned were the correct ones
+        $this->assertEquals(
+            [],
+            array_diff($ret['uids'], $testusersUIDs),
+            "Search should return uids of inserted users"
+        );
+
+
+
+
+
+
+        // assert that search for om returns two users
+        $ret = $this->userManager->searchUsername('om');
+        $this->assertEquals(
+            2,
+            count($ret['uids']),
+            "search for om should give two test users (gave ".count($ret['uids']).")"
+        );
+    }
+
 
 }
