@@ -6,9 +6,16 @@
 </head>
 <body>
     <h1>Admin page</h1>
+
+    <!-- if error occurred -> show message -->
+    {% if wantsMessage != '' %}
+    <h2>{{wantsMessage}}</h2>
+    {% endif %}
+
+    <!-- for each want, show -->
     {% for request in wantsPrivilege %}
 
-    <b>{{request.uid}}</b> wants privilege {{request.privilege_level}} 
+    <b>{{request.user.username}}</b> wants privilege {{request.wouldLike}} 
     <form action="src/privilegeRequestHandler.php">
         <input type="submit" value="Grant" />
     </form>

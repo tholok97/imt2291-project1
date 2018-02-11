@@ -1,6 +1,7 @@
 <?php
 
 require_once dirname(__FILE__) . '/DB.php';
+require_once dirname(__FILE__) . '/User.php';
 require_once dirname(__FILE__) . '/../constants.php';
 require_once dirname(__FILE__) . '/../../config.php';
 
@@ -434,7 +435,7 @@ class UserManager {
     /**
      * Return what users want what privileges
      * @return assoc array with fields: status, 
-     * wants (assoc array with fields: uid, privilege), message
+     * wants (assoc array with fields: uid, privilege_leve), message
      */
     public function getWantsPrivilege() {
 

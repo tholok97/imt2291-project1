@@ -4,6 +4,7 @@ session_start();
 
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/src/classes/UserManager.php';
+require_once dirname(__FILE__) . '/src/functions/functions.php';
 /*
  * Entry-point to the entire site. Users are shown the sites they want using 
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
@@ -70,7 +71,6 @@ if ($page == 'register') {
 
 } else {
 
-
     // Switch on page (DEBUG: just indicate that it's working)
     
     switch ($page) {
@@ -80,13 +80,17 @@ if ($page == 'register') {
     case 'admin':
         $twig_file_to_render = 'admin.twig';
 
-        // DEBUG: dummy wants privilege data
-        $wantsPrivilege[0]['uid'] = 13;
-        $wantsPrivilege[0]['privilege_level'] = 1;
-        $wantsPrivilege[1]['uid'] = 14;
-        $wantsPrivilege[1]['privilege_level'] = 2;
+        // get info
+        $ret_wants = buildWantsPrivilege($userManager);
 
-        $twig_arguments = array('wantsPrivilege' => $wantsPrivilege);
+        // if went fine -> show wants
+        // if didn't go fine -> show error
+        if ($ret_wants['status'] == 'ok') {
+            $twig_arguments = array('wantsPrivilege' => $ret_wants['wantsPrivilege']);
+        } else {
+            $twig_arguments = array('wantsMessage' => "Error getting privilege requests: " . 
+                $ret_wants['message']);
+        }
 
         break;
     case 'videos':
