@@ -41,64 +41,63 @@ class VideoManager {
         }
 
         // If not someone who is trying to hack us.
-        //if (is_uploaded_file($_FILES['fileToUpload']['tmp_name'])) {
-        // If file size not too big.
-        if($videoRef['size'] < 5000000 /*Some number*/) {
-            $title = htmlspecialchars($title);
-            $description = htmlspecialchars($description);
-            $thumbnail = getThumbnail($videoRef);               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
-            $uid = htmlspecialchars($uid);
-            $topic = htmlspecialchars($topic);
-            $course_code = htmlspecialchars($course_code);
-            $timestamp = setTimestamp();
-            $views = 0;
-            $sql = "INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size) VALUES (:title, :description, :thumbnail, :uid, :topic, :course_code, :timestamp, :view_count, :mime, :size)";
-            $sth = $this->db->prepare ($sql);
-            $sth->bindParam(':title', $title);
-            $sth->bindParam(':description', $description);
-            $sth->bindParam(':thumbnail', $thumbnail);
-            $sth->bindParam(':uid', $uid);
-            $sth->bindParam(':topic', $topic);
-            $sth->bindParam(':course_code', $course_code);
-            $sth->bindParam(':timestamp', $timestamp);                   // Setting timestamp.
-            $sth->bindParam(':view_count', $views);                      // Zero-out view-count.
-            $sth->bindParam(':mime', $_FILES['fileToUpload']['type']);
-            $sth->bindParam(':size', $_FILES['fileToUpload']['size']);
-            $sth->execute();
-            //print_r($sth->errorInfo());
-            if ($sth->rowCount()==1) {
-                $id = $this->db->lastInsertId();
-                if (!file_exists(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos')) {      // The user have not uploaded anything before.
-                    mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos', 0777, true);
+        if (is_uploaded_file($_FILES['fileToUpload']['tmp_name'])) {
+            // If file size not too big.
+            if($videoRef['size'] < 5000000 /*Some number*/) {
+                try {
+                    $title = htmlspecialchars($title);
+                    $description = htmlspecialchars($description);
+                    $thumbnail = getThumbnail($videoRef);               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
+                    $uid = htmlspecialchars($uid);
+                    $topic = htmlspecialchars($topic);
+                    $course_code = htmlspecialchars($course_code);
+                    $timestamp = setTimestamp();
+                    $views = 0;
+                    $sql = "INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size) VALUES (:title, :description, :thumbnail, :uid, :topic, :course_code, :timestamp, :view_count, :mime, :size)";
+                    $sth = $this->db->prepare ($sql);
+                    $sth->bindParam(':title', $title);
+                    $sth->bindParam(':description', $description);
+                    $sth->bindParam(':thumbnail', $thumbnail);
+                    $sth->bindParam(':uid', $uid);
+                    $sth->bindParam(':topic', $topic);
+                    $sth->bindParam(':course_code', $course_code);
+                    $sth->bindParam(':timestamp', $timestamp);                   // Setting timestamp.
+                    $sth->bindParam(':view_count', $views);                      // Zero-out view-count.
+                    $sth->bindParam(':mime', $_FILES['fileToUpload']['type']);
+                    $sth->bindParam(':size', $_FILES['fileToUpload']['size']);
+                    $sth->execute();
+
+                    if ($sth->rowCount()==1) {
+                        $id = $this->db->lastInsertId();
+                        if (!file_exists(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos')) {      // The user have not uploaded anything before.
+                            mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos', 0777, true);
+                        }
+                        if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos/'.$id)) {
+                            $ret['status'] = 'ok';
+                            $ret['vid'] = $id;
+                        } else {
+                            $sql = "delete from videos where id=$id";
+                            $this->db->execute($sql);
+                            $ret['errorMessage'] = "Klarte ikke å lagre filen.";
+                            $ret['uid'] = $uid;
+                            $ret['id'] = $id;
+                            $ret['file'] = $_FILES['fileToUpload']['tmp_name'];
+                            $ret['files'] = $_FILES;
+                        }
+                    } else {
+                        $ret['errorMessage'] = "Klarte ikke å laste opp filen.";
+                    }
+                } catch (PDOException $ex) {
+                    $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
                 }
-                if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos/'.$id)) {
-                    $ret['status'] = 'ok';
-                    $ret['vid'] = $id;
-                } else {
-
-                    print_r($sth->errorInfo());
-
-                    $sql = "delete from videos where id=$id";
-                    $this->db->execute($sql);
-                    $ret['errorMessage'] = "Klarte ikke å lagre filen.";
-                    $ret['uid'] = $uid;
-                    $ret['id'] = $id;
-                    $ret['file'] = $_FILES['fileToUpload']['tmp_name'];
-                    $ret['files'] = $_FILES;
-                }
-            } else {
-
-
-                $ret['errorMessage'] = "Klarte ikke å laste opp filen.";
+            }
+            else {
+                $ret['errorMessage'] = "Filen er for stor til å kunne lastes opp.";
             }
         }
         else {
-            $ret['errorMessage'] = "Filen er for stor til å kunne lastes opp.";
-        }
-        /*}
-        else {
             $ret['errorMessage'] = "Vi lurer på om du hacker oss, ser ut som en ulovlig fil.";
-        }*/
+        }
 
         return $ret;
     }
@@ -129,25 +128,32 @@ class VideoManager {
             return $ret;
         }
 
-        $sth = $this->db->prepare('SELECT * FROM video WHERE vid = :vid GROUP BY vid');
-        $sth->bindParam(':vid', $vid);
-        $sth->execute();
+        try {
+            $sth = $this->db->prepare('SELECT * FROM video WHERE vid = :vid GROUP BY vid');
+            $sth->bindParam(':vid', $vid);
+            $sth->execute();
 
-        $views;
-        // While-loop will (hopefully) just go one time.
-        while($row = $sth->fetch(PDO::FETCH_ASSOC))
-        {
-            $views = htmlspecialchars($row['view_count']) + 1;
-            $ret['status'] = 'ok';
-            $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']), htmlspecialchars('uploadedFiles/'.$row['uid'].'/videos/'.$row['vid']), /*htmlspecialchars($row['thumbnail']),*/ htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), $views, htmlspecialchars($row['mime']), htmlspecialchars($row['size']));
+            $views;
+            // While-loop will (hopefully) just go one time.
+            while($row = $sth->fetch(PDO::FETCH_ASSOC))
+            {
+                $views = htmlspecialchars($row['view_count']) + 1;
+                $ret['status'] = 'ok';
+                $ret['video'] = new Video(htmlspecialchars($row['vid']), htmlspecialchars($row['title']), htmlspecialchars($row['description']), htmlspecialchars('uploadedFiles/'.$row['uid'].'/videos/'.$row['vid']), /*htmlspecialchars($row['thumbnail']),*/ htmlspecialchars($row['uid']), htmlspecialchars($row['topic']), htmlspecialchars($row['course_code']), htmlspecialchars($row['timestamp']), $views, htmlspecialchars($row['mime']), htmlspecialchars($row['size']));
+            }
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
         }
 
-        $sql = "UPDATE video SET view_count = :view_count WHERE vid = :vid";
-        $sth = $this->db->prepare ($sql);
-        $sth->bindParam(':view_count', $views);
-        $sth->bindParam(':vid', $vid);
-        $sth->execute();
-
+        try {
+            $sql = "UPDATE video SET view_count = :view_count WHERE vid = :vid";
+            $sth = $this->db->prepare ($sql);
+            $sth->bindParam(':view_count', $views);
+            $sth->bindParam(':vid', $vid);
+            $sth->execute();
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
+        }
         return $ret;
     }
 
@@ -188,20 +194,24 @@ class VideoManager {
             return $ret;
         }
 
-        $sql = "INSERT INTO comment (vid, uid, text, timestamp) VALUES (:vid, :uid, :text, :timestamp)";
-        $sth = $this->db->prepare ($sql);
-        $sth->bindParam(':vid', $vid);
-        $sth->bindParam(':uid', $uid);
-        $sth->bindParam(':text', $text);
-        $sth->bindParam(':timestamp', $timestamp);
-        $sth->execute();
+        try {
+            $sql = "INSERT INTO comment (vid, uid, text, timestamp) VALUES (:vid, :uid, :text, :timestamp)";
+            $sth = $this->db->prepare ($sql);
+            $sth->bindParam(':vid', $vid);
+            $sth->bindParam(':uid', $uid);
+            $sth->bindParam(':text', $text);
+            $sth->bindParam(':timestamp', $timestamp);
+            $sth->execute();
 
-        if ($sth->rowCount()==1) {
-            $ret['status'] = 'ok';
-            $ret['cid'] = $this->db->lastInsertId();
-        }
-        else {
-            $ret['errorMessage'] = 'Fikk ikke lagt til kommentar i databasen.';
+            if ($sth->rowCount()==1) {
+                $ret['status'] = 'ok';
+                $ret['cid'] = $this->db->lastInsertId();
+            }
+            else {
+                $ret['errorMessage'] = 'Fikk ikke lagt til kommentar i databasen.';
+            }
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
         }
 
         return $ret;
@@ -232,23 +242,26 @@ class VideoManager {
             return $ret;
         }
 
-        $sth = $this->db->prepare('SELECT cid, vid, uid, text, timestamp FROM comment WHERE vid = :vid');
-        $sth->bindParam(':vid', $vid);
-        $sth->execute();
-        $ret['status'] = 'ok';
-        $i = 0;
+        try {
+            $sth = $this->db->prepare('SELECT cid, vid, uid, text, timestamp FROM comment WHERE vid = :vid');
+            $sth->bindParam(':vid', $vid);
+            $sth->execute();
+            $ret['status'] = 'ok';
+            $i = 0;
 
-        // Get all comments
-        while($row = $sth->fetch(PDO::FETCH_ASSOC))
-        {
-            $ret['comments'][$i]['cid'] = $row['cid'];
-            $ret['comments'][$i]['vid'] = $row['vid'];
-            $ret['comments'][$i]['uid'] = $row['uid'];
-            $ret['comments'][$i]['text'] = $row['text'];
-            $ret['comments'][$i]['timestamp'] = $row['timestamp'];
-            $i++;
+            // Get all comments
+            while($row = $sth->fetch(PDO::FETCH_ASSOC))
+            {
+                $ret['comments'][$i]['cid'] = $row['cid'];
+                $ret['comments'][$i]['vid'] = $row['vid'];
+                $ret['comments'][$i]['uid'] = $row['uid'];
+                $ret['comments'][$i]['text'] = $row['text'];
+                $ret['comments'][$i]['timestamp'] = $row['timestamp'];
+                $i++;
+            }
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
         }
-
         return $ret;
     }
 
@@ -278,19 +291,23 @@ class VideoManager {
         $res = $this->getUserRating($uid, $vid);
 
         if ($res['status'] != 'ok') {
-            $sql = "INSERT INTO rated (vid, uid, rating) VALUES (:vid, :uid, :rating)";
-            $sth = $this->db->prepare ($sql);
-            $sth->bindParam(':vid', $vid);
-            $sth->bindParam(':uid', $uid);
-            $sth->bindParam(':rating', $rating);
-            $sth->execute();
-    
-            if ($sth->rowCount()==1) {
-                $ret['status'] = 'ok';
-                $ret['cid'] = $this->db->lastInsertId();
-            }
-            else {
-                $ret['errorMessage'] = 'Fikk ikke lagt til rating i databasen.';
+            try {
+                $sql = "INSERT INTO rated (vid, uid, rating) VALUES (:vid, :uid, :rating)";
+                $sth = $this->db->prepare ($sql);
+                $sth->bindParam(':vid', $vid);
+                $sth->bindParam(':uid', $uid);
+                $sth->bindParam(':rating', $rating);
+                $sth->execute();
+        
+                if ($sth->rowCount()==1) {
+                    $ret['status'] = 'ok';
+                    $ret['cid'] = $this->db->lastInsertId();
+                }
+                else {
+                    $ret['errorMessage'] = 'Fikk ikke lagt til rating i databasen.';
+                }
+            } catch (PDOException $ex) {
+                $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
             }
         }
         else {
@@ -357,18 +374,22 @@ class VideoManager {
             }
         }
 
-        $sth = $this->db->prepare($sql);
-        $sth->bindParam(':text', $searchText);
-        $sth->execute();
+        try {
+            $sth = $this->db->prepare($sql);
+            $sth->bindParam(':text', $searchText);
+            $sth->execute();
 
-        $i = 0;
+            $i = 0;
 
-        $ret['status'] = 'ok';
+            $ret['status'] = 'ok';
 
-        while($row = $sth->fetch(PDO::FETCH_ASSOC))
-        {
-            $ret['result'][$i] = $this->get(htmlspecialchars($row['vid']));
-            $i++;
+            while($row = $sth->fetch(PDO::FETCH_ASSOC))
+            {
+                $ret['result'][$i] = $this->get(htmlspecialchars($row['vid']));
+                $i++;
+            }
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
         }
 
         return $ret;
@@ -390,14 +411,18 @@ class VideoManager {
 
         $sql = "SELECT AVG(rating) AS rating FROM rated WHERE vid = :vid GROUP BY vid";
 
-        $sth = $this->db->prepare($sql);
-        $sth->bindParam(":vid", $vid);
-        $sth->execute();
+        try {
+            $sth = $this->db->prepare($sql);
+            $sth->bindParam(":vid", $vid);
+            $sth->execute();
 
-        while($row = $sth->fetch(PDO::FETCH_ASSOC))
-        {
-            $ret['status'] = 'ok';
-            $ret['rating'] = htmlspecialchars($row['rating']);
+            while($row = $sth->fetch(PDO::FETCH_ASSOC))
+            {
+                $ret['status'] = 'ok';
+                $ret['rating'] = htmlspecialchars($row['rating']);
+            }
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
         }
         
         return $ret;
@@ -421,15 +446,19 @@ class VideoManager {
 
         $sql = "SELECT rating FROM rated WHERE vid = :vid AND uid = :uid";
 
-        $sth = $this->db->prepare($sql);
-        $sth->bindParam(":vid", $vid);
-        $sth->bindParam(":uid", $uid);
-        $sth->execute();
+        try {
+            $sth = $this->db->prepare($sql);
+            $sth->bindParam(":vid", $vid);
+            $sth->bindParam(":uid", $uid);
+            $sth->execute();
 
-        while($row = $sth->fetch(PDO::FETCH_ASSOC))
-        {
-            $ret['status'] = 'ok';
-            $ret['rating'] = htmlspecialchars($row['rating']);
+            while($row = $sth->fetch(PDO::FETCH_ASSOC))
+            {
+                $ret['status'] = 'ok';
+                $ret['rating'] = htmlspecialchars($row['rating']);
+            }
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
         }
         
         return $ret;
