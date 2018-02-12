@@ -256,7 +256,7 @@ class VideoManagerTest extends TestCase {
             'Rating gotten from userRating not the same (' . $secondRate . ') on second rating when using another user: ' . $ret['rating']
         );
 
-        $this->videoManager->getRating($vid);
+        $ret = $this->videoManager->getRating($vid);
 
         $this->assertEquals(
             'ok',
