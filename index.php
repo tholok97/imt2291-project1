@@ -93,7 +93,7 @@ if ($page == 'register') {
         break;
     case 'videos':
         if ($param1 == "") {                    // Just page parameter.
-            $twig_file_to_render = 'debug.twig';
+            $twig_file_to_render = 'showVideoForm.twig';
         }
         else {                                  // A parameter
             $video = $videoManager->get($param1);
