@@ -64,11 +64,16 @@ function buildWantsPrivilege($userManager) {
                 $ret['message'] = "Couldn't fetch name: " . $ret_get['message'];
                 return $ret;
             }
-
-
-            // if got this far without fail -> success
-            $ret['status'] = 'ok';
         }
+
+        // message if empty
+        if (count($ret['wantsPrivilege']) == 0) {
+            $ret['message'] = "No privilege requests...";
+        }
+
+
+        // if got this far without fail -> success
+        $ret['status'] = 'ok';
 
     } else {
         $ret['message'] = 'There was an error fetching privilege requests: ' . 

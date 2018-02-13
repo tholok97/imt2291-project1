@@ -97,7 +97,10 @@ if ($page == 'register') {
         // if went fine -> show wants
         // if didn't go fine -> show error
         if ($ret_wants['status'] == 'ok') {
-            $twig_arguments = array('wantsPrivilege' => $ret_wants['wantsPrivilege']);
+            $twig_arguments = array(
+                'wantsPrivilege' => $ret_wants['wantsPrivilege'],
+                'wantsMessage' => $ret_wants['message']
+            );
         } else {
             $twig_arguments = array('wantsMessage' => "Error getting privilege requests: " . 
                 $ret_wants['message']);
