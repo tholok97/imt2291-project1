@@ -551,15 +551,36 @@ class UserManager {
             return $ret;
         }
 
+        $ret['status'] = 'ok';
+
+        
+        return $ret;
+
+    }
+
+    /**
+     * Delete request entry that looks like $uid, $privilege_level
+     * @param $uid
+     * @param $privilege_level
+     * @return assoc array with fields: status, message
+     */
+    public function deletePrivilegeRequest($uid, $privilege_level) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = '';
+
         // delete request entry
         try {
             
             $stmt = $this->dbh->prepare('
                 DELETE FROM wants_privilege
-                WHERE uid = :uid
+                WHERE   uid = :uid
+                AND     privilege_level = :privilege_level
             ');
 
             $stmt->bindParam(':uid', $uid);
+            $stmt->bindParam(':privilege_level', $privilege_level);
 
             if ($stmt->execute()) {
                 if ($stmt->rowCount() > 0) {
@@ -576,7 +597,7 @@ class UserManager {
         }
         
         return $ret;
-
+        
     }
 
 }

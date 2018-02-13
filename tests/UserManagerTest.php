@@ -642,9 +642,43 @@ class UserManagerTest extends TestCase {
             "User in db should have correct privilege_level : " . $ret['message']
         );
 
+    }
+
+    /**
+     * @depends testWantsPrivilegeLevel
+     */
+    public function testDeletePrivilegeRequest() {
+
+        $testuser = new User(
+            'test1',
+            'test2',
+            'test3',
+            0
+        );
+
+        $wants_privilege = 1;
+
+        $testpassword = '123';
+
+        // insert user
+        $ret_adduser = $this->userManager->addUser($testuser, $testpassword);
+
+        $testuser->uid = $ret_adduser['uid'];
+
+        // register privilege request
+        $ret_wants = $this->userManager->requestPrivilege($testuser->uid, $wants_privilege);
 
 
-        // assert that request was deleted
+
+        // assert that deleting is successful
+        $ret = $this->userManager->deletePrivilegeRequest($testuser->uid, $wants_privilege);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Deleting valid request shouldn't fail : " . $ret['message']
+        );
+
+        // assert that request was actually deleted
         $ret_getrequests = $this->userManager->getWantsPrivilege();
         $this->assertEquals(
             false,
@@ -660,6 +694,13 @@ class UserManagerTest extends TestCase {
             "User should no longer have a privilege request registered in the db"
         );
 
+        // assert that deleting invalid user is unsuccesful
+        $ret = $this->userManager->deletePrivilegeRequest(-1, $wants_privilege);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Deleting invalid user should fail"
+        );
     }
 
 }

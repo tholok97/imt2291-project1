@@ -10,15 +10,24 @@ require_once dirname(__FILE__) . '/classes/DB.php';
 $userManager = new UserManager(DB::getDBConnection());
 $ret = $userManager->grantPrivilege($_POST['uid'], $_POST['privilege_level']);
 
-
-// if success -> go to index
-// if not -> reload page
-if ($ret_updateuser['status'] == 'ok') {
-
-    header('Location: ../admin');
-    exit();
-} else {
-    header('Location: ../admin');
+// if didn't work -> early return
+if ($ret['status'] == 'fail') {
+    echo "Didn't grant properly : " . $ret['message'];
     exit();
 }
+
+
+// delete request
+$ret = $userManager->deletePrivilegeRequest($_POST['uid'], $_POST['privilege_level']);
+// if didn't work -> early return
+if ($ret['status'] == 'fail') {
+    echo "Didn't delete request properly : " . $ret['message'];
+    exit();
+}
+
+
+
+// if everything fine -> admin page
+header('Location: ../admin');
+exit();
 
