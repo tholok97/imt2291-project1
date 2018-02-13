@@ -445,4 +445,262 @@ class UserManagerTest extends TestCase {
 
     }
 
+    public function testGetUser() {
+
+        // test user data
+        $username = 'testuser';
+        $password = 'testpassword';
+
+        // generate hash
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        // insert testuser into database
+        $stmt = $this->dbh->prepare('
+            INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+            VALUES (:username, "firstname", "lastname", :hash, 2)
+        ');
+
+        $stmt->bindParam(':username', $username);
+        $stmt->bindValue(':hash', $hash);
+
+        if (!$stmt->execute()) {
+            $this->fail("Couldn't insert test user");
+        }
+
+        if (!password_verify($password, $hash)) {
+            $this->fail("Password isn't right..");
+        }
+
+
+        // store uid
+        $uid = $this->dbh->lastInsertId();
+
+
+
+
+
+
+        // assert that testuser with valid uid gives corret user
+
+        $ret = $this->userManager->getUser($uid);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Getting uid of valid user should return ok : " . $ret['message']
+        );
+
+        $this->assertEquals(
+            $username,
+            $ret['user']->username,
+            "User returned should have correct username"
+        );
+
+
+        // assert that getting invalid user gives fail
+        $ret = $this->userManager->getUser(-1);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Getting invalid user should fail"
+        );
+    }
+
+    /**
+     * @depends testWantsPrivilegeLevel
+     * @depends testAddUser
+     */
+    public function testGetWantsPrivilege() {
+
+        $testuser = new User(
+            'test1',
+            'test2',
+            'test3',
+            0
+        );
+
+        $testpassword = '123';
+
+        // insert user
+        $ret_adduser = $this->userManager->addUser($testuser, $testpassword);
+
+        // request privilege 1
+        $ret_request = $this->userManager->requestPrivilege($ret_adduser['uid'], 1);
+
+
+        // assert that getting all requests returns this  testuser
+
+        $ret = $this->userManager->getWantsPrivilege();
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Getting all wants should be fine"
+        );
+
+        $this->assertEquals(
+            $ret_adduser['uid'],
+            $ret['wants'][0]['uid'],
+            "uid of first wants should be uid of test user"
+        );
+    }
+
+    /**
+     * @depends testAddUser
+     * @depends testGetUser
+     */
+    public function testUpdateUser() {
+        
+        $testuser = new User(
+            'test1',
+            'test2',
+            'test3',
+            0
+        );
+
+        $testpassword = '123';
+
+        // insert user
+        $ret_adduser = $this->userManager->addUser($testuser, $testpassword);
+
+        $testuser->uid = $ret_adduser['uid'];
+
+
+        // assert that updating only privilege_level and firstname does just that
+
+        $testuser->firstname = 'Thomas';
+        $testuser->privilege_level = 2;
+
+
+        $ret = $this->userManager->updateUser($testuser);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Updating should be OK! : " . $ret['message']
+        );
+
+        $gottenUser = $this->userManager->getUser($testuser->uid)['user'];
+
+        $this->assertEquals(
+            $testuser->firstname,
+            $gottenUser->firstname,
+            "Firstname of gotten user should be same as testuser (updated)"
+        );
+
+
+        // assert that updating non-existent user fails
+        $testuser->uid = -1;
+        $ret = $this->userManager->updateUser($testuser);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Updating on non-existent user should fail"
+        );
+    }
+
+    /**
+     * @depends testGetUser
+     * @depends testUpdateUser
+     * @depends testWantsPrivilegeLevel
+     */
+    public function testGrantPrivilege() {
+
+        $testuser = new User(
+            'test1',
+            'test2',
+            'test3',
+            0
+        );
+
+        $wants_privilege = 1;
+
+        $testpassword = '123';
+
+        // insert user
+        $ret_adduser = $this->userManager->addUser($testuser, $testpassword);
+
+        $testuser->uid = $ret_adduser['uid'];
+
+        
+        // register privilege request
+        $ret_wants = $this->userManager->requestPrivilege($testuser->uid, $wants_privilege);
+
+
+
+        // assert that granting the privilege is successful
+        $ret = $this->userManager->grantPrivilege($testuser->uid, $wants_privilege);
+
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Granting registered privilege should be fine : " . $ret['message']
+        );
+
+        // assert that  privilege was actually granted
+        $ret_getuser = $this->userManager->getUser($testuser->uid);
+        $this->assertEquals(
+            $wants_privilege,
+            $ret_getuser['user']->privilege_level,
+            "User in db should have correct privilege_level : " . $ret['message']
+        );
+
+    }
+
+    /**
+     * @depends testWantsPrivilegeLevel
+     */
+    public function testDeletePrivilegeRequest() {
+
+        $testuser = new User(
+            'test1',
+            'test2',
+            'test3',
+            0
+        );
+
+        $wants_privilege = 1;
+
+        $testpassword = '123';
+
+        // insert user
+        $ret_adduser = $this->userManager->addUser($testuser, $testpassword);
+
+        $testuser->uid = $ret_adduser['uid'];
+
+        // register privilege request
+        $ret_wants = $this->userManager->requestPrivilege($testuser->uid, $wants_privilege);
+
+
+
+        // assert that deleting is successful
+        $ret = $this->userManager->deletePrivilegeRequest($testuser->uid, $wants_privilege);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Deleting valid request shouldn't fail : " . $ret['message']
+        );
+
+        // assert that request was actually deleted
+        $ret_getrequests = $this->userManager->getWantsPrivilege();
+        $this->assertEquals(
+            false,
+            in_array(
+                [
+                    'uid' => $testuser->uid, 
+                    '0' => $testuser->uid, 
+                    'privilege_level' => $wants_privilege,
+                    '1' => $wants_privilege
+                ], 
+                $ret_getrequests['wants']
+            ),
+            "User should no longer have a privilege request registered in the db"
+        );
+
+        // assert that deleting invalid user is unsuccesful
+        $ret = $this->userManager->deletePrivilegeRequest(-1, $wants_privilege);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Deleting invalid user should fail"
+        );
+    }
+
 }

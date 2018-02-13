@@ -24,3 +24,61 @@ function setTimestamp() {
 function getThumbnail($videoRef) {
     return file_get_contents(dirname(__FILE__) . "/../../temp/temp.png");
 }
+
+/**
+ * Build wantsPrivilege for admin page
+ *
+ * @param $userManager
+ *
+ * @return assoc array with fields: status, wantsPrivilege, message
+ */
+function buildWantsPrivilege($userManager) {
+
+    // prepare ret
+    $ret['status'] = 'fail';
+    $ret['wantsPrivilege'] = array();;
+    $ret['message'] = '';
+
+    // fetch wants from db
+    $ret_wants = $userManager->getWantsPrivilege();
+
+    // if OK, send wants
+    // if not OK, send error message
+    if ($ret_wants['status'] == 'ok') {
+
+        // for each want, fetch username and add twig arguments
+        foreach ($ret_wants['wants'] as $want) {
+
+            // get more details about user
+            $ret_get = $userManager->getUser($want['uid']);
+
+            if ($ret_get['status'] == 'ok') {
+
+                array_push($ret['wantsPrivilege'], [
+                    'user' => $ret_get['user'],
+                    'wouldLike' => $want['privilege_level']
+                ]);
+
+            } else {
+                $ret['status'] = 'fail';
+                $ret['message'] = "Couldn't fetch name: " . $ret_get['message'];
+                return $ret;
+            }
+        }
+
+        // message if empty
+        if (count($ret['wantsPrivilege']) == 0) {
+            $ret['message'] = "No privilege requests...";
+        }
+
+
+        // if got this far without fail -> success
+        $ret['status'] = 'ok';
+
+    } else {
+        $ret['message'] = 'There was an error fetching privilege requests: ' . 
+            $ret_wants['message'];
+    }
+
+    return $ret;
+}

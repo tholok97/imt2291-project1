@@ -1,6 +1,7 @@
 <?php
 
 require_once dirname(__FILE__) . '/DB.php';
+require_once dirname(__FILE__) . '/User.php';
 require_once dirname(__FILE__) . '/../constants.php';
 require_once dirname(__FILE__) . '/../../config.php';
 
@@ -374,6 +375,229 @@ class UserManager {
         }
 
         return $ret;
+    }
+
+    /**
+     * Return user with given $uid
+     * @param $uid
+     *
+     * @return assoc array with fields: status, user, message
+     */
+    public function getUser($uid) {
+
+        // parepare ret
+        $ret['status'] = 'fail';
+        $ret['user'] = null;
+        $ret['message'] = '';
+
+        try {
+            
+            $stmt = $this->dbh->prepare('
+                SELECT *
+                FROM user
+                WHERE uid = :uid
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+
+            if ($stmt->execute()) {
+
+                $rows = $stmt->fetchAll();
+
+                // success if more than one uid returned
+                if (count($rows) > 0) {
+                
+                    $ret['status'] = 'ok';
+
+                    $row = $rows[0];
+                    $ret['user'] = new User(
+                        $row['username'],
+                        $row['firstname'],
+                        $row['lastname'],
+                        $row['privilege_level']
+                    );
+                    $ret['user']->uid = $row['uid'];
+
+                } else {
+                    $ret['message'] = "No users with uid " . $uid;
+                }
+
+            } else {
+                $ret['message'] = "statememnt didn't execute right : " . $stmt->errorCode();
+            }
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Return what users want what privileges
+     * @return assoc array with fields: status, 
+     * wants (assoc array with fields: uid, privilege_leve), message
+     */
+    public function getWantsPrivilege() {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['wants'] = array();
+        $ret['message'] = '';
+
+        try {
+
+            $stmt = $this->dbh->prepare('
+                SELECT *
+                FROM wants_privilege
+            ');
+
+            if ($stmt->execute()) {
+
+                $ret['status'] = 'ok';
+                
+                foreach ($stmt->fetchAll() as $row) {
+                    array_push($ret['wants'], $row);
+                }
+            } else {
+                $ret['message'] = "Statement didn't exeute right : " . $stmt->errorCode();
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+    }
+
+
+    /**
+     * Updates user in db with given user object (ignores uid (!!))
+     * @param $user
+     * @return assoc array with fields: status, message
+     */
+    public function updateUser($user) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = '';
+
+        try {
+
+
+            $stmt = $this->dbh->prepare('
+                UPDATE user
+                SET username=:username,
+                    firstname=:firstname,
+                    lastname=:lastname,
+                    privilege_level=:privilege_level
+                WHERE uid=:uid
+            ');
+
+            $stmt->bindParam(':username', $user->username);
+            $stmt->bindParam(':firstname', $user->firstname);
+            $stmt->bindParam(':lastname', $user->lastname);
+            $stmt->bindParam(':privilege_level', $user->privilege_level);
+            $stmt->bindParam(':uid', $user->uid);
+
+            if ($stmt->execute()) {
+
+                if ($stmt->rowCount() == 1) {
+                    $ret['status'] = 'ok';
+                } else {
+                    $ret['message'] = "No update was done (/ too many..)";
+                }
+            } else {
+                $ret['message'] = "Statement didn't execute right : " . $stmt->errorCode();
+            }
+
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        
+        return $ret;
+    }
+
+    /**
+     * Grant given privilege to given user
+     * @param $uid
+     * @param $privilege_level
+     *
+     * @return assoc array with fields: status, message
+     */
+    public function grantPrivilege($uid, $privilege_level) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = '';
+
+        // first, update user with new privilege
+
+        // get user
+        $ret_getuser = $this->getUser($uid);
+
+        if ($ret_getuser['status'] != 'ok') {
+            $ret['message'] = "couldn't get user for update : " . $ret_getuser['message'];
+            return $ret;
+        }
+
+        // upate user
+        $ret_getuser['user']->privilege_level = $privilege_level;
+        $ret_update = $this->updateUser($ret_getuser['user']);
+
+        if ($ret_update['status'] != 'ok') {
+            $ret['message'] = "couldn't update privilege" . $ret_update['message'];
+            return $ret;
+        }
+
+        $ret['status'] = 'ok';
+
+        
+        return $ret;
+
+    }
+
+    /**
+     * Delete request entry that looks like $uid, $privilege_level
+     * @param $uid
+     * @param $privilege_level
+     * @return assoc array with fields: status, message
+     */
+    public function deletePrivilegeRequest($uid, $privilege_level) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = '';
+
+        // delete request entry
+        try {
+            
+            $stmt = $this->dbh->prepare('
+                DELETE FROM wants_privilege
+                WHERE   uid = :uid
+                AND     privilege_level = :privilege_level
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+            $stmt->bindParam(':privilege_level', $privilege_level);
+
+            if ($stmt->execute()) {
+                if ($stmt->rowCount() > 0) {
+                    $ret['status'] = 'ok';
+                } else {
+                    $ret['message'] = "No rows were affected..";
+                }
+            } else {
+                $ret['message'] = "Statement didn't execute right : " . $stmt->errorCode();
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+        
+        return $ret;
+        
     }
 
 }

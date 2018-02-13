@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <h1>Admin page</h1>
+
+    <!-- if error occurred -> show message -->
+    {% if wantsMessage != '' %}
+    <h2>{{wantsMessage}}</h2>
+    {% endif %}
+
+    <!-- for each want, show -->
+    {% for request in wantsPrivilege %}
+
+    <b>{{request.user.username}}</b> wants privilege {{request.wouldLike}} 
+    <form method="post" action="src/privilegeRequestHandler.php">
+        <input type="hidden" name="uid" value="{{request.user.uid}}"/>
+        <input type="hidden" name="privilege_level" value="{{request.wouldLike}}"/>
+        <input type="submit" value="Grant" />
+    </form>
+    
+    <br>
+
+    {% endfor %}
+</body>
+</html>
