@@ -16,7 +16,9 @@
     {% for request in wantsPrivilege %}
 
     <b>{{request.user.username}}</b> wants privilege {{request.wouldLike}} 
-    <form action="src/privilegeRequestHandler.php">
+    <form method="post" action="src/privilegeRequestHandler.php">
+        <input type="hidden" name="uid" value="{{request.user.uid}}"/>
+        <input type="hidden" name="privilege_level" value="{{request.wouldLike}}"/>
         <input type="submit" value="Grant" />
     </form>
     

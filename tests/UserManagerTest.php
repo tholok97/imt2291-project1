@@ -596,4 +596,70 @@ class UserManagerTest extends TestCase {
         );
     }
 
+    /**
+     * @depends testGetUser
+     * @depends testUpdateUser
+     * @depends testWantsPrivilegeLevel
+     */
+    public function testGrantPrivilege() {
+
+        $testuser = new User(
+            'test1',
+            'test2',
+            'test3',
+            0
+        );
+
+        $wants_privilege = 1;
+
+        $testpassword = '123';
+
+        // insert user
+        $ret_adduser = $this->userManager->addUser($testuser, $testpassword);
+
+        $testuser->uid = $ret_adduser['uid'];
+
+        
+        // register privilege request
+        $ret_wants = $this->userManager->requestPrivilege($testuser->uid, $wants_privilege);
+
+
+
+        // assert that granting the privilege is successful
+        $ret = $this->userManager->grantPrivilege($testuser->uid, $wants_privilege);
+
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Granting registered privilege should be fine : " . $ret['message']
+        );
+
+        // assert that  privilege was actually granted
+        $ret_getuser = $this->userManager->getUser($testuser->uid);
+        $this->assertEquals(
+            $wants_privilege,
+            $ret_getuser['user']->privilege_level,
+            "User in db should have correct privilege_level : " . $ret['message']
+        );
+
+
+
+        // assert that request was deleted
+        $ret_getrequests = $this->userManager->getWantsPrivilege();
+        $this->assertEquals(
+            false,
+            in_array(
+                [
+                    'uid' => $testuser->uid, 
+                    '0' => $testuser->uid, 
+                    'privilege_level' => $wants_privilege,
+                    '1' => $wants_privilege
+                ], 
+                $ret_getrequests['wants']
+            ),
+            "User should no longer have a privilege request registered in the db"
+        );
+
+    }
+
 }

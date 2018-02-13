@@ -65,6 +65,7 @@ function buildWantsPrivilege($userManager) {
                 return $ret;
             }
 
+
             // if got this far without fail -> success
             $ret['status'] = 'ok';
         }

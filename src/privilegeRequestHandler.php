@@ -4,16 +4,16 @@ session_start();
 
 require_once dirname(__FILE__) . '/classes/UserManager.php';
 require_once dirname(__FILE__) . '/classes/User.php';
+require_once dirname(__FILE__) . '/classes/DB.php';
 
-// heigten privlege TODO
+// grant privilege
+$userManager = new UserManager(DB::getDBConnection());
+$ret = $userManager->grantPrivilege($_POST['uid'], $_POST['privilege_level']);
 
-$ret['status'] = 'ok';
 
 // if success -> go to index
 // if not -> reload page
-if ($ret['status'] == 'ok') {
-
-    // TODO: currently ignores it if registering privilege fails....
+if ($ret_updateuser['status'] == 'ok') {
 
     header('Location: ../admin');
     exit();
