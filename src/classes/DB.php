@@ -23,6 +23,7 @@ class DB {
     }
   }
 
+
   public static function getDBConnection($dsn = Config::DB_DSN, $user = Config::DB_USER, $password = Config::DB_PASSWORD) {
       if (DB::$db==null) {
         DB::$db = new self($dsn, $user, $password);

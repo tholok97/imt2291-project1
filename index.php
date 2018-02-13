@@ -4,6 +4,8 @@ session_start();
 
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/src/classes/UserManager.php';
+require_once dirname(__FILE__) . '/src/functions/functions.php';
+require_once dirname(__FILE__) . '/src/classes/VideoManager.php';
 /*
  * Entry-point to the entire site. Users are shown the sites they want using 
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
@@ -37,12 +39,22 @@ $twig_arguments = array();
  */
 $userManager = new UserManager(DB::getDBConnection());
 
+/**
+ * Used to use video-content
+ */
+$videoManager = new VideoManager(DB::getDBConnection());
+
 
 
 
 // page stores parameter passed by GET. Contains an indication of what 
 // page to be shown
 $page = @$_GET['page'];
+
+// Parameter 1 to be used by page
+$param1 = @$_GET['param1'];
+
+//echo "Page: " . $page . ", Param1: " . $param1;
 
 
 
@@ -70,17 +82,62 @@ if ($page == 'register') {
 
 } else {
 
-
     // Switch on page (DEBUG: just indicate that it's working)
     
     switch ($page) {
+    case 'upload':
+        $twig_file_to_render = 'upload.twig';
+        break;
     case 'admin':
-        $twig_file_to_render = 'debug.twig';
-        $twig_arguments = array('message' => 'DEBUG: admin page');
+        $twig_file_to_render = 'admin.twig';
+
+        // get info
+        $ret_wants = buildWantsPrivilege($userManager);
+
+        // if went fine -> show wants
+        // if didn't go fine -> show error
+        if ($ret_wants['status'] == 'ok') {
+            $twig_arguments = array(
+                'wantsPrivilege' => $ret_wants['wantsPrivilege'],
+                'wantsMessage' => $ret_wants['message']
+            );
+        } else {
+            $twig_arguments = array('wantsMessage' => "Error getting privilege requests: " . 
+                $ret_wants['message']);
+        }
+
         break;
     case 'videos':
-        $twig_file_to_render = 'debug.twig';
-        $twig_arguments = array('message' => 'DEBUG: vidoes page');
+        if ($param1 == "") {                    // Just page parameter.
+            $twig_file_to_render = 'showVideoForm.twig';
+        }
+        else {                                  // A parameter
+            $video = $videoManager->get($param1);
+            if($video['status'] == 'ok') {
+                $twig_file_to_render = 'showVideo.twig';
+                $twig_arguments = array('video' => $video['video']);
+            }
+            else {
+                $twig_file_to_render = 'debug.twig';
+                $twig_arguments = array('message' => 'Error: ' . $video['errorMessage']);
+            }
+        }
+        break;
+    case 'search':
+        if ($param1 == "") {                    // Just page parameter.
+            $twig_file_to_render = 'advancedSearch.twig';
+        }
+        else {                                  // A parameter
+            $result = $videoManager->search("Big Buck Bunny");
+            if($result['status'] == 'ok') {
+                $twig_file_to_render = 'showSearch.twig';
+                $twig_arguments = array('result' => $result['result']);
+            }
+            else {
+                $twig_file_to_render = 'debug.twig';
+                $twig_arguments = array('message' => 'Error: ' . $result['errorMessage']);
+            }
+        }
         break;
     case 'logout':
 
