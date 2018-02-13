@@ -543,4 +543,57 @@ class UserManagerTest extends TestCase {
         );
     }
 
+    /**
+     * @depends testAddUser
+     * @depends testGetUser
+     */
+    public function testUpdateUser() {
+        
+        $testuser = new User(
+            'test1',
+            'test2',
+            'test3',
+            0
+        );
+
+        $testpassword = '123';
+
+        // insert user
+        $ret_adduser = $this->userManager->addUser($testuser, $testpassword);
+
+        $testuser->uid = $ret_adduser['uid'];
+
+
+        // assert that updating only privilege_level and firstname does just that
+
+        $testuser->firstname = 'Thomas';
+        $testuser->privilege_level = 2;
+
+
+        $ret = $this->userManager->updateUser($testuser);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Updating should be OK! : " . $ret['message']
+        );
+
+        $gottenUser = $this->userManager->getUser($testuser->uid)['user'];
+
+        $this->assertEquals(
+            $testuser->firstname,
+            $gottenUser->firstname,
+            "Firstname of gotten user should be same as testuser (updated)"
+        );
+
+
+        // assert that updating non-existent user fails
+        $testuser->uid = -1;
+        $ret = $this->userManager->updateUser($testuser);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Updating on non-existent user should fail"
+        );
+    }
+
 }

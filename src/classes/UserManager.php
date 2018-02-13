@@ -470,5 +470,53 @@ class UserManager {
     }
 
 
+    /**
+     * Updates user in db with given user object (ignores uid (!!))
+     * @param $user
+     * @return assoc array with fields: status, message
+     */
+    public function updateUser($user) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = '';
+
+        try {
+
+
+            $stmt = $this->dbh->prepare('
+UPDATE user
+SET username=:username,
+    firstname=:firstname,
+    lastname=:lastname,
+    privilege_level=:privilege_level
+WHERE uid=:uid
+            ');
+
+            $stmt->bindParam(':username', $user->username);
+            $stmt->bindParam(':firstname', $user->firstname);
+            $stmt->bindParam(':lastname', $user->lastname);
+            $stmt->bindParam(':privilege_level', $user->privilege_level);
+            $stmt->bindParam(':uid', $user->uid);
+
+            if ($stmt->execute()) {
+
+                if ($stmt->rowCount() == 1) {
+                    $ret['status'] = 'ok';
+                } else {
+                    $ret['message'] = "No update was done (/ too many..)";
+                }
+            } else {
+                $ret['message'] = "Statement didn't execute right : " . $stmt->errorCode();
+            }
+
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        
+        return $ret;
+    }
 
 }
