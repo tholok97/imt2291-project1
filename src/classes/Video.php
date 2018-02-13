@@ -29,7 +29,6 @@ class Video {
      * @param string $title
      * @param string $description
      * @param string $url - url to the video file
-     * @param blob $thumbnail - picture
      * @param int $uid - id to user who uploaded video
      * @param string $topic
      * @param string $course_code

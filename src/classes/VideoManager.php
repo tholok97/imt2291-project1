@@ -2,6 +2,7 @@
 
 require_once 'DB.php';
 require_once 'Video.php';
+require_once 'UserManager.php';
 require_once dirname(__FILE__) . '/../constants.php';
 require_once dirname(__FILE__) . '/../../config.php';
 require_once dirname(__FILE__) . '/../functions/functions.php';
@@ -329,7 +330,11 @@ class VideoManager {
      */
     public function search($searchText, $options = null) {
         $ret['status'] = 'fail';
+        $ret['result'] = null;
         $ret['errorMessage'] = null;
+        //$ret['firstname'] = null;
+        //$ret['lastname'] = null;
+        $sql;
 
         // Check if connection to database was successfully established.
         if ($this->db == null) {
@@ -340,43 +345,81 @@ class VideoManager {
         $searchText = htmlspecialchars($searchText);
         $sql;                                               // Set sql-variable ready.
 
+        //$search = 
+
         // No options set, search through all meaningful columns.
-        if ($options = null) {
-            $sql = "SELECT vid FROM video WHERE title LIKE %" . $searchText . "% OR description LIKE %" . $searchText . "% OR topic LIKE %" . $searchText . "% OR course_code LIKE %" . $searchText . "% OR timestamp LIKE %" . $searchText . "%";
+       /* if ($options == null) {
+            $sql = "SELECT vid FROM video WHERE title LIKE :text OR description LIKE :text OR topic LIKE :text OR course_code LIKE :text OR timestamp LIKE :text";
         }
-        else {                                         // Some options most likely set
+        else {  */                                       // Some options most likely set
             // Check that something is actually set, if not, give error.
-            if((isset($options['title']) && $options['title'] == true)
+            if(($options['title'] == true)
                 || (isset($options['description']) && $options['description'] == true)
                 || (isset($options['topic']) && $options['topic'] == true)
+            
                 || (isset($options['course_code']) && $options['course_code'] == true)
-                || (isset($options['timestamp']) && $options['timestamp'] == true)) {
+                || (isset($options['timestamp']) && $options['timestamp'] == true)
+                || (isset($options['firstname']) && $options['firstname'] == true)
+                || (isset($options['lastname']) && $options['lastname'] == true)) {
                 $sql = "SELECT vid FROM video WHERE";
+
                 if (isset($options['title']) && $options['title'] == true) {
-                    $sql = $sql . " title LIKE %:text%";
+                    $sql = $sql . " title LIKE :text";
                 }
                 if (isset($options['description']) && $options['description'] == true) {
-                    $sql = $sql . " OR description LIKE %:text%";
+                    $sql = $sql . " OR description LIKE :text";
                 }
                 if (isset($options['topic']) && $options['topic'] == true) {
-                    $sql = $sql . " OR topic LIKE %:text%";
+                    $sql = $sql . " OR topic LIKE :text";
                 }
                 if (isset($options['course_code']) && $options['course_code'] == true) {
-                    $sql = $sql . " OR course_code LIKE %:text%";
+                    $sql = $sql . " OR course_code LIKE :text";
                 }
                 if (isset($options['timestamp']) && $options['timestamp'] == true) {
-                    $sql = $sql . " OR timestamp LIKE %:text%";
+                    $sql = $sql . " OR timestamp LIKE :text";
                 }
-            }
-            else {
+                if (isset($options['firstname']) && $options['firstname'] == true) {
+                    //Search if necessarry?
+                    $userManager = new UserManager($this->db);
+                    $userFirstnameSearchRet = $userManager->search($searchText,"firstname");
+                    for($i=0;$i < count($userFirstnameSearchRet['uids']);$i++) {
+                        $sql = $sql . " OR uid LIKE " . $userFirstnameSearchRet['uids'][$i];
+                    }
+                }
+                if (isset($options['lastname']) && $options['lastname'] == true) {
+                    //Search if necessarry?
+                    $userManager = new UserManager($this->db);
+                    $userLastnameSearchRet = $userManager->search($searchText,"lastname");
+                    for($i=0;$i < count($userLastnameSearchRet['uids']);$i++) {
+                        $sql = $sql . " OR uid LIKE " . $userLastnameSearchRet['uids'][$i];
+                    }
+                }
+        //}
+        /*    else {
                 $ret['errorMessage'] = 'Ingen valg er satt, kan derfor ikke gi noen resultater.';
                 return $ret;
-            }
-        }
+            }*/
+    }
 
         try {
             $sth = $this->db->prepare($sql);
-            $sth->bindParam(':text', $searchText);
+            echo $sql;
+            $sth->bindValue(':text', "%" . $searchText . "%");
+            
+            //Send in all uids for firstname
+            /*for($i=0;$i < count($userFirstnameSearchRet['uids']);$i++) {
+                $search = "%" . $userFirstnameSearchRet['uids'][$i] . "%";
+                $searchParam = ':firstname' . $i;
+                $sth->bindParam($searchParam, $search);
+            }
+
+            //Send in all uids for firstname
+            for($i=0;$i < count($userLastnameSearchRet['uids']);$i++) {
+                $search = "%" . $userLastnameSearchRet['uids'][$i] . "%";
+                $searchParam = ':lastname' . $i;
+                $sth->bindParam($searchParam, $search);
+            }*/
+
             $sth->execute();
 
             $i = 0;

@@ -271,4 +271,92 @@ class VideoManagerTest extends TestCase {
         );
 
     }
+
+    public function testSearch() {
+        // make test user (is needed to upload a video)
+        $user = new User(
+            'testuser', 
+            'firstname', 
+            'secondname', 
+            2
+        );
+
+        $password = 'testpassword';
+
+        // assert that adding new user goes well
+        $ret = $this->userManager->addUser($user, $password);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Couldn't add valid user :" . $ret['message']
+        );
+
+        $ret = $this->userManager->login("testuser", $password);
+
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'login not ok for valid user'
+        );
+
+        $uid = $ret['uid'];
+        // Make a testvideo
+        $ret = uploadVideoTestdata("Test video", "This is a test video", $uid, "Testvideos", "IMT2263");
+        
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'Uploading video not ok: ' . $ret['errorMessage']
+        );
+
+        $ret = uploadVideoTestdata("Test video 2", "This is the second test video", $uid, "Testvideos", "IMT2263");
+        
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'Uploading video not ok: ' . $ret['errorMessage']
+        );
+
+        $vid = $ret['vid'];
+        
+        // Test search
+        $searchPlaces['title'] = true;
+        $ret = $this->videoManager->search("Test video 2", $searchPlaces); // Will search on common places.
+
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'Searching not ok on first search: ' . $ret['errorMessage']
+        );
+
+        print_r($ret);
+
+        $this->assertEquals(
+            '1',
+            count($ret['result']),
+            'Search result not 1 on first search but: ' . count($ret['result'])
+        );
+
+        //Search only in firstname and lastname. 
+        $searchPlaces['title'] = true;
+        $searchPlaces["firstname"] = true;
+        $searchPlaces["lastname"] = true;
+
+        $ret = $this->videoManager->search("name", $searchPlaces);
+
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'Searching not ok on second search: ' . $ret['errorMessage']
+        );
+
+        print_r($ret);
+
+        $this->assertEquals(
+            '2',
+            count($ret['result']),
+            'Search result not 2 on second search but: ' . count($ret['result'])
+        );
+
+    }
 }

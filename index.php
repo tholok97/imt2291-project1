@@ -107,6 +107,22 @@ if ($page == 'register') {
             }
         }
         break;
+    case 'search':
+        if ($param1 == "") {                    // Just page parameter.
+            $twig_file_to_render = 'advancedSearch.twig';
+        }
+        else {                                  // A parameter
+            $result = $videoManager->search("Big Buck Bunny");
+            if($result['status'] == 'ok') {
+                $twig_file_to_render = 'showSearch.twig';
+                $twig_arguments = array('result' => $result['result']);
+            }
+            else {
+                $twig_file_to_render = 'debug.twig';
+                $twig_arguments = array('message' => 'Error: ' . $result['errorMessage']);
+            }
+        }
+        break;
     case 'logout':
 
         // unset session uid to indicate logged out
