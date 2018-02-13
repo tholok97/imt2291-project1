@@ -30,7 +30,7 @@
 
 ## Test
 
-Tests are placed under `tests/`. Run all tests with `./vendor/bin/phpunit tests/*`
+Tests are placed under `tests/`. Run all tests with `./vendor/bin/phpunit tests`
 
 ## Documentation
 
