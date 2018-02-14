@@ -42,9 +42,9 @@ class VideoManager {
         }
 
         // If not someone who is trying to hack us.
-        if (is_uploaded_file($_FILES['fileToUpload']['tmp_name'])) {
+        if (is_uploaded_file($videoRef['tmp_name'])) {
             // If file size not too big.
-            if($videoRef['size'] < 5000000 /*Some number*/) {
+            if($videoRef['size'] < Constants::MAX_FILESIZE) {
                 try {
                     $title = htmlspecialchars($title);
                     $description = htmlspecialchars($description);
@@ -64,8 +64,8 @@ class VideoManager {
                     $sth->bindParam(':course_code', $course_code);
                     $sth->bindParam(':timestamp', $timestamp);                   // Setting timestamp.
                     $sth->bindParam(':view_count', $views);                      // Zero-out view-count.
-                    $sth->bindParam(':mime', $_FILES['fileToUpload']['type']);
-                    $sth->bindParam(':size', $_FILES['fileToUpload']['size']);
+                    $sth->bindParam(':mime', $videoRef['type']);
+                    $sth->bindParam(':size', $videoRef['size']);
                     $sth->execute();
 
                     if ($sth->rowCount()==1) {
@@ -73,17 +73,13 @@ class VideoManager {
                         if (!file_exists(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos')) {      // The user have not uploaded anything before.
                             mkdir(dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos', 0777, true);
                         }
-                        if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos/'.$id)) {
+                        if (move_uploaded_file($videoRef['tmp_name'], dirname(__FILE__) . '/../../uploadedFiles/'.$uid.'/videos/'.$id)) {
                             $ret['status'] = 'ok';
                             $ret['vid'] = $id;
                         } else {
                             $sql = "delete from videos where id=$id";
                             $this->db->execute($sql);
                             $ret['errorMessage'] = "Klarte ikke å lagre filen.";
-                            $ret['uid'] = $uid;
-                            $ret['id'] = $id;
-                            $ret['file'] = $_FILES['fileToUpload']['tmp_name'];
-                            $ret['files'] = $_FILES;
                         }
                     } else {
                         $ret['errorMessage'] = "Klarte ikke å laste opp filen.";
@@ -93,7 +89,7 @@ class VideoManager {
                 }
             }
             else {
-                $ret['errorMessage'] = "Filen er for stor til å kunne lastes opp.";
+                $ret['errorMessage'] = "Filen er for stor til å kunne lastes opp, vi tillater kun opp til " . (Constants::MAX_FILESIZE/1000/1000) . " MB.";
             }
         }
         else {
@@ -332,8 +328,6 @@ class VideoManager {
         $ret['status'] = 'fail';
         $ret['result'] = null;
         $ret['errorMessage'] = null;
-        //$ret['firstname'] = null;
-        //$ret['lastname'] = null;
         $sql;
 
         // Check if connection to database was successfully established.
@@ -345,15 +339,7 @@ class VideoManager {
         $searchText = htmlspecialchars($searchText);
         $sql;                                               // Set sql-variable ready.
 
-        //$search = 
-
-        // No options set, search through all meaningful columns.
-       /* if ($options == null) {
-            $sql = "SELECT vid FROM video WHERE title LIKE :text OR description LIKE :text OR topic LIKE :text OR course_code LIKE :text OR timestamp LIKE :text";
-        }
-        else {  */                                       // Some options most likely set
-            // Check that something is actually set, if not, give error.
-            if(($options['title'] == true)
+            if((isset($options['title']) && $options['title'] == true)
                 || (isset($options['description']) && $options['description'] == true)
                 || (isset($options['topic']) && $options['topic'] == true)
             
@@ -363,27 +349,45 @@ class VideoManager {
                 || (isset($options['lastname']) && $options['lastname'] == true)) {
                 $sql = "SELECT vid FROM video WHERE";
 
+                $firstFlag = true;                                         // If first adding in sql.
                 if (isset($options['title']) && $options['title'] == true) {
+                    if(!$firstFlag) {
+                        $sql = $sql . " OR";
+                    }
+                    $firstFlag = false;
                     $sql = $sql . " title LIKE :text";
                 }
                 if (isset($options['description']) && $options['description'] == true) {
-                    $sql = $sql . " OR description LIKE :text";
+                    if(!$firstFlag) {
+                        $sql = $sql . " OR";
+                    }
+                    $firstFlag = false;
+                    $sql = $sql . "description LIKE :text";
                 }
                 if (isset($options['topic']) && $options['topic'] == true) {
-                    $sql = $sql . " OR topic LIKE :text";
+                    if(!$firstFlag) {
+                        $sql = $sql . " OR";
+                    }
+                    $firstFlag = false;
+                    $sql = $sql . " topic LIKE :text";
                 }
                 if (isset($options['course_code']) && $options['course_code'] == true) {
-                    $sql = $sql . " OR course_code LIKE :text";
-                }
-                if (isset($options['timestamp']) && $options['timestamp'] == true) {
-                    $sql = $sql . " OR timestamp LIKE :text";
+                    if(!$firstFlag) {
+                        $sql = $sql . " OR";
+                    }
+                    $firstFlag = false;
+                    $sql = $sql . " course_code LIKE :text";
                 }
                 if (isset($options['firstname']) && $options['firstname'] == true) {
                     //Search if necessarry?
                     $userManager = new UserManager($this->db);
                     $userFirstnameSearchRet = $userManager->search($searchText,"firstname");
                     for($i=0;$i < count($userFirstnameSearchRet['uids']);$i++) {
-                        $sql = $sql . " OR uid LIKE " . $userFirstnameSearchRet['uids'][$i];
+                        if(!$firstFlag) {
+                            $sql = $sql . " OR";
+                        }
+                        $firstFlag = false;
+                        $sql = $sql . " uid LIKE " . $userFirstnameSearchRet['uids'][$i];
                     }
                 }
                 if (isset($options['lastname']) && $options['lastname'] == true) {
@@ -391,15 +395,18 @@ class VideoManager {
                     $userManager = new UserManager($this->db);
                     $userLastnameSearchRet = $userManager->search($searchText,"lastname");
                     for($i=0;$i < count($userLastnameSearchRet['uids']);$i++) {
-                        $sql = $sql . " OR uid LIKE " . $userLastnameSearchRet['uids'][$i];
+                        if(!$firstFlag) {
+                            $sql = $sql . " OR";
+                        }
+                        $firstFlag = false;
+                        $sql = $sql . " uid LIKE " . $userLastnameSearchRet['uids'][$i];
                     }
                 }
-        //}
-        /*    else {
-                $ret['errorMessage'] = 'Ingen valg er satt, kan derfor ikke gi noen resultater.';
-                return $ret;
-            }*/
-    }
+           }
+           else {
+            $ret['errorMessage'] = 'Ingen valg er satt, kan derfor ikke gi noen resultater.';
+            return $ret;
+        }
 
         try {
             $sth = $this->db->prepare($sql);

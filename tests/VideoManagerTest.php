@@ -329,7 +329,7 @@ class VideoManagerTest extends TestCase {
             'Searching not ok on first search: ' . $ret['errorMessage']
         );
 
-        print_r($ret);
+        //print_r($ret);
 
         $this->assertEquals(
             '1',
@@ -350,7 +350,7 @@ class VideoManagerTest extends TestCase {
             'Searching not ok on second search: ' . $ret['errorMessage']
         );
 
-        print_r($ret);
+        //print_r($ret);
 
         $this->assertEquals(
             '2',
