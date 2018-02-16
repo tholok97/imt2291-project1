@@ -8,6 +8,9 @@ vendor/
 config.php
 uploadedFiles/*
 
+# ignore database stuff
+db_data/*
+
 # don't ignore gitkeep
 !.gitkeep
 
