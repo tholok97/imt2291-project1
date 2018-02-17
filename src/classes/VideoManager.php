@@ -362,7 +362,7 @@ class VideoManager {
                         $sql = $sql . " OR";
                     }
                     $firstFlag = false;
-                    $sql = $sql . "description LIKE :text";
+                    $sql = $sql . " description LIKE :text";
                 }
                 if (isset($options['topic']) && $options['topic'] == true) {
                     if(!$firstFlag) {
@@ -410,7 +410,7 @@ class VideoManager {
 
         try {
             $sth = $this->db->prepare($sql);
-            //echo $sql;
+            echo $sql;
             $sth->bindValue(':text', "%" . $searchText . "%");
             
             //Send in all uids for firstname

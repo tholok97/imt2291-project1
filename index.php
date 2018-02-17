@@ -133,14 +133,14 @@ if ($page == 'register') {
     case 'search':
         if ($param1 == "result") {                    // Result shuld be retrived.
             $result = $sessionManager->get("searchResult");
-            if($result[0] != null) {
+            if($result != null) {
                 $twig_file_to_render = 'showSearch.twig';
                 print_r($result);
                 $twig_arguments = array('result' => $result);
             }
             else {
                  // Go to search-page without parameters
-                header('Location: ../error/result is' . $i);
+                header('Location: ../search');
             }
         }
         else if($param1 == "") {                       // Only page parameter, show search-site

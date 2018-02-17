@@ -37,6 +37,7 @@ if ($result['status'] == 'ok') {
     
     // Go to index-page
     header('Location: ../search/result');
+    //print_r($result);
 }
 else {
     // Go to index-page
