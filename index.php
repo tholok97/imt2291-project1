@@ -135,7 +135,7 @@ if ($page == 'register') {
             $result = $sessionManager->get("searchResult");
             if($result != null) {
                 $twig_file_to_render = 'showSearch.twig';
-                print_r($result);
+                //print_r($result);
                 $twig_arguments = array('result' => $result);
             }
             else {
