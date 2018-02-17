@@ -5,6 +5,9 @@
     <title></title>
 </head>
 <body>
+    {% if message != "" %}
+    <p style="border:1px solid black">{{message}}</p>
+    {% endif %}
     <a href="./register">Register here</a>
     <h1>Login page</h1>
     <form action="src/loginFormHandler.php" method="post">

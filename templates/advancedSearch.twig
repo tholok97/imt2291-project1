@@ -3,6 +3,9 @@
         <title>Advanced search</title>
     </head>
     <body>
+        {% if message != "" %}
+        <p style="border:1px solid black">{{message}}</p>
+        {% endif %}
         <form action="src/searchFormHandler.php" method="post">
             <label for="searchText">Search:</label> <input type="text" name="searchText" id="searchText">
             <input type="submit" name="submit" id="submit" value="Søk"><br><br>

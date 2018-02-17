@@ -6,6 +6,7 @@ require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/src/classes/UserManager.php';
 require_once dirname(__FILE__) . '/src/functions/functions.php';
 require_once dirname(__FILE__) . '/src/classes/VideoManager.php';
+require_once dirname(__FILE__) . '/src/classes/SessionManager.php';
 /*
  * Entry-point to the entire site. Users are shown the sites they want using 
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
@@ -15,6 +16,8 @@ require_once dirname(__FILE__) . '/src/classes/VideoManager.php';
 
 // loader used to fetch files for twig
 $loader = new Twig_Loader_Filesystem(__DIR__. '/templates');
+
+
 
 // setup twig
 $twig = new Twig_Environment($loader, array());
@@ -32,6 +35,17 @@ $twig_file_to_render = null;
  */
 $twig_arguments = array();
 
+/**
+ * Used to retrieve stuff stored in session
+ */
+$sessionManager = new SessionManager();
+
+// try and retrieve message
+$msg = $sessionManager->get("message");
+if ($msg != null) {
+    $twig_arguments["message"] = $msg;
+}
+
 
 
 /**
@@ -43,7 +57,6 @@ $userManager = new UserManager(DB::getDBConnection());
  * Used to use video-content
  */
 $videoManager = new VideoManager(DB::getDBConnection());
-
 
 
 
@@ -97,13 +110,11 @@ if ($page == 'register') {
         // if went fine -> show wants
         // if didn't go fine -> show error
         if ($ret_wants['status'] == 'ok') {
-            $twig_arguments = array(
-                'wantsPrivilege' => $ret_wants['wantsPrivilege'],
-                'wantsMessage' => $ret_wants['message']
-            );
+            $twig_arguments['wantsPrivilege'] = $ret_wants['wantsPrivilege'];
+            $twig_arguments['wantsMessage'] = $ret_wants['message'];
         } else {
-            $twig_arguments = array('wantsMessage' => "Error getting privilege requests: " . 
-                $ret_wants['message']);
+            $twig_arguments['wantsMessage'] = "Error getting privilege requests: " . 
+                $ret_wants['message'];
         }
 
         break;
@@ -152,3 +163,6 @@ if ($page == 'register') {
 
 // Render page
 echo $twig->render($twig_file_to_render, $twig_arguments);
+
+// clean the session manager
+$sessionManager->clean();

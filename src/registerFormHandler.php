@@ -4,6 +4,9 @@ session_start();
 
 require_once dirname(__FILE__) . '/classes/UserManager.php';
 require_once dirname(__FILE__) . '/classes/User.php';
+require_once dirname(__FILE__) . '/classes/SessionManager.php';
+
+$sessionManager = new SessionManager();
 
 // build user from POST
 $user = new User(
@@ -33,9 +36,12 @@ if ($ret['status'] == 'ok') {
 
     // TODO: currently ignores it if registering privilege fails....
 
+    $sessionManager->put("message", "Successfully registered!");
     header('Location: ../');
     exit();
 } else {
+
+    $sessionManager->put("message", "Couldn't register..");
     header('Location: ../register');
     exit();
 }

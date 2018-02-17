@@ -5,6 +5,9 @@
     <title></title>
 </head>
 <body>
+    {% if message != "" %}
+    <p style="border:1px solid black">{{message}}</p>
+    {% endif %}
     <ul>
         <li><a href="./admin">Admin page</a></li>
         <li><a href="./videos">Videos page</a></li>

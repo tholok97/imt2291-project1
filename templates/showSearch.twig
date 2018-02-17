@@ -5,6 +5,9 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     </head>
     <body>
+        {% if message != "" %}
+        <p style="border:1px solid black">{{message}}</p>
+        {% endif %}
         <div class="container-fluid">
         {% for video in result %}
             <div class="col-sm-4">

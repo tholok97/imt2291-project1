@@ -5,6 +5,9 @@
     <title></title>
 </head>
 <body>
+    {% if message != "" %}
+    <p style="border:1px solid black">{{message}}</p>
+    {% endif %}
     <h1>Admin page</h1>
 
     <!-- if error occurred -> show message -->

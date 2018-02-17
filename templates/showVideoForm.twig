@@ -3,6 +3,9 @@
 
 </head>
 <body>
+    {% if message != "" %}
+    <p style="border:1px solid black">{{message}}</p>
+    {% endif %}
 <form action='src/videoFormHandler.php' method='post'>
 <label for="id">Video id</label> <input type='number' name='id'></input><input type='submit' name='submit' value='Se video'></input>
 </form>
