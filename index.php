@@ -126,11 +126,11 @@ if ($page == 'register') {
             $video = $videoManager->get($param1);
             if($video['status'] == 'ok') {
                 $twig_file_to_render = 'showVideo.twig';
-                $twig_arguments = array('video' => $video['video']);
+                $twig_arguments['video'] = $video['video'];
             }
             else {
                 $twig_file_to_render = 'debug.twig';
-                $twig_arguments = array('message' => 'Error: ' . $video['errorMessage']);
+                $twig_arguments['message'] = 'Error: ' . $video['errorMessage'];
             }
         }
         break;
@@ -142,11 +142,11 @@ if ($page == 'register') {
             $result = $videoManager->search("Big Buck Bunny");
             if($result['status'] == 'ok') {
                 $twig_file_to_render = 'showSearch.twig';
-                $twig_arguments = array('result' => $result['result']);
+                $twig_arguments['result'] = $result['result'];
             }
             else {
                 $twig_file_to_render = 'debug.twig';
-                $twig_arguments = array('message' => 'Error: ' . $result['errorMessage']);
+                $twig_arguments['message'] = 'Error: ' . $result['errorMessage'];
             }
         }
         break;
