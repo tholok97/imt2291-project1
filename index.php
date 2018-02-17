@@ -6,6 +6,8 @@ require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/src/classes/UserManager.php';
 require_once dirname(__FILE__) . '/src/functions/functions.php';
 require_once dirname(__FILE__) . '/src/classes/VideoManager.php';
+require_once dirname(__FILE__) . '/src/classes/SessionManager.php';
+
 /*
  * Entry-point to the entire site. Users are shown the sites they want using 
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
@@ -43,6 +45,11 @@ $userManager = new UserManager(DB::getDBConnection());
  * Used to use video-content
  */
 $videoManager = new VideoManager(DB::getDBConnection());
+
+/**
+ * Used to use video-content
+ */
+$sessionManager = new SessionManager();
 
 
 
@@ -124,19 +131,24 @@ if ($page == 'register') {
         }
         break;
     case 'search':
-        if ($param1 == "") {                    // Just page parameter.
-            $twig_file_to_render = 'advancedSearch.twig';
-        }
-        else {                                  // A parameter
-            $result = $videoManager->search("Big Buck Bunny");
-            if($result['status'] == 'ok') {
+        if ($param1 == "result") {                    // Result shuld be retrived.
+            $result = $sessionManager->get("searchResult");
+            if($result[0] != null) {
                 $twig_file_to_render = 'showSearch.twig';
-                $twig_arguments = array('result' => $result['result']);
+                print_r($result);
+                $twig_arguments = array('result' => $result);
             }
             else {
-                $twig_file_to_render = 'debug.twig';
-                $twig_arguments = array('message' => 'Error: ' . $result['errorMessage']);
+                 // Go to search-page without parameters
+                header('Location: ../error/result is' . $i);
             }
+        }
+        else if($param1 == "") {                       // Only page parameter, show search-site
+            $twig_file_to_render = 'advancedSearch.twig';
+        }
+        else {                                         // Some unexpected input, reset so we get correct sending of searchForm
+            // Go to search-page without parameters
+            header('Location: ../search');
         }
         break;
     case 'logout':

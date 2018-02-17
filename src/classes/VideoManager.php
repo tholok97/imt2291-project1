@@ -410,7 +410,7 @@ class VideoManager {
 
         try {
             $sth = $this->db->prepare($sql);
-            echo $sql;
+            //echo $sql;
             $sth->bindValue(':text', "%" . $searchText . "%");
             
             //Send in all uids for firstname

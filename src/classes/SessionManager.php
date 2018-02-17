@@ -19,7 +19,7 @@ class SessionManager {
      * @return void
      */
     public function put($name, $object) {
-        $_SESSION[$this->sessionVariableName][$name] = $object;
+        $_SESSION[$this->sessionVariableName][$name] = serialize($object);
     }
 
     /**
@@ -31,7 +31,7 @@ class SessionManager {
         if (!isset($_SESSION[$this->sessionVariableName][$name])) {
             return null;
         } else {
-            return $_SESSION[$this->sessionVariableName][$name];
+            return unserialize($_SESSION[$this->sessionVariableName][$name]);
         }
     }
 
