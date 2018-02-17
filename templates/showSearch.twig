@@ -8,6 +8,13 @@
         {% if message != "" %}
         <p style="border:1px solid black">{{message}}</p>
         {% endif %}
+        <ul>
+            <li><a href="./admin">Admin page</a></li>
+            <li><a href="./videos">Videos page</a></li>
+            <li><a href="./">Index page</a></li>
+            <li><a href="./upload">Upload page</a></li>
+            <li><a href="./logout">Logout</a></li>
+        </ul>
         <div class="container-fluid">
         {% for video in result %}
             <div class="col-sm-4">

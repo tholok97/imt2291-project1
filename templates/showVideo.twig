@@ -1,10 +1,19 @@
-<html><head></head><body>
+<html>
+    <head></head>
+    <body>
     {% if message != "" %}
     <p style="border:1px solid black">{{message}}</p>
     {% endif %}
-<video width="768" height="432" controls>
+    <ul>
+        <li><a href="./admin">Admin page</a></li>
+        <li><a href="./videos">Videos page</a></li>
+        <li><a href="./">Index page</a></li>
+        <li><a href="./upload">Upload page</a></li>
+        <li><a href="./logout">Logout</a></li>
+    </ul>
+    <video width="768" height="432" controls>
     <source src="../{{video.url}}" type="{{video.mime}}">
     Din nettleser støtter ikke video-taggen i html5, oppdater nettleseren.
   </video>
-  </body>
-  </html>
+</body>
+</html>
