@@ -154,7 +154,14 @@ if ($page == 'register') {
 
         // unset session uid to indicate logged out
         unset($_SESSION['uid']);
-        $twig_file_to_render = 'login.twig';
+
+        // put msg
+        $sessionManager->put("message", "Logged out");
+
+        // reload page (surpass twig system)
+        header("Location: ./");
+        exit();
+
         break;
     default:
         $twig_file_to_render = 'notfound.twig';
