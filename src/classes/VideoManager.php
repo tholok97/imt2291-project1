@@ -30,7 +30,7 @@ class VideoManager {
      * 
      * @return array[] Returns an associative array with the fields 'status', 'vid' (video id) and 'errorMessage' (if error).
      */
-    public function upload($title, $description, $uid, $topic, $course_code, $videoRef) {
+    public function upload($title, $description, $uid, $topic, $course_code, $videoRef, $thumbnailRef) {
         $ret['status'] = 'fail';
         $ret['vid'] = null;
         $ret['errorMessage'] = null;
@@ -42,13 +42,13 @@ class VideoManager {
         }
 
         // If not someone who is trying to hack us.
-        if (is_uploaded_file($videoRef['tmp_name'])) {
+        if (is_uploaded_file($videoRef['tmp_name']) && is_uploaded_file($thumbnailRef['tmp_name'])) {
             // If file size not too big.
             if($videoRef['size'] < Constants::MAX_FILESIZE) {
                 try {
                     $title = htmlspecialchars($title);
                     $description = htmlspecialchars($description);
-                    $thumbnail = getThumbnail($videoRef);               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
+                    $thumbnail = getThumbnail($thumbnailRef);               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
                     $uid = htmlspecialchars($uid);
                     $topic = htmlspecialchars($topic);
                     $course_code = htmlspecialchars($course_code);
@@ -142,14 +142,16 @@ class VideoManager {
             $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
         }
 
-        try {
-            $sql = "UPDATE video SET view_count = :view_count WHERE vid = :vid";
-            $sth = $this->db->prepare ($sql);
-            $sth->bindParam(':view_count', $views);
-            $sth->bindParam(':vid', $vid);
-            $sth->execute();
-        } catch (PDOException $ex) {
-            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
+        if ($increaseViews == true) {
+            try {
+                $sql = "UPDATE video SET view_count = :view_count WHERE vid = :vid";
+                $sth = $this->db->prepare ($sql);
+                $sth->bindParam(':view_count', $views);
+                $sth->bindParam(':vid', $vid);
+                $sth->execute();
+            } catch (PDOException $ex) {
+                $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
+            }
         }
         return $ret;
     }
@@ -223,6 +225,7 @@ class VideoManager {
      */
     public function getComments($vid) {
         $ret['status'] = 'fail';
+        $ret['comments'][0]['text'] = 'Ingen kommentarer';
         $ret['errorMessage'] = null;
 
         $vid = htmlspecialchars($vid);              // Be sure we are not hacked.
@@ -246,6 +249,7 @@ class VideoManager {
             $ret['status'] = 'ok';
             $i = 0;
 
+            $userManager = new UserManager(DB::getDBConnection());
             // Get all comments
             while($row = $sth->fetch(PDO::FETCH_ASSOC))
             {
@@ -254,6 +258,7 @@ class VideoManager {
                 $ret['comments'][$i]['uid'] = $row['uid'];
                 $ret['comments'][$i]['text'] = $row['text'];
                 $ret['comments'][$i]['timestamp'] = $row['timestamp'];
+                $ret['comments'][$i]['userInfo'] = $userManager->getUser($row['uid']);      //Info about writer of the comment.
                 $i++;
             }
         } catch (PDOException $ex) {
@@ -435,7 +440,7 @@ class VideoManager {
 
             while($row = $sth->fetch(PDO::FETCH_ASSOC))
             {
-                $ret['result'][$i] = $this->get(htmlspecialchars($row['vid']));
+                $ret['result'][$i] = $this->get(htmlspecialchars($row['vid']), false);
                 $i++;
             }
         } catch (PDOException $ex) {

@@ -41,6 +41,6 @@ if ($result['status'] == 'ok') {
 }
 else {
     // Go to index-page
-    header('Location: ../error/' . $result['errorMessage']);
+    header('Location: ../search');
 }
 exit();

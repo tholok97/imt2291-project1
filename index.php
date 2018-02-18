@@ -118,11 +118,22 @@ if ($page == 'register') {
         if ($param1 == "") {                    // Just page parameter.
             $twig_file_to_render = 'showVideoForm.twig';
         }
-        else {                                  // A parameter
+        else {                                  // A parameter.
             $video = $videoManager->get($param1);
+            /*for ($i = 0; $i < count($video['video']); $i++) {
+                $video['video']->description = nl2br(htmlspecialchars($video['video']->description));     // nl2br is to get speces correctly.
+            }*/
+            $comments = $videoManager->getComments(htmlspecialchars($video['video']->vid));
+            /*for ($i = 0; $i < count($comments['comments']); $i++) {
+                $comments['comments'][$i]['text'] = nl2br(htmlspecialchars($comments['comments'][$i]['text']));     // nl2br is to get speces correctly.
+            }*/
+            
             if($video['status'] == 'ok') {
                 $twig_file_to_render = 'showVideo.twig';
-                $twig_arguments = array('video' => $video['video']);
+                $twig_arguments = array('video' => $video['video'],
+                'comments' => $comments['comments'],
+                'teacher' => $userManager->getUser($video['video']->uid),   // Publishing user info.
+                'userId' => htmlspecialchars($_SESSION['uid']));            // ID for the user who watch.
             }
             else {
                 $twig_file_to_render = 'debug.twig';

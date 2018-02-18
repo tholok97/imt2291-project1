@@ -21,8 +21,8 @@ function setTimestamp() {
  * 
  * @return string/blob A thumbnail as string/blob
  */
-function getThumbnail($videoRef) {
-    return file_get_contents(dirname(__FILE__) . "/../../temp/temp.png");
+function getThumbnail($thumbnailRef) {
+    return file_get_contents($thumbnailRef['tmp_name']);
 }
 
 /**

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>Search result</title>
@@ -5,7 +6,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     </head>
     <body>
-        <div class="container-fluid">
+        <div class="container">
         <div class="row">
             {% for video in result %}
                 <div class="col-sm-4">
@@ -13,7 +14,7 @@
                         <img class="card-img-top" src="../src/getVideoThumbnail.php?vid={{video.video.vid}}" alt="Card image" style="width:100%">
                                 <div class="card-body">
                                 <h4 class="card-title">{{video.video.title}}</h4>
-                                <p class="card-text">{{video.video.description}}<br>Topic: {{video.video.topic}}</p>
+                                <p class="card-text">{{video.video.description}}<br>Emne: {{video.video.topic}}</p>
                                 <a href="../videos/{{video.video.vid}}" class="btn btn-primary">Se video</a>
                             </div>
                         </div>    

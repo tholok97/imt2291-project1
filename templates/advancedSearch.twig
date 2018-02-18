@@ -1,18 +1,22 @@
 <html>
     <head>
-        <title>Advanced search</title>
+        <title>Avansert søk</title>
+        <!-- Latest compiled and minified Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     </head>
-    <body>
-        <form action="src/searchFormHandler.php" method="post">
-            <label for="searchText">Search:</label> <input type="text" name="searchText" id="searchText">
-            <input type="submit" name="submit" id="submit" value="Søk"><br><br>
-            <label>Søk i:</label><br>
-            <input type="checkbox" name="titleBox" value="title" checked><label for="titleBox">Tittel</label>
-            <input type="checkbox" name="descriptionBox" value="description" checked><label for="descriptionBox">Beskrivelse</label>
-            <input type="checkbox" name="topicBox" value="topic" checked><label for="topicBox">Emne</label>
-            <input type="checkbox" name="courseBox" value="course" checked><label for="courseBox">Emnekode</label>
-            <input type="checkbox" name="firstnameBox" value="firstname" checked><label for="firstnameBox">Fornavn</label>
-            <input type="checkbox" name="lastnameBox" value="lastname" checked><label for="lastnameBox">Etternavn</label>
-        </form>
+    <body style='text-align: center;'>
+        <div class='container'>
+            <form action="src/searchFormHandler.php" method="post">
+                <label for="searchText">Søk:</label> <input type="text" name="searchText" id="searchText">
+                <input type="submit" name="submit" id="submit" value="Søk"><br><br>
+                <label>Søk i:</label><br>
+                <input type="checkbox" name="titleBox" value="title" checked><label for="titleBox">Tittel</label>
+                <input type="checkbox" name="descriptionBox" value="description" checked><label for="descriptionBox">Beskrivelse</label>
+                <input type="checkbox" name="topicBox" value="topic" checked><label for="topicBox">Emne</label>
+                <input type="checkbox" name="courseBox" value="course" checked><label for="courseBox">Emnekode</label>
+                <input type="checkbox" name="firstnameBox" value="firstname" checked><label for="firstnameBox">Fornavn</label>
+                <input type="checkbox" name="lastnameBox" value="lastname" checked><label for="lastnameBox">Etternavn</label>
+            </form>
+        </div>
     </body>
 </html>
