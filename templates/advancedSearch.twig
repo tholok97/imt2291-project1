@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>Advanced search</title>
+    </head>
+    <body>
+        <form action="src/searchFormHandler.php" method="post">
+            <label for="searchText">Search:</label> <input type="text" name="searchText" id="searchText">
+            <input type="submit" name="submit" id="submit" value="Søk"><br><br>
+            <label>Søk i:</label><br>
+            <input type="checkbox" name="titleBox" value="title"><label for="titleBox">Tittel</label>
+            <input type="checkbox" name="descriptionBox" value="description"><label for="descriptionBox">Beskrivelse</label>
+            <input type="checkbox" name="topicBox" value="topic"><label for="topicBox">Emne</label>
+            <input type="checkbox" name="courseBox" value="course"><label for="courseBox">Emnekode</label>
+            <input type="checkbox" name="timestampBox" value="timestamp"><label for="timestampBox">Tidskode</label>
+            <input type="checkbox" name="firstnameBox" value="firstname"><label for="firstnameBox">Fornavn</label>
+            <input type="checkbox" name="lastnameBox" value="lastname"><label for="lastnameBox">Etternavn</label>
+        </form>
+    </body>
+</html>
