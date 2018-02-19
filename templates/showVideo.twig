@@ -1,7 +1,82 @@
-<html><head></head><body>
-<video width="768" height="432" controls>
-    <source src="../{{video.url}}" type="{{video.mime}}">
-    Din nettleser støtter ikke video-taggen i html5, oppdater nettleseren.
-  </video>
-  </body>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Video</title>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  </head>
+    <body style='text-align: center;'>
+      <div class="container">
+      <h1>{{video.title}}</h1>
+      <div class="row">
+          <div class="col-md-12">
+            <video width="768" height="432" poster="../src/getVideoThumbnail.php?vid={{video.vid}}"controls>
+              <source src="../{{video.url}}" type="{{video.mime}}">
+              Din nettleser støtter ikke video-taggen i html5, oppdater nettleseren.
+            </video>
+          </div>
+        </div>
+        
+        <!-- Columns for description -->
+        <div class="row">
+          <div class="col-md-12">
+            <h2>Beskrivelse</h2>
+            <div class="card">
+              <p>{{video.description|nl2br}}</p>
+              <p><b>Lastet opp av:</b> {{teacher.user.firstname}} {{teacher.user.lastname}} den {{video.timestamp}}</p>
+              <p><b>Stjerner (gjennomsnitt):</b> {{rating.rating}} stjerner av {{rating.numberOfRatings}} stemmer.</p>
+              <p><b>Emnekode:</b> {{video.course_code}}
+              <p><b>Emne:</b> {{video.topic}}</p>
+              <p><b>Antall ganger sett:</b> {{video.view_count}}
+            </div>
+          </div>
+        </div><br /><br />
+        <!-- Column for rating -->
+        <div class="row">
+          <div class="col-md-12">
+            <h2>Ranger video:</h2>
+            {% if userRating.status == 'ok' %}
+              Du har allerede gitt stjerner. Du ga {{userRating.rating}} stjerner.<br /><br/>
+            {% endif %}
+            {% if userRating.status == 'fail' %}
+              <form action='../src/ratingFormHandler.php' method="post">
+                <input type="radio" name="rating" value="1" /> 1 stjerne
+                <input type="radio" name="rating" value="2" /> 2 stjerner
+                <input type="radio" name="rating" value="3" /> 3 stjerner
+                <input type="radio" name="rating" value="4" /> 4 stjerner
+                <input type="radio" name="rating" value="5" /> 5 stjerner
+                <input type='hidden' name='uid' value='{{userId}}'></input>
+                <input type='hidden' name='vid' value='{{video.vid}}'></input><br />
+                <input type='submit' name='submit' value="Ranger"/><br /><br/>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+        <!-- Column for comments -->
+        <h2>Kommentarer</h2>
+        <div class="row">
+          <div class="col-md-12">
+            <h4>Ny kommentar:</h4>
+            <form action='../src/commentFormHandler.php' method="post">
+              <textarea id='text' name='text' cols="50" rows="5"></textarea>
+              <input type='hidden' name='uid' value='{{userId}}'></input>
+              <input type='hidden' name='vid' value='{{video.vid}}'></input><br />
+              <input type='submit' name='submit' value='Kommenter'></input><br/><br/>
+            </form>
+          </div>
+        </div>
+        <div class="row">
+        {% for comment in comments %}
+          <div class="col-md-12">
+            <div class="card">
+              <h4>{{comment.userInfo.user.firstname}} {{comment.userInfo.user.lastname}}</h4>
+              <p>{{comment.timestamp}}
+              <p>{{comment.text|nl2br}}</p>
+            </div>
+            <br />
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </body>
   </html>

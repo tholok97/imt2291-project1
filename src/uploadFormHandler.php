@@ -12,7 +12,8 @@ $res = $VideoManager->upload(
     $_SESSION['uid'],
     $_POST['topic'],
     $_POST['course'],
-    $_FILES['fileToUpload']
+    $_FILES['fileToUpload'],
+    $_FILES['thumbnail']
 );
 
 // if success -> go to index
@@ -21,7 +22,8 @@ if ($res['status'] == 'ok') {
     header('Location: ../');
     exit();
 } else {
-    header('Location: ../upload');
+    print_r($res);
+    //header('Location: ../upload/');
     exit();
 }
 
