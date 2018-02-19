@@ -44,7 +44,7 @@ class VideoManager {
         // If not someone who is trying to hack us.
         if (is_uploaded_file($videoRef['tmp_name']) && is_uploaded_file($thumbnailRef['tmp_name'])) {
             // If file size not too big.
-            if($videoRef['size'] < Constants::MAX_FILESIZE) {
+            if($videoRef['size'] <= Constants::MAX_FILESIZE_VIDEO && $thumbnailRef['size'] <= Constants::MAX_FILESIZE_THUMBNAIL) {
                 try {
                     $title = htmlspecialchars($title);
                     $description = htmlspecialchars($description);
@@ -89,7 +89,7 @@ class VideoManager {
                 }
             }
             else {
-                $ret['errorMessage'] = "Filen er for stor til å kunne lastes opp, vi tillater kun opp til " . (Constants::MAX_FILESIZE/1000/1000) . " MB.";
+                $ret['errorMessage'] = "Filen er for stor til å kunne lastes opp, vi tillater kun opp til " . (Constants::MAX_FILESIZE_VIDEO/1000/1000) . " MB for video, og " . (Constants::MAX_FILESIZE_THUMBNAIL/1000/1000) . " MB for thumbnail.";
             }
         }
         else {
@@ -225,7 +225,7 @@ class VideoManager {
      */
     public function getComments($vid) {
         $ret['status'] = 'fail';
-        $ret['comments'][0]['text'] = 'Ingen kommentarer';
+        $ret['comments'][0]['text'] = 'Ingen kommentarer';      // Will return this string if no comments found
         $ret['errorMessage'] = null;
 
         $vid = htmlspecialchars($vid);              // Be sure we are not hacked.
@@ -290,30 +290,36 @@ class VideoManager {
             return $ret;
         }
 
-        $res = $this->getUserRating($uid, $vid);
+        if ($rating >= Constants::RATING_MIN && $rating <= Constants::RATING_MAX) {
+            $res = $this->getUserRating($uid, $vid);
 
-        if ($res['status'] != 'ok') {
-            try {
-                $sql = "INSERT INTO rated (vid, uid, rating) VALUES (:vid, :uid, :rating)";
-                $sth = $this->db->prepare ($sql);
-                $sth->bindParam(':vid', $vid);
-                $sth->bindParam(':uid', $uid);
-                $sth->bindParam(':rating', $rating);
-                $sth->execute();
-        
-                if ($sth->rowCount()==1) {
-                    $ret['status'] = 'ok';
-                    $ret['cid'] = $this->db->lastInsertId();
+            if ($res['status'] != 'ok') {
+                try {
+                    $sql = "INSERT INTO rated (vid, uid, rating) VALUES (:vid, :uid, :rating)";
+                    $sth = $this->db->prepare ($sql);
+                    $sth->bindParam(':vid', $vid);
+                    $sth->bindParam(':uid', $uid);
+                    $sth->bindParam(':rating', $rating);
+                    $sth->execute();
+                    //print_r($sth->errorInfo());
+
+                    if ($sth->rowCount()==1) {
+                        $ret['status'] = 'ok';
+                        $ret['cid'] = $this->db->lastInsertId();
+                    }
+                    else {
+                        $ret['errorMessage'] = 'Fikk ikke lagt til rating i databasen.';
+                    }
+                } catch (PDOException $ex) {
+                    $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
                 }
-                else {
-                    $ret['errorMessage'] = 'Fikk ikke lagt til rating i databasen.';
-                }
-            } catch (PDOException $ex) {
-                $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
+            }
+            else {
+                $ret['errorMessage'] = 'Har allerede lagt til en rating. Rating er ' . $res['rating'];
             }
         }
         else {
-            $ret['errorMessage'] = 'Har allerede lagt til en rating. Rating er ' . $res['rating'];
+            $ret['errorMessage'] = 'Rating er ikke imellom ' . Constants::RATING_MIN . ' og ' . Constants::RATING_MAX . '.';
         }
         
 
@@ -459,12 +465,13 @@ class VideoManager {
      */
     public function getRating($vid) {
         $ret['status'] = 'fail';
-        $ret['rating'] = null;
+        $ret['rating'] = 0;                     // Returns if none found.
+        $ret['numberOfRatings'] = 0;             // Returns if none found.
         $ret['errorMessage'] = "Vi fikk ikke noe resultat";
 
         $vid = htmlspecialchars($vid);
 
-        $sql = "SELECT AVG(rating) AS rating FROM rated WHERE vid = :vid GROUP BY vid";
+        $sql = "SELECT AVG(rating) AS rating, COUNT(rating) AS numberOfRatings FROM rated WHERE vid = :vid GROUP BY vid";
 
         try {
             $sth = $this->db->prepare($sql);
@@ -475,6 +482,7 @@ class VideoManager {
             {
                 $ret['status'] = 'ok';
                 $ret['rating'] = htmlspecialchars($row['rating']);
+                $ret['numberOfRatings'] = htmlspecialchars($row['numberOfRatings']);
             }
         } catch (PDOException $ex) {
             $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
@@ -511,6 +519,7 @@ class VideoManager {
             {
                 $ret['status'] = 'ok';
                 $ret['rating'] = htmlspecialchars($row['rating']);
+                $ret['errorMessage'] = "";
             }
         } catch (PDOException $ex) {
             $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();

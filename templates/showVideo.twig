@@ -21,13 +21,37 @@
         <div class="row">
           <div class="col-md-12">
             <h2>Beskrivelse</h2>
-            <p>{{video.timestamp}}</p>
-            <p><b>Emnekode:</b> {{video.course_code}}
-            <p><b>Emne:</b> {{video.topic}}</p>
-            <p>{{video.description}}</p>
-            <p><b>Antall ganger sett:</b> {{video.view_count}}
+            <div class="card">
+              <p>{{video.description|nl2br}}</p>
+              <p><b>Lastet opp av:</b> {{teacher.user.firstname}} {{teacher.user.lastname}} den {{video.timestamp}}</p>
+              <p><b>Stjerner (gjennomsnitt):</b> {{rating.rating}} stjerner av {{rating.numberOfRatings}} stemmer.</p>
+              <p><b>Emnekode:</b> {{video.course_code}}
+              <p><b>Emne:</b> {{video.topic}}</p>
+              <p><b>Antall ganger sett:</b> {{video.view_count}}
+            </div>
           </div>
         </div><br /><br />
+        <!-- Column for rating -->
+        <div class="row">
+          <div class="col-md-12">
+            <h2>Ranger video:</h2>
+            {% if userRating.status == 'ok' %}
+              Du har allerede gitt stjerner. Du ga {{userRating.rating}} stjerner.<br /><br/>
+            {% endif %}
+            {% if userRating.status == 'fail' %}
+              <form action='../src/ratingFormHandler.php' method="post">
+                <input type="radio" name="rating" value="1" /> 1 stjerne
+                <input type="radio" name="rating" value="2" /> 2 stjerner
+                <input type="radio" name="rating" value="3" /> 3 stjerner
+                <input type="radio" name="rating" value="4" /> 4 stjerner
+                <input type="radio" name="rating" value="5" /> 5 stjerner
+                <input type='hidden' name='uid' value='{{userId}}'></input>
+                <input type='hidden' name='vid' value='{{video.vid}}'></input><br />
+                <input type='submit' name='submit' value="Ranger"/><br /><br/>
+              </form>
+            {% endif %}
+          </div>
+        </div>
         <!-- Column for comments -->
         <h2>Kommentarer</h2>
         <div class="row">
@@ -47,7 +71,7 @@
             <div class="card">
               <h4>{{comment.userInfo.user.firstname}} {{comment.userInfo.user.lastname}}</h4>
               <p>{{comment.timestamp}}
-              <p>{{comment.text}}</p>
+              <p>{{comment.text|nl2br}}</p>
             </div>
             <br />
           </div>

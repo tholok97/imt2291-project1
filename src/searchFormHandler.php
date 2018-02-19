@@ -35,12 +35,12 @@ if ($result['status'] == 'ok') {
 
     $SessionManager->put("searchResult",$result['result']);
     
-    // Go to index-page
+    // Go to result-page
     header('Location: ../search/result');
-    //print_r($result);
+    exit();
 }
 else {
     // Go to index-page
     header('Location: ../search');
+    exit();
 }
-exit();
