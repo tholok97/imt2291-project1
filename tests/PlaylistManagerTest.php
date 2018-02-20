@@ -10,6 +10,7 @@ class PlaylistManagerTest extends TestCase {
 
     private $playlistManager = null;
     private $dbh = null;
+
     private $thumbnail = null;
 
     protected function setup() {
@@ -33,6 +34,11 @@ class PlaylistManagerTest extends TestCase {
         if (!$this->thumbnail = file_get_contents(Config::TEST_THUMBNAIL_PATH)) {
             $this->fail("Couldn't load test thumbnail");
         }
+
+
+
+        // set up test properties
+
 
         
     }
@@ -240,5 +246,116 @@ WHERE uid=:uid AND pid=:pid
             $ret['status'],
             "Adding to invalid playlist should fail"
         );
+    }
+
+    /**
+     * @depends testAddPlaylist
+     * @depends testAddVideoToPlaylist
+     */
+    public function testRemoveVideoFromPlaylist() {
+
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+        // add testvideo
+        $this->dbh->query("
+INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size)
+VALUES ('','','',$testuid,'','','',0,'','')
+        ");
+        $testvid = $this->dbh->lastInsertId();
+
+
+        // add video to playlist
+        $this->playlistManager->addVideoToPlaylist($testvid, $testpid);
+
+
+
+        // remove from playlist
+        $res = $this->playlistManager->removeVideoFromPlaylist($testvid, $testpid);
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Removing video from playlist should be fine"
+        );
+
+        // test that was actually removed
+
+        $stmt = $this->dbh->prepare("
+SELECT * 
+FROM in_playlist
+WHERE vid=:vid AND pid=:pid
+        ");
+
+        $stmt->bindParam(':vid', $testvid);
+        $stmt->bindParam(':pid', $testpid);
+
+        $stmt->execute();
+
+        if ($stmt->rowCount() != 0) {
+            $this->fail("Video wasn't removed");
+        }
+
+    }
+
+    /**
+     * @depends testAddPlaylist
+     * @depends testAddMaintainerToPlaylist
+     */
+    public function testRemoveMaintainerFromPlaylist() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+
+        // add video to playlist
+        $this->playlistManager->addMaintainerToPlaylist($testuid, $testpid);
+
+
+
+        // remove user from maintainers
+        $res = $this->playlistManager->removeMaintainerFromPlaylist($testuid, $testpid);
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Removing maintainer from playlist should be fine"
+        );
+
+        // test that was actually removed
+
+        $stmt = $this->dbh->prepare("
+SELECT * 
+FROM maintains
+WHERE uid=:uid AND pid=:pid
+        ");
+
+        $stmt->bindParam(':uid', $testuid);
+        $stmt->bindParam(':pid', $testpid);
+
+        $stmt->execute();
+
+        if ($stmt->rowCount() != 0) {
+            $this->fail("Maintainer wasn't removed wasn't removed");
+        }
     }
 }

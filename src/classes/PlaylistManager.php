@@ -144,6 +144,69 @@ VALUES (:uid, :pid)
     public function removeVideoFromPlaylist($vid, $pid) {
 
 
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+
+        try {
+
+            $stmt = $this->dbh->prepare('
+DELETE FROM in_playlist
+WHERE vid=:vid AND pid=:pid
+            ');
+
+
+            $stmt->bindParam(':vid', $vid);
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+                $ret['status'] = 'ok';
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+
+    }
+
+    /**
+     * Removes maintainer from playlist
+     * @param $uid
+     * @param $pid
+     * @return assoc array with fields: status, message
+     */
+    public function removeMaintainerFromPlaylist($uid, $pid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+
+        try {
+
+            $stmt = $this->dbh->prepare('
+DELETE FROM maintains
+WHERE uid=:uid AND pid=:pid
+            ');
+
+
+            $stmt->bindParam(':uid', $uid);
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+                $ret['status'] = 'ok';
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
     }
 
 }
@@ -153,6 +216,7 @@ VALUES (:uid, :pid)
  *
  *  addPlaylist (takes playlist as parameter and adds it to db. gives back pid)
  *  addToPlaylist (takes video and playlist and adds video to playlist)
+ *  addMaintainerToPlaylist 
  *  getPlaylist (returns playlist object with all contents)
  *  removePlaylist (takes pid as parameter and removes it)
  *  updatePlaylist (takes playlist (with pid set) and updates metainfo
