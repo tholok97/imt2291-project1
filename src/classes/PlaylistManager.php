@@ -369,6 +369,54 @@ WHERE pid=:pid
     }
 
     /**
+     * Update playlist with values given
+     * @param $pid
+     * @param $title
+     * @param $description
+     * @param $thumbnail
+     * @return assoc array with fields: status, message
+     */
+    public function updatePlaylist($pid, $title, $description, $thumbnail) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+
+        try {
+
+            $stmt = $this->dbh->prepare('
+UPDATE playlist
+SET title=:title, description=:description, thumbnail=:thumbnail
+WHERE pid=:pid
+            ');
+
+
+
+            $stmt->bindParam(':pid', $pid);
+            $stmt->bindParam(':title', $title);
+            $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':thumbnail', $thumbnail);
+
+            if ($stmt->execute()) {
+                if ($stmt->rowCount()) {
+                    $ret['status'] = 'ok';
+                } else {
+                    $ret['message'] = "No row updated";
+                }
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+
+
+        return $ret;
+    }
+
+    /**
      * Returns Playlist object of playlist in system
      * @param $pid
      * @return assoc array with fields: status, message, playlist
@@ -387,25 +435,6 @@ WHERE pid=:pid
         return $ret;
     }
 
-    /**
-     * Update playlist with values given
-     * @param $pid
-     * @param $title
-     * @param $description
-     * @param $thumbnail
-     * @return assoc array with fields: status, message
-     */
-    public function updatePlaylist($pid, $title, $description, $thumbnail) {
-
-        // prepare ret
-        $ret['status'] = 'fail';
-        $ret['message'] = "";
-
-        // TODO
-
-
-        return $ret;
-    }
 
     /**
      * Swap positions of two videos in playlist
