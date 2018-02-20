@@ -511,4 +511,67 @@ WHERE pid=:pid
         );
     }
 
+    /*
+     * @depends testAddPlaylist
+     */
+    public function testUpdatePlaylist() {
+
+        // testdata
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+
+        // add playlist
+        $res_add = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+
+
+        // change some stuff
+        $testtitle = "newtitle";
+        $testdescription = "newdescription";
+
+
+        // assert not okay to update invalid pid
+        $res = $this->playlistManager->updatePlaylist(-1, $testtitle, $testdescription, $this->thumbnail);
+        $this->assertEquals(
+            'fail',
+            $res['status'],
+            "Updating invalid pid should fail"
+        );
+
+
+
+        // try and update
+        $res = $this->playlistManager->updatePlaylist($res_add['pid'], $testtitle, $testdescription, $this->thumbnail);
+
+
+        // assert ok
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Updating should be okay"
+        );
+
+
+        // try and fetch inserted stuff from db
+        $stmt = $this->dbh->prepare('SELECT * FROM playlist WHERE pid=:pid');
+        $stmt->bindParam(':pid', $res_add['pid']);
+        $stmt->execute();
+
+        // assert that correct stuff is in db
+        
+        $row = $stmt->fetchAll()[0];
+        
+        $this->assertEquals(
+            $testtitle,
+            $row['title'],
+            "wrong title after update"
+        );
+
+        $this->assertEquals(
+            $testdescription,
+            $row['description'],
+            "wrong description after update"
+        );
+
+    }
+
 }
