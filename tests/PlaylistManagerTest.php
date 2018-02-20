@@ -108,6 +108,81 @@ class PlaylistManagerTest extends TestCase {
     /**
      * @depends testAddPlaylist
      */
+    public function testGetNextPosition() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+        // add testvideo1
+        $this->dbh->query("
+INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size)
+VALUES ('','','',$testuid,'','','',0,'','')
+        ");
+        $testvid1 = $this->dbh->lastInsertId();
+
+
+
+
+        // assert that succeeds for valid pid
+        $res = $this->playlistManager->getNextPosition($testpid);
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "should succeed for valid pid"
+        );
+
+
+
+
+        // get next position for playlist
+        $res = $this->playlistManager->getNextPosition($testpid);
+
+        // assert is 0 (ince none added
+        $this->assertEquals(
+            1,
+            $res['position'],
+            "initla position should be 1"
+        );
+
+
+
+        // insert one video
+
+        $this->dbh->query("
+INSERT INTO in_playlist (vid, pid, position)
+VALUES ($testvid1, $testpid, 1)
+        ");
+
+
+
+        // get next position for playlist
+        $res = $this->playlistManager->getNextPosition($testpid);
+
+        // assert is 2 (since there is one from before)
+        $this->assertEquals(
+            2,
+            $res['position'],
+            "second video should get position 2"
+        );
+
+
+
+    }
+
+    /**
+     * @depends testAddPlaylist
+     * @depends testGetNextPosition
+     */
     public function testAddVideoToPlaylist() {
 
         // add test playlist
@@ -435,4 +510,5 @@ WHERE pid=:pid
             "Deleting invalid playlist should fail"
         );
     }
+
 }

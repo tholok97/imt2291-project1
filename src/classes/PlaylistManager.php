@@ -62,6 +62,58 @@ VALUES (:title, :description, :thumbnail)
     }
 
     /**
+     * Get position next video in playlist should have
+     * @param $pid
+     * @return assoc array with fields: status, message, posiiton
+     */
+    public function getNextPosition($pid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['position'] = null;
+
+
+        try {
+            
+            $stmt = $this->dbh->prepare('
+SELECT MAX(position)
+FROM in_playlist
+WHERE pid=:pid
+            ');
+
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                $ret['status'] = 'ok';
+
+                $max = $stmt->fetchAll()[0]['MAX(position)'];
+
+
+                // if no entries yet -> 1
+                // if entry -> max + 1
+                if ($max == null) {
+                    $ret['position'] = 1;
+                } else {
+                    $ret['position'] = $max + 1;
+                }
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+
+
+        return $ret;
+
+    }
+
+    /**
      * Adds video to playlist
      * @param $vid
      * @param $pid
@@ -73,6 +125,15 @@ VALUES (:title, :description, :thumbnail)
         $ret['status'] = 'fail';
         $ret['message'] = "";
 
+        // FETCH NEXT POSITION
+        $res_position = $position = $this->getNextPosition($pid);
+
+        if ($res_position['status'] == 'fail') {
+            $ret['message'] = $res_position['message'];
+            return $ret;
+        }
+
+
         try {
 
             $stmt = $this->dbh->prepare('
@@ -83,7 +144,7 @@ VALUES (:vid, :pid, :position)
 
             $stmt->bindParam(':vid', $vid);
             $stmt->bindParam(':pid', $pid);
-            $stmt->bindParam(':position', $pid); // TODO OOOOO!
+            $stmt->bindParam(':position', $res_position['position']);
 
             if ($stmt->execute()) {
                 $ret['status'] = 'ok';
@@ -351,13 +412,8 @@ WHERE pid=:pid
 /*
  * TODO
  *
- *  addPlaylist (takes playlist as parameter and adds it to db. gives back pid)
- *  addToPlaylist (takes video and playlist and adds video to playlist)
- *  addMaintainerToPlaylist 
  *  getPlaylist (returns playlist object with all contents)
- *  removePlaylist (takes pid as parameter and removes it)
  *  updatePlaylist (takes playlist (with pid set) and updates metainfo
- *  removeFromPlaylist (takes video and playlist and removes video from playlist)
  *  reorderVideo (takes an old and new position, and swaps the video at the old 
         position with the one at the new
  */
