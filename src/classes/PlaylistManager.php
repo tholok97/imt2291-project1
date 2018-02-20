@@ -3,6 +3,7 @@
 require_once dirname(__FILE__) . '/DB.php';
 require_once dirname(__FILE__) . '/User.php';
 require_once dirname(__FILE__) . '/UserManager.php';
+require_once dirname(__FILE__) . '/Playlist.php';
 require_once dirname(__FILE__) . '/VideoManager.php';
 require_once dirname(__FILE__) . '/../constants.php';
 require_once dirname(__FILE__) . '/../../config.php';
@@ -430,9 +431,76 @@ WHERE pid=:pid
         $ret['message'] = "";
         $ret['playlist'] = null;
 
-        // TODO
+
+        // FETCH ALL MAINTAINERS
+        $ret_maintainers = $this->getMaintainersOfPlaylist($pid);
+
+        // if failed -> early return)
+        if ($ret_maintainers['status'] == 'fail') {
+            $ret['message'] = "Couldn't fetch maintainers : " . $ret_maintainers['message'];
+        }
 
 
+        // FETCH ALL VIDEOS
+        $ret_videos= $this->getVideosFromPlaylist($pid);
+
+        // if failed -> early return)
+        if ($ret_videos['status'] == 'fail') {
+            $ret['message'] = "Couldn't fetch videos : " . $ret_videos['message'];
+        }
+
+
+        // make return playlist
+        $ret['playlist'] = new Playlist();
+
+        // set values gathered so far
+        $ret['playlist']->maintainers = $ret_maintainers['users'];
+        $ret['playlist']->videos = $ret_videos['videos'];
+        $ret['playlist']->pid = $pid;
+
+
+        // FETCH METADATA
+        try {
+
+            $stmt = $this->dbh->prepare('
+SELECT *
+FROM playlist
+WHERE pid=:pid
+            ');
+
+
+
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                if ($stmt->rowCount() == 1) {
+                    $row = $stmt->fetchAll()[0];
+
+                    // set rest of playlist values
+                    $ret['playlist']->title = $row['title'];
+                    $ret['playlist']->description = $row['description'];
+
+                } else {
+                    $ret['message'] = "More than one playlist returned from db";
+                    return $ret;
+                }
+
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+
+
+        // if got this far -> status ok
+        $ret['status'] = 'ok';
 
         return $ret;
     }
@@ -546,6 +614,7 @@ WHERE pid=:pid
 SELECT vid
 FROM in_playlist
 WHERE pid=:pid
+ORDER BY position
             ');
 
             $stmt->bindParam(':pid', $pid);

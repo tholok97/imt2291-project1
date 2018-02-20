@@ -696,4 +696,94 @@ VALUES ('','','',$testuid,'$testtopic','','',0,'','')
 
     }
 
+    public function testGetPlaylist() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+
+        $testusername = "tommyboi";
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('$testusername','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+
+        $testtopic = "horses";
+
+        // add testvideo
+        $this->dbh->query("
+INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size)
+VALUES ('','','',$testuid,'$testtopic','','',0,'','')
+        ");
+        $testvid = $this->dbh->lastInsertId();
+
+
+
+        // add user as maintainer
+        $res_addmaintainer = $this->playlistManager->addMaintainerToPlaylist($testuid, $testpid);
+
+        // add video to playlist
+        $res_addvideo = $this->playlistManager->addVideoToPlaylist($testvid, $testpid);
+
+
+
+        // assert that getting invalid playlist fails
+        $res = $this->playlistManager->getPlaylist(-1);
+        $this->assertEquals(
+            'fail',
+            $res['status'],
+            "Getting invalid playlist should fail"
+        );
+
+
+        // get playlist
+        $res = $this->playlistManager->getPlaylist($testpid);
+
+        // assert ok
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Getting valid playlist should be fine" 
+        );
+
+
+        // assert that returned correct number of videos
+        $this->assertEquals(
+            1,
+            count($res['playlist']->videos),
+            "Should return 1 video"
+        );
+
+        // assert that returned correct number of maintainers
+        $this->assertEquals(
+            1,
+            count($res['playlist']->maintainers),
+            "Should return 1 video"
+        );
+
+
+        // assert that correct video returned
+        $this->assertEquals(
+            $testuid,
+            $res['playlist']->videos[0]->uid,
+            "Correct user should be returned"
+        );
+
+        // assert that correct maintainer returned
+        $this->assertEquals(
+            $testusername,
+            $res['playlist']->maintainers[0]->username,
+            "Correct user should be returned"
+        );
+
+
+    }
+
 }
