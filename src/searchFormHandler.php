@@ -33,14 +33,14 @@ $result = $VideoManager->search(htmlspecialchars($_POST['searchText']), $searchA
 
 if ($result['status'] == 'ok') {
 
-    $SessionManager->put("searchResult",$result['result']);
+    $SessionManager->put("searchResult",$result['result'], true);
     
     // Go to result-page
     header('Location: ../search/result');
     exit();
 }
 else {
-    // Go to index-page
+    // Reload page
     header('Location: ../search');
     exit();
 }

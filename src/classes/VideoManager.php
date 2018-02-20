@@ -157,6 +157,79 @@ class VideoManager {
     }
 
     /**
+     * Edit video-info.
+     * 
+     * @param int The id to the video to edit.
+     * @param int The id to the user who edit (to check for correct user).
+     * @param string The new title.
+     * @param string The new description.
+     * @param string The new topic.
+     * @param string The new course_code.
+     * 
+     * @return array[] Returns an associative array with fields 'status' and evt. 'errorMessage' if status is 'fail'.
+     */
+
+    function update($vid, $uid, $title, $description, $topic, $course_code) {
+        $ret['status'] = 'fail';
+        $ret['errorMessage'] = null;
+
+        // Check if a numeric id is more than 0.
+        if (!is_numeric($vid) || $vid <= 0) {
+            $ret['errorMessage'] = 'Fikk ingen korrekt video-id';
+            return $ret;
+        }
+
+        // Check if connection to database was successfully established.
+        if ($this->db == null) {
+            $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
+            return $ret;
+        }
+
+        // Try to check if uid is the correct id
+
+        try {
+            $sql = "SELECT uid FROM video WHERE vid = :vid";
+            $sth = $this->db->prepare($sql);
+            $sth->bindParam(':vid', $vid);
+            $sth->execute();
+           
+            $teacher;
+            while($row = $sth->fetch(PDO::FETCH_ASSOC))
+            {
+                $teacher = $row['uid'];
+            }
+
+            // If the person who uploaded video is the one who register, update video-info
+            if ($uid == $teacher) {
+                $sql = "UPDATE video SET title = :title, description = :description, topic = :topic, course_code = :course_code WHERE vid = :vid";
+                $sth = $this->db->prepare ($sql);
+                $sth->bindParam(':title', $title);
+                $sth->bindParam(':description', $description);
+                $sth->bindParam(':topic', $topic);
+                $sth->bindParam(':course_code', $course_code);
+                $sth->bindParam(':vid', $vid);
+                $sth->execute();
+
+                if ($sth->rowCount() > 0) {
+                    $ret['status'] = 'ok';
+                }
+                else {
+                    $ret['errorMessage'] = "Klarte ikke å oppdatere video-informasjonen. Prøv igjen senere. Vennligst ta kontakt med administrator om problemet vedvarer.";
+                }
+            
+                $teacher;
+                while($row = $sth->fetch(PDO::FETCH_ASSOC))
+                {
+                    $techer = $row['uid'];
+                }
+            }
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
+        }
+
+    }
+
+    /**
      * Comment video.
      * 
      * @param string The text which is the comment.

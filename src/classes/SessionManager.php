@@ -18,8 +18,11 @@ class SessionManager {
      * @param $object
      * @return void
      */
-    public function put($name, $object) {
-        $_SESSION[$this->sessionVariableName][$name] = serialize($object);
+    public function put($name, $object, $serialize = false) {
+        if ($serialize) {                           // If we want to serialize (if object inside).
+            $object = serialize($object);
+        }
+        $_SESSION[$this->sessionVariableName][$name] = $object;
     }
 
     /**
@@ -27,11 +30,15 @@ class SessionManager {
      * @param $name
      * @return the object or null if error
      */
-    public function get($name) {
+    public function get($name, $unserialize = false) {
         if (!isset($_SESSION[$this->sessionVariableName][$name])) {
             return null;
         } else {
-            return unserialize($_SESSION[$this->sessionVariableName][$name]);
+            $ret = $_SESSION[$this->sessionVariableName][$name];
+            if ($unserialize) {                           // If we want to unserialize (if object inside).
+                $ret = unserialize($ret);
+            }
+            return $ret;
         }
     }
 

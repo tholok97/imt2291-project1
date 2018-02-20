@@ -56,12 +56,15 @@ $sessionManager = new SessionManager();
 
 // page stores parameter passed by GET. Contains an indication of what 
 // page to be shown
-$page = @$_GET['page'];
+$page = htmlspecialchars(@$_GET['page']);
 
 // Parameter 1 to be used by page
-$param1 = @$_GET['param1'];
+$param1 = htmlspecialchars(@$_GET['param1']);
 
-//echo "Page: " . $page . ", Param1: " . $param1;
+// Parameter 2 to be used by page
+$param2 = htmlspecialchars(@$_GET['param2']);
+
+//echo "Page: " . $page . ", Param1: " . $param1 . ", Param2: " . $param2;
 
 
 
@@ -118,7 +121,7 @@ if ($page == 'register') {
         if ($param1 == "") {                    // Just page parameter.
             $twig_file_to_render = 'showVideoForm.twig';
         }
-        else {                                  // A parameter.
+        else if ($param1 != "" && $param2 == "") {                                  // A parameter.
             $video = $videoManager->get($param1);
             $comments = $videoManager->getComments($video['video']->vid);
             $rating = $videoManager->getRating($video['video']->vid);
@@ -131,17 +134,28 @@ if ($page == 'register') {
                 'userId' => htmlspecialchars($_SESSION['uid']),              // ID for the user who watch.
                 'rating' => $rating,
                 'userRating' => $userRating
-            );            
+                );            
             }
             else {
                 $twig_file_to_render = 'debug.twig';
                 $twig_arguments = array('message' => 'Error: ' . $video['errorMessage']);
             }
         }
+        else {
+            $video = $videoManager->get($param1);   // To check the uid
+            if($video['status'] == 'ok') {
+                if($video['video']->uid == htmlspecialchars($_SESSION['uid'])) {
+                    $twig_file_to_render = 'editVideo.twig';
+                    $twig_arguments = array('video' => $video['video'],
+                    'userId' => htmlspecialchars($_SESSION['uid']),              // ID for the user who edit.
+                    );
+                }
+            }
+        }
         break;
     case 'search':
         if ($param1 == "result") {                    // Result shuld be retrived.
-            $result = $sessionManager->get("searchResult");
+            $result = $sessionManager->get("searchResult", true);
             if($result != null) {
                 $twig_file_to_render = 'showSearch.twig';
                 //print_r($result);
