@@ -75,8 +75,6 @@ VALUES (:title, :description, :thumbnail)
 
         try {
 
-            echo "vid: $vid, pid: $pid";
-            
             $stmt = $this->dbh->prepare('
 INSERT INTO in_playlist (vid, pid, position)
 VALUES (:vid, :pid, :position)
@@ -102,12 +100,49 @@ VALUES (:vid, :pid, :position)
     }
 
     /**
+     * add maintainer to playlist
+     * @param $uid
+     * @param $pid
+     * @return assoc array with fields: status, message
+     */
+    public function addMaintainerToPlaylist($uid, $pid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+
+        try {
+
+            $stmt = $this->dbh->prepare('
+INSERT INTO maintains (uid, pid)
+VALUES (:uid, :pid)
+            ');
+
+
+            $stmt->bindParam(':uid', $uid);
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+                $ret['status'] = 'ok';
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+    }
+
+    /**
      * Removes video from playlist
      * @param $vid
      * @param $pid
      * @return assoc array with fields: status, message
      */
     public function removeVideoFromPlaylist($vid, $pid) {
+
 
     }
 

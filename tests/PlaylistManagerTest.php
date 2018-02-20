@@ -155,5 +155,90 @@ WHERE vid=:vid AND pid=:pid
             $this->fail("Wasn't inserted into db");
         }
 
+
+
+
+        // assert that adding invalid video fails
+        $ret = $this->playlistManager->addVideoToPlaylist(-1, $testpid);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Adding invalid video should fail"
+        );
+
+        // assert that adding to invalid playlist fails
+        $ret = $this->playlistManager->addVideoToPlaylist($testvid, -1);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Adding to invalid playlist should fail"
+        );
+
+    }
+
+    /**
+     * @depends testAddPlaylist
+     */
+    public function testAddMaintainerToPlaylist() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+
+
+        // add maintainer to playlist
+        $res = $this->playlistManager->addMaintainerToPlaylist($testuid, $testpid);
+
+
+        // assert that adding it was ok
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Adding maintainer should be ok"
+        );
+
+        // assert that was actually added
+
+        $stmt = $this->dbh->prepare("
+SELECT * 
+FROM maintains
+WHERE uid=:uid AND pid=:pid
+        ");
+
+        $stmt->bindParam(':uid', $testuid);
+        $stmt->bindParam(':pid', $testpid);
+
+        $stmt->execute();
+
+        if ($stmt->rowCount() == 0) {
+            $this->fail("Wasn't inserted into db");
+        }
+
+
+        // assert that adding invalid video fails
+        $ret = $this->playlistManager->addMaintainerToPlaylist(-1, $testpid);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Adding invalid user should fail"
+        );
+
+        // assert that adding to invalid playlist fails
+        $ret = $this->playlistManager->addMaintainerToPlaylist($testuid, -1);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Adding to invalid playlist should fail"
+        );
     }
 }
