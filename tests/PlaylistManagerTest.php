@@ -358,4 +358,81 @@ WHERE uid=:uid AND pid=:pid
             $this->fail("Maintainer wasn't removed wasn't removed");
         }
     }
+
+    /**
+     * @depends testAddPlaylist
+     * @depends testAddVideoToPlaylist
+     * @depends testAddMaintainerToPlaylist
+     */
+    public function testRemovePlaylist() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+        // add testvideo
+        $this->dbh->query("
+INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size)
+VALUES ('','','',$testuid,'','','',0,'','')
+        ");
+        $testvid = $this->dbh->lastInsertId();
+
+
+        // add user as maintainer of playlist
+        $this->playlistManager->addMaintainerToPlaylist($testuid, $testpid);
+
+        // add video to playlist
+        $this->playlistManager->addVideoToPlaylist($testvid, $testpid);
+
+
+
+
+        // remove playlist
+        $res = $this->playlistManager->removePlaylist($testpid);
+
+
+        // assert fine
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Deleting playlist should be fine"
+        );
+
+
+        // assert that was actually removed
+
+        $stmt = $this->dbh->prepare("
+SELECT * 
+FROM playlist
+WHERE pid=:pid
+        ");
+
+        $stmt->bindParam(':pid', $testpid);
+
+        $stmt->execute();
+
+        if ($stmt->rowCount() != 0) {
+            $this->fail("Playlist wasn't removed properly");
+        }
+
+
+
+
+        // assert that removing invalid playlist fails
+        $res = $this->playlistManager->removePlaylist(-1);
+        $this->assertEquals(
+            'fail',
+            $res['status'],
+            "Deleting invalid playlist should fail"
+        );
+    }
 }

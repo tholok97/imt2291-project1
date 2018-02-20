@@ -209,6 +209,104 @@ WHERE uid=:uid AND pid=:pid
         return $ret;
     }
 
+    /**
+     * Completely removes playlist (including references from other tables)
+     * @param $pid
+     * @return assoc array with fields: status, message
+     */
+    public function removePlaylist($pid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+
+
+        // REMOVE ALL MAINTAINERS
+        try {
+
+            $stmt = $this->dbh->prepare('
+DELETE FROM maintains
+WHERE pid=:pid
+            ');
+
+
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                // NO OP. FLOW CONTINUES AFTER CATCH
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+
+        // REMOVE ALL VIDEOS
+        try {
+
+            $stmt = $this->dbh->prepare('
+DELETE FROM in_playlist
+WHERE pid=:pid
+            ');
+
+
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                // NO OP. FLOW CONTINUES AFTER CATCH
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+        // REMOVE PLAYLIST
+        try {
+
+            $stmt = $this->dbh->prepare('
+DELETE FROM playlist
+WHERE pid=:pid
+            ');
+
+
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                if ($stmt->rowCount() == 1) {
+                    // NO OP. FLOW CONTINUES AFTER CATCH
+                } else {
+                    $ret['message'] = "no playlist was deleted";
+                    return $ret;
+                }
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+        $ret['status'] = 'ok';
+
+
+        return $ret;
+    }
+
 }
 
 /*
