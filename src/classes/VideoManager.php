@@ -157,6 +157,45 @@ class VideoManager {
     }
 
     /**
+     * Edit video-info.
+     * 
+     * @param int The id to the video to edit.
+     * @param int The id to the user who edit (to check for correct user).
+     * @param string The new title.
+     * @param string The new description.
+     * @param string The new topic.
+     * @param string The new course_code.
+     * 
+     * @return array[] Returns an associative array with fields 'status' and evt. 'errorMessage' if status is 'fail'.
+     */
+
+    function update($vid, $uid, $title, $description, $topic, $course_code) {
+        $ret['status'] = 'fail';
+        $ret['errorMessage'] = null;
+
+        // Check if a numeric id is more than 0.
+        if (!is_numeric($vid) || $vid <= 0) {
+            $ret['errorMessage'] = 'Fikk ingen korrekt video-id';
+            return $ret;
+        }
+
+        // Check if connection to database was successfully established.
+        if ($this->db == null) {
+            $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
+            return $ret;
+        }
+
+        // Try to check if uid 
+        try {
+            $sql = "SELECT uid FROM video WHERE vid=:vid";
+
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
+        }
+
+    }
+
+    /**
      * Comment video.
      * 
      * @param string The text which is the comment.
