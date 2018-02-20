@@ -631,4 +631,69 @@ VALUES ('$testusername','','','',0)
 
     }
 
+    /**
+     * @depends testAddPlaylist
+     * @depends testAddVideoToPlaylist
+     */
+    public function testGetVideosFromPlaylist() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+
+        $testtopic = "horses";
+
+        // add testvideo
+        $this->dbh->query("
+INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size)
+VALUES ('','','',$testuid,'$testtopic','','',0,'','')
+        ");
+        $testvid = $this->dbh->lastInsertId();
+
+
+        // add video to playlist
+        $res_addvideo = $this->playlistManager->addVideoToPlaylist($testvid, $testpid);
+
+
+
+
+        // get videos from playlist
+        $res = $this->playlistManager->getVideosFromPlaylist($testpid);
+
+
+
+        // assert success
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Getting all videos should be successful"
+        );
+
+        // assert stuff actually returned
+        $this->assertEquals(
+            1,
+            count($res['videos']),
+            "Number of videos returned should be 1"
+        );
+
+
+        // assert correct stuff returned
+        $this->assertEquals(
+            $testtopic,
+            $res['videos'][0]->topic,
+            "Incorrect video returned"
+        );
+
+    }
+
 }

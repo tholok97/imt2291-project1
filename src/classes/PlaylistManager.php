@@ -3,6 +3,7 @@
 require_once dirname(__FILE__) . '/DB.php';
 require_once dirname(__FILE__) . '/User.php';
 require_once dirname(__FILE__) . '/UserManager.php';
+require_once dirname(__FILE__) . '/VideoManager.php';
 require_once dirname(__FILE__) . '/../constants.php';
 require_once dirname(__FILE__) . '/../../config.php';
 
@@ -518,6 +519,74 @@ WHERE pid=:pid
 
 
         // if got this far -> ok
+        $ret['status'] = 'ok';
+
+        return $ret;
+    }
+
+    /**
+     * get all videos (Video objects) associated with playlist
+     * @param $pid
+     * @return assoc array with fields: status, message, videos
+     */
+    public function getVideosFromPlaylist($pid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['videos'] = array();
+
+        // array to hold vis
+        $vids = array();
+
+        // FIRST GET ALL VID'S
+        try {
+            
+            $stmt = $this->dbh->prepare('
+SELECT vid
+FROM in_playlist
+WHERE pid=:pid
+            ');
+
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                // add all (if any) found vids to vids
+                foreach($stmt->fetchAll() as $row) {
+                    array_push($vids, $row['vid']);
+                }
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+
+
+
+        // get videomanager
+        $videoManager = new VideoManager($this->dbh);
+
+        // FOR EACH VID -> APPEND CORRESPONDING VIDEO OBJECT TO RET
+        foreach ($vids as $vid) {
+
+            $ret_getvideo = $videoManager->get($vid, false);
+
+            if ($ret_getvideo['status'] == 'fail') {
+                $ret['message'] = "Couldn't get video object : " . $ret_getvideo['message'];
+                return $ret;
+            } else {
+                array_push($ret['videos'], $ret_getvideo['video']);
+            }
+        }
+
+        // if got this far -> success
         $ret['status'] = 'ok';
 
         return $ret;
