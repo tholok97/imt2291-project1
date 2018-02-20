@@ -400,7 +400,26 @@ WHERE pid=:pid
         // prepare ret
         $ret['status'] = 'fail';
         $ret['message'] = "";
-        $ret['playlist'] = null;
+
+        // TODO
+
+
+        return $ret;
+    }
+
+    /**
+     * Swap positions of two videos in playlist
+     *
+     * @param $pos1
+     * @param $pos2
+     * @param $pid
+     * @return assoc array with fields: status, message
+     */
+    public function swapPositionsInPlaylist($pos1, $pos2, $pid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
 
         // TODO
 
