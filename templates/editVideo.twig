@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <ul>
+        <li><a href="./admin">Admin page</a></li>
+        <li><a href="./videos">Videos page</a></li>
+        <li><a href="./">Index page</a></li>
+        <li><a href="./upload">Upload page</a></li>
+        <li><a href="./search">Search page</a></li>
+        <li><a href="./logout">Logout</a></li>
+    </ul>
+    <h1>Upload page</h1>
+    <form action="../../src/editVideoFormHandler.php" method="post" enctype="multipart/form-data">
+        <label for="title">Tittel:</label> <input type="text" name="title" id="title" value="{{video.title}}" /><br />
+        <label for="descr">Beskrivelse:</label><br /><textarea name="descr" id="descr" cols="100" rows="10">{{video.description}}</textarea><br />
+        <label for="topic">Tema:</label> <input type="text" name="topic" id="topic" value="{{video.topic}}" /><br />
+        <label for="course">Emnekode: </label> <input type="text" name="course" id="course" value="{{video.course_code}}" /><br />
+        <input type="hidden" name="vid" value="{{video.vid}}">
+        <input type="submit" name='submit' value="Oppdater videoen i databasen" />
+    </form>
+</body>
+</html>

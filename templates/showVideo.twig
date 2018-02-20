@@ -8,6 +8,9 @@
     <body style='text-align: center;'>
       <div class="container">
       <h1>{{video.title}}</h1>
+      {% if userId == teacher.user.uid %}
+        <a href="{{video.vid}}/edit" class="btn btn-info">Rediger</a>
+      {% endif %}
       <div class="row">
           <div class="col-md-12">
             <video width="768" height="432" poster="../src/getVideoThumbnail.php?vid={{video.vid}}"controls>
