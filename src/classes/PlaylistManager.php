@@ -307,6 +307,45 @@ WHERE pid=:pid
         return $ret;
     }
 
+    /**
+     * Returns Playlist object of playlist in system
+     * @param $pid
+     * @return assoc array with fields: status, message, playlist
+     */
+    public function getPlaylist($pid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['playlist'] = null;
+
+        // TODO
+
+
+
+        return $ret;
+    }
+
+    /**
+     * Update playlist with values given
+     * @param $pid
+     * @param $title
+     * @param $description
+     * @param $thumbnail
+     * @return assoc array with fields: status, message
+     */
+    public function updatePlaylist($pid, $title, $description, $thumbnail) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['playlist'] = null;
+
+        // TODO
+
+
+        return $ret;
+    }
 }
 
 /*
