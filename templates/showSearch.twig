@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>Search result</title>
@@ -5,19 +6,21 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     </head>
     <body>
-        <div class="container-fluid">
-        {% for video in result %}
-            <div class="col-sm-4">
-                <div class="card">
-                    <img class="card-img-top" src="src/getVideoThumbnail.php?vid={{video.video.vid}}" alt="Card image" style="width:100%">
-                            <div class="card-body">
-                            <h4 class="card-title">{{video.video.title}}</h4>
-                            <p class="card-text">{{video.video.description}}</p>
-                            <a href="videos/{{video.video.vid}}" class="btn btn-primary">Se video</a>
-                        </div>
-                    </div>    
-                </div>
-            {% endfor %}
+        <div class="container">
+        <div class="row">
+            {% for video in result %}
+                <div class="col-sm-4">
+                    <div class="card">
+                        <img class="card-img-top" src="../src/getVideoThumbnail.php?vid={{video.video.vid}}" alt="Card image" style="width:100%">
+                                <div class="card-body">
+                                <h4 class="card-title">{{video.video.title}}</h4>
+                                <p class="card-text"><b>Tid lastet opp:</b> {{video.video.timestamp}}<br /><b>Emnekode:</b> {{video.video.course_code}}<br /><b>Emne:</b> {{video.video.topic}}</p>
+                                <a href="../videos/{{video.video.vid}}" class="btn btn-primary">Se video</a>
+                            </div>
+                        </div>    
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </body>
 </html>

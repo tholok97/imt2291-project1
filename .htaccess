@@ -3,4 +3,4 @@ RewriteEngine On
 
 # Transform any address that looks like ".../anything" into 
 # ".../index.php?page=anything"
-RewriteRule ^/?([a-zA-Z_]+)/?([a-zA-Z_0-9]*)$ index.php?page=$1&param1=$2 [L]
+RewriteRule ^/?([a-zA-Z_]+)/?([a-zA-Z_0-9]*)/?([a-zA-Z_0-9]*)$ index.php?page=$1&param1=$2&param2=$3 [L]

@@ -6,24 +6,21 @@ require_once dirname(__FILE__) . '/classes/VideoManager.php';
 
 
 $VideoManager = new VideoManager(DB::getDBConnection());
-$res = $VideoManager->upload(
+$res = $VideoManager->update(
+    $_POST['vid'],
+    $_SESSION['uid'],
     $_POST['title'],
     $_POST['descr'],
-    $_SESSION['uid'],
     $_POST['topic'],
-    $_POST['course'],
-    $_FILES['fileToUpload'],
-    $_FILES['thumbnail']
+    $_POST['course']
 );
 
 // if success -> go to index
 // if not -> reload page
 if ($res['status'] == 'ok') {
-    header('Location: ../');
+    header('Location: ../videos/' . $_POST['vid']);
     exit();
 } else {
-    print_r($res);
-    //header('Location: ../upload/');
+    header('Location: ../videos/' . $_POST['vid']);
     exit();
 }
-

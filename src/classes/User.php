@@ -24,7 +24,6 @@ class User {
     /**
      * Just constructs a User object
      *
-     * @param $uid
      * @param $username
      * @param $firstname
      * @param $lastname

@@ -23,4 +23,9 @@ class Config {
     const DB_TEST_DSN = 'mysql:dbname=imt2291_project1_test;host=127.0.0.1';
     const DB_TEST_USER = 'root';
     const DB_TEST_PASSWORD = '';
+
+    /**
+     * Path to a test thumbnail image
+     */
+    const TEST_THUMBNAIL_PATH = "temp/temp.png";
 }

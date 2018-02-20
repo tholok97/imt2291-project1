@@ -6,6 +6,8 @@ require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/src/classes/UserManager.php';
 require_once dirname(__FILE__) . '/src/functions/functions.php';
 require_once dirname(__FILE__) . '/src/classes/VideoManager.php';
+require_once dirname(__FILE__) . '/src/classes/SessionManager.php';
+
 /*
  * Entry-point to the entire site. Users are shown the sites they want using 
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
@@ -44,17 +46,25 @@ $userManager = new UserManager(DB::getDBConnection());
  */
 $videoManager = new VideoManager(DB::getDBConnection());
 
+/**
+ * Used to use video-content
+ */
+$sessionManager = new SessionManager();
+
 
 
 
 // page stores parameter passed by GET. Contains an indication of what 
 // page to be shown
-$page = @$_GET['page'];
+$page = htmlspecialchars(@$_GET['page']);
 
 // Parameter 1 to be used by page
-$param1 = @$_GET['param1'];
+$param1 = htmlspecialchars(@$_GET['param1']);
 
-//echo "Page: " . $page . ", Param1: " . $param1;
+// Parameter 2 to be used by page
+$param2 = htmlspecialchars(@$_GET['param2']);
+
+//echo "Page: " . $page . ", Param1: " . $param1 . ", Param2: " . $param2;
 
 
 
@@ -111,32 +121,57 @@ if ($page == 'register') {
         if ($param1 == "") {                    // Just page parameter.
             $twig_file_to_render = 'showVideoForm.twig';
         }
-        else {                                  // A parameter
+        else if ($param1 != "" && $param2 == "") {                                  // A parameter.
             $video = $videoManager->get($param1);
+            $comments = $videoManager->getComments($video['video']->vid);
+            $rating = $videoManager->getRating($video['video']->vid);
+            $userRating = $videoManager->getUserRating(htmlspecialchars($_SESSION['uid']),$video['video']->vid);      // Check user has rated, and eventually get that rate.
             if($video['status'] == 'ok') {
                 $twig_file_to_render = 'showVideo.twig';
-                $twig_arguments = array('video' => $video['video']);
+                $twig_arguments = array('video' => $video['video'],
+                'comments' => $comments['comments'],
+                'teacher' => $userManager->getUser($video['video']->uid),   // Publishing user info.
+                'userId' => htmlspecialchars($_SESSION['uid']),              // ID for the user who watch.
+                'rating' => $rating,
+                'userRating' => $userRating
+                );            
             }
             else {
                 $twig_file_to_render = 'debug.twig';
                 $twig_arguments = array('message' => 'Error: ' . $video['errorMessage']);
             }
         }
+        else {
+            $video = $videoManager->get($param1);   // To check the uid
+            if($video['status'] == 'ok') {
+                if($video['video']->uid == htmlspecialchars($_SESSION['uid'])) {
+                    $twig_file_to_render = 'editVideo.twig';
+                    $twig_arguments = array('video' => $video['video'],
+                    'userId' => htmlspecialchars($_SESSION['uid']),              // ID for the user who edit.
+                    );
+                }
+            }
+        }
         break;
     case 'search':
-        if ($param1 == "") {                    // Just page parameter.
-            $twig_file_to_render = 'advancedSearch.twig';
-        }
-        else {                                  // A parameter
-            $result = $videoManager->search("Big Buck Bunny");
-            if($result['status'] == 'ok') {
+        if ($param1 == "result") {                    // Result shuld be retrived.
+            $result = $sessionManager->get("searchResult", true);
+            if($result != null) {
                 $twig_file_to_render = 'showSearch.twig';
-                $twig_arguments = array('result' => $result['result']);
+                //print_r($result);
+                $twig_arguments = array('result' => $result);
             }
             else {
-                $twig_file_to_render = 'debug.twig';
-                $twig_arguments = array('message' => 'Error: ' . $result['errorMessage']);
+                 // Go to search-page without parameters
+                header('Location: ../search');
             }
+        }
+        else if($param1 == "") {                       // Only page parameter, show search-site
+            $twig_file_to_render = 'advancedSearch.twig';
+        }
+        else {                                         // Some unexpected input, reset so we get correct sending of searchForm
+            // Go to search-page without parameters
+            header('Location: ../search');
         }
         break;
     case 'logout':
