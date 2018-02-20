@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <ul>
+        <li><a href="./admin">Admin page</a></li>
+        <li><a href="./videos">Videos page</a></li>
+        <li><a href="./">Index page</a></li>
+        <li><a href="./upload">Upload page</a></li>
+        <li><a href="./search">Search page</a></li>
+        <li><a href="./logout">Logout</a></li>
+    </ul>
+    <h1>Playlist page</h1>
+    <h2>{{playlist.name}}</h2> 
+
+    <h3>Maintainers: </h3>
+    <h3></h3>
+    <h3></h3>
+
+    {% for video in playlist %}
+
+    <p>{{video.title}}</p>
+
+    {% endfor  %}
+</body>
+</html>
