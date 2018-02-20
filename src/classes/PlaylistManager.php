@@ -2,6 +2,7 @@
 
 require_once dirname(__FILE__) . '/DB.php';
 require_once dirname(__FILE__) . '/User.php';
+require_once dirname(__FILE__) . '/UserManager.php';
 require_once dirname(__FILE__) . '/../constants.php';
 require_once dirname(__FILE__) . '/../../config.php';
 
@@ -455,13 +456,78 @@ WHERE pid=:pid
 
         return $ret;
     }
+
+    /**
+     * returns all associated maintainers of playlist in db
+     * @param $pid
+     * @return assoc array with fields: status, message, users (User objects)
+     */
+    public function getMaintainersOfPlaylist($pid) {
+
+        // prepare ret
+        $ret['message'] = "";
+        $ret['status'] = 'fail';
+        $ret['users'] = array();
+
+        // array to hold uids of maintainers
+        $uids = array();
+
+
+        // GET UIDS
+        try {
+            
+            $stmt = $this->dbh->prepare('
+SELECT uid
+FROM maintains
+WHERE pid=:pid
+            ');
+
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                // add all (if any) found uids to uids
+                foreach($stmt->fetchAll() as $row) {
+                    array_push($uids, $row['uid']);
+                }
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+        // prepare userManager
+        $userManager = new UserManager($this->dbh);
+
+        // FOR EACH UID IN UIDS -> FETCH USER OBJECT FROM USERMANAGER
+        foreach ($uids as $uid) {
+            $ret_getuser = $userManager->getUser($uid);
+
+            if ($ret_getuser['status'] == 'fail') {
+                $ret['message'] = "Couldn't get user object : " . $ret_getuser['message'];
+                return $ret;
+            } else {
+                array_push($ret['users'], $ret_getuser['user']);
+            }
+        }
+
+
+        // if got this far -> ok
+        $ret['status'] = 'ok';
+
+        return $ret;
+    }
 }
 
 /*
  * TODO
  *
  *  getPlaylist (returns playlist object with all contents)
- *  updatePlaylist (takes playlist (with pid set) and updates metainfo
  *  reorderVideo (takes an old and new position, and swaps the video at the old 
         position with the one at the new
  */

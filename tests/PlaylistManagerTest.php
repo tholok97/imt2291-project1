@@ -574,4 +574,61 @@ WHERE pid=:pid
 
     }
 
+    /**
+     * @depends testAddPlaylist
+     * @depends testAddMaintainerToPlaylist
+     */
+    public function testGetMaintainersOfPlaylist() {
+        
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+
+        $testusername = "dory";
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('$testusername','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+
+        // add maintainer to playlist
+        $res = $this->playlistManager->addMaintainerToPlaylist($testuid, $testpid);
+
+
+
+
+        // get all maintainers
+        $res = $this->playlistManager->getMaintainersOfPlaylist($testpid);
+
+        // assert ok
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Getting maintainers of valid playlist shouldn't fail"
+        );
+
+        // assert stuff was actually returned
+        $this->assertEquals(
+            1,
+            count($res['users']),
+            "Number of users returned should be 1"
+        );
+
+
+
+        // assert correct one returned
+        $this->assertEquals(
+            $testusername,
+            $res['users'][0]->username,
+            "User returned wasn't the correct one"
+        );
+
+    }
+
 }
