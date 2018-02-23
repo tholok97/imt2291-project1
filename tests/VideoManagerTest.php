@@ -223,7 +223,7 @@ class VideoManagerTest extends TestCase {
             'Rating gotten from all video ratings not the same (' . $firstRate . ') on first rating: ' . $ret['rating']
         );
 
-        $secondRate = 16;
+        $secondRate = 5;
 
         // Check if errorMessage if new addRating with same user on same video.
         $ret = $this->videoManager->addRating($secondRate, $uid, $vid);
@@ -358,5 +358,91 @@ class VideoManagerTest extends TestCase {
             'Search result not 2 on second search but: ' . count($ret['result'])
         );
 
+    }
+
+    function testUpdate() {
+        // make test user (is needed to upload a video)
+        $user = new User(
+            'testuser', 
+            'firstname', 
+            'secondname', 
+            2
+        );
+
+        $password = 'testpassword';
+
+        // assert that adding new user goes well
+        $ret = $this->userManager->addUser($user, $password);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Couldn't add valid user :" . $ret['message']
+        );
+
+        $ret = $this->userManager->login("testuser", $password);
+
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'login not ok for valid user'
+        );
+
+        $uid = $ret['uid'];
+        // Make a testvideo
+
+        $title = "Test video";
+        $description = "This is a test video";
+        $topic = "Testvideos";
+        $course_code = "IMT2263";
+
+        $ret = uploadVideoTestdata($title, $description, $uid, $topic, $course_code);
+        
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'Uploading video not ok: ' . $ret['errorMessage']
+        );
+
+        $vid = $ret['vid'];
+
+        $ret = $this->videoManager->get($vid);
+
+        //Check that getting video is ok and title is correct.
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'Getting video not ok: ' . $ret['errorMessage']
+        );
+
+        $this->assertEquals(
+            $title,
+            $ret['video']->title,
+            'Getting title not the same as the title sent in under upload: ' . $ret['errorMessage']
+        );
+
+        $newTitle = "Testvideo updated";
+
+        $ret = $this->videoManager->update($vid, $uid,$newTitle, $description, $topic, $course_code);
+
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'Updating video not ok: ' . $ret['errorMessage']
+        );
+
+        $ret = $this->videoManager->get($vid);
+
+        //Check that getting video is ok and title is correct.
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'Getting video not ok after updating: ' . $ret['errorMessage']
+        );
+
+        $this->assertEquals(
+            $newTitle,
+            $ret['video']->title,
+            'Getting title not the same as the title sent in under update: ' . $ret['errorMessage']
+        );
     }
 }
