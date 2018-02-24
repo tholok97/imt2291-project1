@@ -14,5 +14,25 @@
         <li><a href="./logout">Logout</a></li>
     </ul>
     <h1>Index page!</h1>
+    <!--
+    Student stuff:
+    * subscriptions
+    -->
+    <h2>Student stuff</h2>
+    <!--
+    Lecturer stuff:
+    * own playlists
+    * own videos
+    -->
+    {% if privilege_level > 0 %}
+    <h2>Lecturer stuff</h2>
+    {% endif %}
+    <!--
+    Admin stuff
+    * privilege requests?
+    -->
+    {% if privilege_level > 1 %}
+    <h2>Admin stuff</h2>
+    {% endif %}
 </body>
 </html>
