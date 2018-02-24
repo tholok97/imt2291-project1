@@ -7,6 +7,7 @@ require_once dirname(__FILE__) . '/src/classes/UserManager.php';
 require_once dirname(__FILE__) . '/src/functions/functions.php';
 require_once dirname(__FILE__) . '/src/classes/VideoManager.php';
 require_once dirname(__FILE__) . '/src/classes/SessionManager.php';
+require_once dirname(__FILE__) . '/src/classes/PlaylistManager.php';
 /*
  * Entry-point to the entire site. Users are shown the sites they want using 
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
@@ -45,6 +46,10 @@ $msg = $sessionManager->get("message");
 if ($msg != null) {
     $twig_arguments["message"] = $msg;
 }
+
+
+// prepare playlistManager
+$playlistManager = new PlaylistManager(DB::getDBConnection());
 
 
 
@@ -104,9 +109,22 @@ if ($page == 'register') {
 
 } else {
 
-    // Switch on page (DEBUG: just indicate that it's working)
+    // Switch on page
     
     switch ($page) {
+    case 'editPlaylist':
+        if ($_SESSION['privilege_level'] < 1) {
+            $sessionManager->put('message', "You aren't allowed to do that!");
+
+            // reload page (surpass twig system)
+            header("Location: ./");
+            exit();
+        }
+
+        $twig_file_to_render = 'editPlaylist.twig';
+        $twig_arguments['playlist'] = $playlistManager->getPlaylist(2);
+
+        break;
     case 'createPlaylist':
         if ($_SESSION['privilege_level'] > 0) {
             $twig_file_to_render = 'createPlaylist.twig';

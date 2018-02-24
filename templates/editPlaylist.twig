@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    {% if message != "" %}
+    <p style="border:1px solid black">{{message}}</p>
+    {% endif %}
+    <ul>
+        <li><a href="./admin">Admin page</a></li>
+        <li><a href="./videos">Videos page</a></li>
+        <li><a href="./">Index page</a></li>
+        <li><a href="./upload">Upload page</a></li>
+        <li><a href="./search">Search page</a></li>
+        <li><a href="./logout">Logout</a></li>
+    </ul>
+    <h1>Edit playlist page</h1>
+
+    <h2>Edit metainfo</h2>
+    <!--currently can't alter thumbnail..-->
+    <form action="./src/updatePlaylist.php" method="post">
+        <label for="title">title: </label><input name="title" type="text" value="{{playlist.title}}"/><br/>
+        <label for="description">description: </label><input name="description" type="text" value="{{playlist.description}}"/><br/>
+        <input type="submit" name='submit'/>
+    </form>
+
+    <h2>Edit videos</h2>
+
+    <h3>Add video</h3>
+
+    <h3>Remove video</h3>
+
+    <h2>Edit maintainers</h2>
+</body>
+</html>
