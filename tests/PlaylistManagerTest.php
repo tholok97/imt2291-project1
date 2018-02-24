@@ -893,4 +893,54 @@ WHERE vid=$testvid2 AND pid=$testpid
         );
     }
 
+    /**
+     * @depends testAddPlaylist
+     */
+    public function testSearchPlaylist() {
+
+        
+        // playlists to test with
+        
+        $testplaylists[0]['title'] = "the title";
+        $testplaylists[0]['description'] = "the description";
+
+        $testplaylists[1]['title'] = "apple";
+        $testplaylists[1]['description'] = "orange";
+
+        $testplaylists[2]['title'] = "the tit";
+        $testplaylists[2]['description'] = "the des";
+
+        // insert them
+        for ($i = 0; $i < count($testplaylists); ++$i) {
+            $res = $this->playlistManager->addPlaylist(
+                $testplaylists[$i]['title'], 
+                $testplaylists[$i]['description'], 
+                $this->thumbnail
+            );
+            $testplaylists[$i]['pid'] = $res['pid'];
+        }
+
+
+        // assert that valid search is okay
+        $res = $this->playlistManager->searchPlaylists('string', ['title']);
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Searching for valid thing should be okay"
+        );
+
+        // assert that invalid search field is fail
+        $res = $this->playlistManager->searchPlaylists('string', ['notarealfield']);
+        $this->assertEquals(
+            'fail',
+            $res['status'],
+            "Searching in invalid field should fail"
+        );
+
+        
+
+
+
+    }
+
 }

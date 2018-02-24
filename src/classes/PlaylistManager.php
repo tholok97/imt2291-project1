@@ -806,6 +806,25 @@ ORDER BY position
         return $ret;
     }
 
+    /**
+     * Returns list of search results given search string and stuff to search for
+     * @param $searchfor string to search for
+     * @param $searchwhere array of columns to search in (out of: description, title)
+     * @return assoc array with fields: status, message, playlists (array of playlist objects)
+     */
+    public function searchPlaylists() {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['playlists'] = array();
+
+        // TODO
+
+        return $ret;
+        
+    }
+
 }
 
 /*
