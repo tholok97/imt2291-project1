@@ -5,7 +5,9 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     </head>
     <body style='text-align: center;'>
+    {% include 'navbar.twig' %}
         <div class='container'>
+            <h1>Avansert søk</h1>
             <form action="src/searchFormHandler.php" method="post">
                 <label for="searchText">Søk:</label> <input type="text" name="searchText" id="searchText">
                 <input type="submit" name="submit" id="submit" value="Søk"><br><br>
