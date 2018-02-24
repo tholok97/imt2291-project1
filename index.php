@@ -97,7 +97,12 @@ if ($page == 'register') {
     
     switch ($page) {
     case 'createPlaylist':
-        $twig_file_to_render = 'createPlaylist.twig';
+        if ($_SESSION['privilege_level'] > 0) {
+            $twig_file_to_render = 'createPlaylist.twig';
+        } else {
+            $sessionManager->put('message', "You aren't allowed to do that!");
+            $twig_file_to_render = 'index.twig';
+        }
         break;
     case 'upload':
         $twig_file_to_render = 'upload.twig';
