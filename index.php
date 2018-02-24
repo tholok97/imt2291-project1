@@ -95,6 +95,9 @@ if ($page == 'register') {
     // Switch on page (DEBUG: just indicate that it's working)
     
     switch ($page) {
+    case 'createPlaylist':
+        $twig_file_to_render = 'createPlaylist.twig';
+        break;
     case 'upload':
         $twig_file_to_render = 'upload.twig';
         break;
