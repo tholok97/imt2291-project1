@@ -120,9 +120,11 @@ if ($page == 'register') {
             header("Location: ./");
             exit();
         }
+        
+        $ret = $playlistManager->getPlaylist(2);
 
         $twig_file_to_render = 'editPlaylist.twig';
-        $twig_arguments['playlist'] = $playlistManager->getPlaylist(2);
+        $twig_arguments['playlist'] = $ret['playlist'];
 
         break;
     case 'createPlaylist':

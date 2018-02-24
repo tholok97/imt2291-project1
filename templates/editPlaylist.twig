@@ -21,6 +21,7 @@
     <h2>Edit metainfo</h2>
     <!--currently can't alter thumbnail..-->
     <form action="./src/updatePlaylist.php" method="post">
+        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
         <label for="title">title: </label><input name="title" type="text" value="{{playlist.title}}"/><br/>
         <label for="description">description: </label><input name="description" type="text" value="{{playlist.description}}"/><br/>
         <input type="submit" name='submit'/>
@@ -28,10 +29,34 @@
 
     <h2>Edit videos</h2>
 
-    <h3>Add video</h3>
-
     <h3>Remove video</h3>
+    {% for video in playlist.videos%}
+    <form action="./src/removeVideoFromPlaylistHandler.php" method="post">
+        <input type="hidden" name="vid" value="{{video.vid}}"/>
+        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
+        <label for="submit">{{video.title}} - </label><input type="submit" name="submit" value="remove"/>
+    </form>
+    <br>
+    {% endfor %}
 
     <h2>Edit maintainers</h2>
+
+    <h3>Add maintainer</h3>
+    <form action="./src/addMaintainerHandler.php" method="post">
+        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
+        <label for="username: "></label><input type="text" name="username"/>
+        <input type="submit" name="submit" value="add"/>
+    </form>
+
+
+    <h3>Remove maintainer</h3>
+    {% for maintainer in playlist.maintainers %}
+    <form action="./src/removeMaintainerHandler.php" method="post">
+        <input type="hidden" name="uid" value="{{maintainer.uid}}"/>
+        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
+        <label for="submit">{{maintainer.username}} - </label><input type="submit" name="submit" value="remove"/>
+    </form>
+    {% endfor %}
+
 </body>
 </html>
