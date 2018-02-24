@@ -21,6 +21,7 @@ class Video {
     public $view_count;
     public $mime;
     public $size;
+    public $position;
 
     /**
      * Just constructs a Video object

@@ -29,12 +29,20 @@
 
     <h2>Edit videos</h2>
 
+    <h3>Reorder videos</h3>
+    <form action="./src/swapVideosHandler.php" method="post">
+        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
+        <label for="position1">Position of first video to swap: </label><input name="position1" type="text"/><br/>
+        <label for="position2">Position of second video to swap: </label><input name="position2" type="text"/><br/>
+        <input type="submit" name="submit" value="reorder"/>
+    </form>
+
     <h3>Remove video</h3>
     {% for video in playlist.videos%}
     <form action="./src/removeVideoFromPlaylistHandler.php" method="post">
         <input type="hidden" name="vid" value="{{video.vid}}"/>
         <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-        <label for="submit">{{video.title}} - </label><input type="submit" name="submit" value="remove"/>
+        <label for="submit">{{video.position}} - {{video.title}} - </label><input type="submit" name="submit" value="remove"/>
     </form>
     <br>
     {% endfor %}

@@ -754,7 +754,7 @@ WHERE pid=:pid
         try {
             
             $stmt = $this->dbh->prepare('
-SELECT vid
+SELECT vid, position
 FROM in_playlist
 WHERE pid=:pid
 ORDER BY position
@@ -766,7 +766,7 @@ ORDER BY position
 
                 // add all (if any) found vids to vids
                 foreach($stmt->fetchAll() as $row) {
-                    array_push($vids, $row['vid']);
+                    array_push($vids, $row);
                 }
 
             } else {
@@ -788,13 +788,15 @@ ORDER BY position
         // FOR EACH VID -> APPEND CORRESPONDING VIDEO OBJECT TO RET
         foreach ($vids as $vid) {
 
-            $ret_getvideo = $videoManager->get($vid, false);
+            $ret_getvideo = $videoManager->get($vid['vid'], false);
 
             if ($ret_getvideo['status'] == 'fail') {
                 $ret['message'] = "Couldn't get video object : " . $ret_getvideo['message'];
                 return $ret;
             } else {
-                array_push($ret['videos'], $ret_getvideo['video']);
+                $video = $ret_getvideo['video'];
+                $video->position = $vid['position'];
+                array_push($ret['videos'], $video);
             }
         }
 
