@@ -112,13 +112,33 @@ if ($page == 'register') {
             $twig_file_to_render = 'createPlaylist.twig';
         } else {
             $sessionManager->put('message', "You aren't allowed to do that!");
-            $twig_file_to_render = 'index.twig';
+
+            // reload page (surpass twig system)
+            header("Location: ./");
+            exit();
         }
         break;
     case 'upload':
-        $twig_file_to_render = 'upload.twig';
+        if ($_SESSION['privilege_level'] > 0) {
+            $twig_file_to_render = 'upload.twig';
+        } else {
+            $sessionManager->put('message', "You aren't allowed to do that!");
+
+            // reload page (surpass twig system)
+            header("Location: ./");
+            exit();
+        }
         break;
     case 'admin':
+
+        if ($_SESSION['privilege_level'] < 2) {
+            $sessionManager->put('message', "You aren't allowed to do that!");
+
+            // reload page (surpass twig system)
+            header("Location: ./");
+            exit();
+        }
+
         $twig_file_to_render = 'admin.twig';
 
         // get info
