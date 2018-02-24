@@ -809,17 +809,57 @@ ORDER BY position
     /**
      * Returns list of search results given search string and stuff to search for
      * @param $searchfor string to search for
-     * @param $searchwhere array of columns to search in (out of: description, title)
+     * @param $searchwhere either description or title
      * @return assoc array with fields: status, message, playlists (array of playlist objects)
      */
-    public function searchPlaylists() {
+    public function searchPlaylists($searchfor, $searchwhere) {
 
         // prepare ret
         $ret['status'] = 'fail';
         $ret['message'] = "";
         $ret['playlists'] = array();
 
-        // TODO
+        // Can't use PDO prepared statements for field, so have to do 
+        // anti-hack test manually
+        if ($searchwhere != 'title' && $searchwhere != 'description') {
+            $ret['messsage'] = 'Invalid field specified';
+            return $ret;
+        }
+
+        // try and search
+        try {
+
+            $stmt = $this->dbh->prepare("
+SELECT *
+FROM playlist
+WHERE $searchwhere LIKE :search
+            ");
+
+            $stmt->bindValue(':search', '%' . $searchfor . '%');
+
+            if ($stmt->execute()) {
+                foreach ($stmt->fetchAll() as $row) {
+
+                    // build statement objects
+                    $ret_getplaylist = $this->getPlaylist($row['pid']);
+
+                    if ($ret_getplaylist['status'] == 'fail') {
+                        $ret['message'] = "Couldn't bould playlist from pid in search : " . $ret_getplaylist['message'];
+                        return $ret;
+                    }
+
+                    array_push($ret['playlists'], $ret_getplaylist['playlist']);
+
+                }
+                $ret['status'] = 'ok';
+            } else {
+                $ret['message'] = "Statement didn't execute right";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
 
         return $ret;
         

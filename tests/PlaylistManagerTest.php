@@ -922,7 +922,7 @@ WHERE vid=$testvid2 AND pid=$testpid
 
 
         // assert that valid search is okay
-        $res = $this->playlistManager->searchPlaylists('string', ['title']);
+        $res = $this->playlistManager->searchPlaylists('string', 'title');
         $this->assertEquals(
             'ok',
             $res['status'],
@@ -930,7 +930,7 @@ WHERE vid=$testvid2 AND pid=$testpid
         );
 
         // assert that invalid search field is fail
-        $res = $this->playlistManager->searchPlaylists('string', ['notarealfield']);
+        $res = $this->playlistManager->searchPlaylists('string', 'notarealfield');
         $this->assertEquals(
             'fail',
             $res['status'],
@@ -938,6 +938,23 @@ WHERE vid=$testvid2 AND pid=$testpid
         );
 
         
+        // assert correct amount of stuff returned from search in title
+        $res = $this->playlistManager->searchPlaylists('the', 'title');
+        $this->assertEquals(
+            2,
+            count($res['playlists']),
+            "Number of playlists in searchresults should be 2 "
+        );
+
+        // assert correct amount of stuff returned from search in description
+        $res = $this->playlistManager->searchPlaylists('des', 'description');
+        $this->assertEquals(
+            2,
+            count($res['playlists']),
+            "Number of playlists in searchresults should be 2 "
+        );
+
+
 
 
 
