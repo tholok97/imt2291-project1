@@ -786,4 +786,111 @@ VALUES ('','','',$testuid,'$testtopic','','',0,'','')
 
     }
 
+    /*
+     * @depends testAddVideoToPlaylist
+     */
+    public function testSwapPositionsInPlaylist() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+
+        $testusername = "tommyboi";
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('$testusername','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+
+        $testtopic = "horses";
+
+        // add testvideo 1
+        $this->dbh->query("
+INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size)
+VALUES ('','','',$testuid,'$testtopic','','',0,'','')
+        ");
+        $testvid1 = $this->dbh->lastInsertId();
+
+        // add testvideo 2
+        $this->dbh->query("
+INSERT INTO video (title, description, thumbnail, uid, topic, course_code, timestamp, view_count, mime, size)
+VALUES ('','','',$testuid,'$testtopic','','',0,'','')
+        ");
+        $testvid2 = $this->dbh->lastInsertId();
+
+        // add videos to playlist
+        $this->playlistManager->addVideoToPlaylist($testvid1, $testpid);
+        $this->playlistManager->addVideoToPlaylist($testvid2, $testpid);
+
+
+
+
+
+
+        // assert that swapping invalid videos fails
+        $ret = $this->playlistManager->swapPositionsInPlaylist(-1, -1, $testpid);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Swapping two invalid videos should fail"
+        );
+
+        // assert that swapping in invalid playlist fails
+        $ret = $this->playlistManager->swapPositionsInPlaylist(
+            $testvid1, 
+            $testvid2, 
+            -1
+        );
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Swapping in invalid playlist should fail"
+        );
+
+
+        // assert that swapping valid stuff is ok
+        $ret = $this->playlistManager->swapPositionsInPlaylist(
+            1,
+            2,
+            $testpid
+        );
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Swapping valid stuff should be ok : " . $ret['message']
+        );
+
+
+        // assert that swapping happened successfully
+        $stmt = $this->dbh->query("
+SELECT position 
+FROM in_playlist
+WHERE vid=$testvid1 AND pid=$testpid
+        ");
+
+        $this->assertEquals(
+            2,
+            $stmt->fetchAll()[0]['position'],
+            "Position of vid1 after swap should be 2"
+        );
+
+        $stmt = $this->dbh->query("
+SELECT position 
+FROM in_playlist
+WHERE vid=$testvid2 AND pid=$testpid
+        ");
+
+        $this->assertEquals(
+            1,
+            $stmt->fetchAll()[0]['position'],
+            "Position of vid2 after swap should be 1"
+        );
+    }
+
 }
