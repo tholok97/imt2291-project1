@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <ul>
+        <li><a href="./admin">Admin page</a></li>
+        <li><a href="./videos">Videos page</a></li>
+        <li><a href="./">Index page</a></li>
+        <li><a href="./upload">Upload page</a></li>
+        <li><a href="./search">Search page</a></li>
+        <li><a href="./logout">Logout</a></li>
+    </ul>
+    <h1>Create playlist page</h1>
+    <form action="./src/createPlaylistHandler.php" method="post" enctype="multipart/form-data">
+        <label for="title">title: </label><input name="title" type="text"/><br/>
+        <label for="description">description: </label><input name="description" type="text"/><br/>
+        <label for="thumbnail">thumbnail: </label><input type="file" name="thumbnail"><br />
+        <input type="submit" name='submit'/>
+    </form>
+</body>
+</html>

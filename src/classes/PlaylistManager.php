@@ -520,7 +520,150 @@ WHERE pid=:pid
         $ret['status'] = 'fail';
         $ret['message'] = "";
 
-        // TODO
+        $entryPos1Vid = -1;
+        $entryPos2Vid = -1;
+
+        // get video with pos1
+        try {
+
+            $stmt = $this->dbh->prepare('
+SELECT vid
+FROM in_playlist
+WHERE pid=:pid AND position=:position
+            ');
+
+            $stmt->bindParam(':pid', $pid);
+            $stmt->bindParam(':position', $pos1);
+
+            if ($stmt->execute()) {
+                $rows = $stmt->fetchAll();
+                if (count($rows) > 0) {
+                    $entryPos1Vid = $rows[0]['vid'];
+                } else {
+                    $ret['message'] = "No entries for pos1!!";
+                    return $ret;
+                }
+            } else {
+                $ret['message'] = "Statement for pos1 didn't execute right";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+
+
+
+        // get video with pos2
+        try {
+
+            $stmt = $this->dbh->prepare('
+SELECT vid
+FROM in_playlist
+WHERE pid=:pid AND position=:position
+            ');
+
+            $stmt->bindParam(':pid', $pid);
+            $stmt->bindParam(':position', $pos2);
+
+            if ($stmt->execute()) {
+                $rows = $stmt->fetchAll();
+                if (count($rows) > 0) {
+                    $entryPos2Vid = $rows[0]['vid'];
+                } else {
+                    $ret['message'] = "No entries for pos1!!";
+                    return $ret;
+                }
+            } else {
+                $ret['message'] = "Statement for pos2 didn't execute right";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+
+
+
+
+        // update the db entry for pos 1
+        try {
+
+            $stmt = $this->dbh->prepare('
+UPDATE in_playlist
+SET position=:position
+WHERE vid=:vid AND pid=:pid
+            ');
+
+            $stmt->bindParam(':position', $pos2);
+            $stmt->bindParam(':vid', $entryPos1Vid);
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                if ($stmt->rowCount() > 0) {
+
+                    // NO OP. FLOW CONTINUES UNDER CATCH
+                } else {
+                    $ret['message'] = "Didn't update any entries..";
+                    return $ret;
+                }
+
+            } else {
+                $ret['message'] = "Statement to update pos1 didn't execute right";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+        // update the db entry for pos 2
+        try {
+
+            $stmt = $this->dbh->prepare('
+UPDATE in_playlist
+SET position=:position
+WHERE vid=:vid AND pid=:pid
+            ');
+
+            $stmt->bindParam(':position', $pos1);
+            $stmt->bindParam(':vid', $entryPos2Vid);
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                if ($stmt->rowCount() > 0) {
+
+                    // NO OP. FLOW CONTINUES UNDER CATCH
+                } else {
+                    $ret['message'] = "Didn't update any entries..";
+                    return $ret;
+                }
+
+            } else {
+                $ret['message'] = "Statement to update pos2 didn't execute right";
+                return $ret;
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+            return $ret;
+        }
+
+
+
+
+
+
+
+        // if got this far -> ok
+        $ret['status'] = 'ok';
 
 
         return $ret;
@@ -611,7 +754,7 @@ WHERE pid=:pid
         try {
             
             $stmt = $this->dbh->prepare('
-SELECT vid
+SELECT vid, position
 FROM in_playlist
 WHERE pid=:pid
 ORDER BY position
@@ -623,7 +766,7 @@ ORDER BY position
 
                 // add all (if any) found vids to vids
                 foreach($stmt->fetchAll() as $row) {
-                    array_push($vids, $row['vid']);
+                    array_push($vids, $row);
                 }
 
             } else {
@@ -645,13 +788,15 @@ ORDER BY position
         // FOR EACH VID -> APPEND CORRESPONDING VIDEO OBJECT TO RET
         foreach ($vids as $vid) {
 
-            $ret_getvideo = $videoManager->get($vid, false);
+            $ret_getvideo = $videoManager->get($vid['vid'], false);
 
             if ($ret_getvideo['status'] == 'fail') {
                 $ret['message'] = "Couldn't get video object : " . $ret_getvideo['message'];
                 return $ret;
             } else {
-                array_push($ret['videos'], $ret_getvideo['video']);
+                $video = $ret_getvideo['video'];
+                $video->position = $vid['position'];
+                array_push($ret['videos'], $video);
             }
         }
 
@@ -660,6 +805,7 @@ ORDER BY position
 
         return $ret;
     }
+
 }
 
 /*

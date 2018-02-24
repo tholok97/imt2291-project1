@@ -20,9 +20,10 @@ function uploadVideoTestdata($title, $description, $uid, $topic, $course_code) {
         return $ret;
     }
 
+    $thumbnailRef['tmp_name'] = dirname(__FILE__) . '/../temp/temp.png';
     $title = htmlspecialchars($title);
     $description = htmlspecialchars($description);
-    $thumbnail = getThumbnail("...");               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
+    $thumbnail = getThumbnail($thumbnailRef);               // Muligens vi må endre til $_FILES på noen av de under, i tilfelle vil $videoRef bli helt fjernet.
     $uid = htmlspecialchars($uid);
     $topic = htmlspecialchars($topic);
     $course_code = htmlspecialchars($course_code);

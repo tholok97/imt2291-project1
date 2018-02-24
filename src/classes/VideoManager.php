@@ -226,7 +226,7 @@ class VideoManager {
         } catch (PDOException $ex) {
             $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
         }
-
+        return $ret;
     }
 
     /**

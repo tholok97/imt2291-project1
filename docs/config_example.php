@@ -3,7 +3,6 @@
 /**
  * Environment-dependant constants.
  */
-
 class Config {
 
 
