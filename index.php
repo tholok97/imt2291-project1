@@ -7,7 +7,6 @@ require_once dirname(__FILE__) . '/src/classes/UserManager.php';
 require_once dirname(__FILE__) . '/src/functions/functions.php';
 require_once dirname(__FILE__) . '/src/classes/VideoManager.php';
 require_once dirname(__FILE__) . '/src/classes/SessionManager.php';
-
 /*
  * Entry-point to the entire site. Users are shown the sites they want using 
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
@@ -17,6 +16,8 @@ require_once dirname(__FILE__) . '/src/classes/SessionManager.php';
 
 // loader used to fetch files for twig
 $loader = new Twig_Loader_Filesystem(__DIR__. '/templates');
+
+
 
 // setup twig
 $twig = new Twig_Environment($loader, array());
@@ -34,6 +35,17 @@ $twig_file_to_render = null;
  */
 $twig_arguments = array();
 
+/**
+ * Used to retrieve stuff stored in session
+ */
+$sessionManager = new SessionManager();
+
+// try and retrieve message
+$msg = $sessionManager->get("message");
+if ($msg != null) {
+    $twig_arguments["message"] = $msg;
+}
+
 
 
 /**
@@ -50,7 +62,6 @@ $videoManager = new VideoManager(DB::getDBConnection());
  * Used to use video-content
  */
 $sessionManager = new SessionManager();
-
 
 
 
@@ -116,13 +127,11 @@ if ($page == 'register') {
         // if went fine -> show wants
         // if didn't go fine -> show error
         if ($ret_wants['status'] == 'ok') {
-            $twig_arguments = array(
-                'wantsPrivilege' => $ret_wants['wantsPrivilege'],
-                'wantsMessage' => $ret_wants['message']
-            );
+            $twig_arguments['wantsPrivilege'] = $ret_wants['wantsPrivilege'];
+            $twig_arguments['wantsMessage'] = $ret_wants['message'];
         } else {
-            $twig_arguments = array('wantsMessage' => "Error getting privilege requests: " . 
-                $ret_wants['message']);
+            $twig_arguments['wantsMessage'] = "Error getting privilege requests: " . 
+                $ret_wants['message'];
         }
 
         break;
@@ -147,7 +156,7 @@ if ($page == 'register') {
             }
             else {
                 $twig_file_to_render = 'debug.twig';
-                $twig_arguments = array('message' => 'Error: ' . $video['errorMessage']);
+                $twig_arguments['message'] = 'Error: ' . $video['errorMessage'];
             }
         }
         else {
@@ -189,6 +198,14 @@ if ($page == 'register') {
         unset($_SESSION['uid']);
         unset($_SESSION['privilege_level']);
         $twig_file_to_render = 'login.twig';
+
+        // put msg
+        $sessionManager->put("message", "Logged out");
+
+        // reload page (surpass twig system)
+        header("Location: ./");
+        exit();
+
         break;
     default:
         $twig_file_to_render = 'notfound.twig';
@@ -197,3 +214,6 @@ if ($page == 'register') {
 
 // Render page
 echo $twig->render($twig_file_to_render, $twig_arguments);
+
+// clean the session manager
+$sessionManager->clean();
