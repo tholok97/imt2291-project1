@@ -41,6 +41,7 @@ $twig_arguments = array();
  */
 $sessionManager = new SessionManager();
 
+
 // try and retrieve message
 $msg = $sessionManager->get("message");
 if ($msg != null) {

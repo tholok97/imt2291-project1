@@ -20,7 +20,7 @@
 
     <h2>Edit metainfo</h2>
     <!--currently can't alter thumbnail..-->
-    <form action="./src/updatePlaylist.php" method="post">
+    <form action="./src/updatePlaylistHandler.php" method="post">
         <input type="hidden" name="pid" value="{{playlist.pid}}"/>
         <label for="title">title: </label><input name="title" type="text" value="{{playlist.title}}"/><br/>
         <label for="description">description: </label><input name="description" type="text" value="{{playlist.description}}"/><br/>
