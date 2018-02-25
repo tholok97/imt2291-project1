@@ -14,16 +14,21 @@
         <li><a href="./logout">Logout</a></li>
     </ul>
     <h1>Playlist page</h1>
-    <h2>{{playlist.name}}</h2> 
+    <h2>Title: {{playlist.title}}</h2> 
 
     <h3>Maintainers: </h3>
-    <h3></h3>
-    <h3></h3>
+    <ul>
+        {% for maintainer in playlist.maintainers %}
+        <li>{{maintainer.firstname}}</li>
+        {% endfor %}
+    </ul>
 
-    {% for video in playlist %}
 
-    <p>{{video.title}}</p>
-
-    {% endfor  %}
+    <h3>Videos:</h3>
+    <ul>
+        {% for video in playlist.videos %}
+        <li>{{video.title}}</li>
+        {% endfor  %}
+    </ul>
 </body>
 </html>

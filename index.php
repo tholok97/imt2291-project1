@@ -282,5 +282,4 @@ if ($page == 'register') {
 // Render page
 echo $twig->render($twig_file_to_render, $twig_arguments);
 
-// clean the session manager
-$sessionManager->clean();
+$sessionManager->remove('message');

@@ -53,6 +53,15 @@ class SessionManager {
     }
 
     /**
+     * Unset something
+     * @param $name
+     * @return void
+     */
+    public function remove($name) {
+        unset($_SESSION[$this->sessionVariableName][$name]);
+    }
+
+    /**
      * Print contents of session manager storage
      * FOR DEBUG
      * @return void
