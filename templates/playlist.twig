@@ -15,6 +15,7 @@
             <h1>Playlist page</h1>
             <h2>Title: {{playlist.title}}</h2> 
 
+            <!-- subscribe button -->
             {% if subscribed == 'false' %}
             <form action="./src/subscribeToHandler.php" method="post">
                 <input type="hidden" name="uid" value="{{user.uid}}">
@@ -27,6 +28,18 @@
             <i>Du abonnerer på denne spillelisten</i>
 
             {% endif %}
+
+
+            <!-- edit button -->
+            {% if isMaintainer %}
+            <form action="./src/editPlaylistHandler.php" method="post">
+                <input type="hidden" name="pid" value="{{playlist.pid}}">
+                <input type="submit" name="submit" value="Administrer denne spillelisten">
+            </form>
+            {% endif %}
+
+
+
 
             <h3>Maintainers: </h3>
             <ul>

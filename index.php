@@ -171,6 +171,20 @@ if ($page == 'register') {
             $twig_arguments['subscribed'] = $ret_subscribed['subscribed'];
 
 
+
+            // figure out if user is maintainer
+            $isMaintainer = false;
+
+            foreach ($playlist->maintainers as $maintainer) {
+                if ($maintainer->uid == $_SESSION['uid']) {
+                    $isMaintainer = true;
+                }
+            }
+
+            $twig_arguments['isMaintainer'] = $isMaintainer;
+
+
+
             // show playlist
             $twig_arguments['playlist'] = $playlist;
             $twig_file_to_render = 'playlist.twig';
@@ -194,8 +208,19 @@ if ($page == 'register') {
             header("Location: ./");
             exit();
         }
+
+        $pid = $sessionManager->get('playlistToEdit');
+
+
+        if ($pid == null) {
+
+            $sessionManager->put('message', "Kunne ikke laste admin side for spilleliste");
+            header("Location: ./");
+            exit();
+        }
+
         
-        $ret = $playlistManager->getPlaylist(2);
+        $ret = $playlistManager->getPlaylist($pid);
 
         $twig_file_to_render = 'editPlaylist.twig';
         $twig_arguments['playlist'] = $ret['playlist'];
