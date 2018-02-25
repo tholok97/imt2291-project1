@@ -15,7 +15,8 @@ $ret = $userManager->grantPrivilege($_POST['uid'], $_POST['privilege_level']);
 
 // if didn't work -> early return
 if ($ret['status'] == 'fail') {
-    $sessionManager->put("message", "Couldn't grant request. Error: " . $ret['message']);
+    $sessionManager->put("message", "Kunne ikke godta forespørsel. Error: " . $ret['message']);
+    $sessionManager->put('messageStatus', "danger");
     echo "Didn't grant properly : " . $ret['message'];
     exit();
 }
@@ -25,7 +26,8 @@ if ($ret['status'] == 'fail') {
 $ret = $userManager->deletePrivilegeRequest($_POST['uid'], $_POST['privilege_level']);
 // if didn't work -> early return
 if ($ret['status'] == 'fail') {
-    $sessionManager->put("message", "Couldn't grant request. Error: " . $ret['message']);
+    $sessionManager->put("message", "Kunne ikke godta forespørsel: " . $ret['message']);
+    $sessionManager->put('messageStatus', "danger");
     echo "Didn't delete request properly : " . $ret['message'];
     exit();
 }
@@ -34,6 +36,7 @@ if ($ret['status'] == 'fail') {
 
 // if everything fine -> admin page
 $sessionManager->put("message", "Successfully granted privilege");
+$sessionManager->put('messageStatus', "danger");
 header('Location: ../admin');
 exit();
 

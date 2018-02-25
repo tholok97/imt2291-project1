@@ -44,9 +44,12 @@ $sessionManager = new SessionManager();
 
 // try and retrieve message
 $msg = $sessionManager->get("message");
-if ($msg != null) {
+$msgStatus = $sessionManager->get("messageStatus"); //If not null it should be either 'success', 'warning' or any other of bootstraps alerts (see https://www.w3schools.com/bootstrap4/bootstrap_alerts.asp)
+if ($msg != null && $msgStatus != null) {
     $twig_arguments["message"] = $msg;
+    $twig_arguments["messageStatus"] = $msgStatus;
 }
+
 
 
 // prepare playlistManager
@@ -64,11 +67,6 @@ $userManager = new UserManager(DB::getDBConnection());
  */
 $videoManager = new VideoManager(DB::getDBConnection());
 
-/**
- * Used to use video-content
- */
-$sessionManager = new SessionManager();
-
 
 
 // page stores parameter passed by GET. Contains an indication of what 
@@ -83,6 +81,9 @@ $param2 = htmlspecialchars(@$_GET['param2']);
 
 //echo "Page: " . $page . ", Param1: " . $param1 . ", Param2: " . $param2;
 
+
+
+$ret_user = @$userManager->getUser($_SESSION['uid']);
 
 
 // The ye old huge if-else of stuff..
@@ -104,25 +105,119 @@ if ($page == 'register') {
 
 } else if (!isset($_GET['page'])) {
 
+    $twig_arguments['user'] = $ret_user['user'];
+
     // If page is unset show index page, if it is set load correct page based on it
     $twig_file_to_render = 'index.twig';
     $twig_arguments['privilege_level'] = $_SESSION['privilege_level'];
 
+} else if ($ret_user['status'] != 'ok') {
+
+        $twig_file_to_render = 'internalerror.twig';
+        $twig_arguments['message'] = "Kunne ikke laste bruker : " . $ret_user['message'];
+
 } else {
+
+
+    $twig_arguments['user'] = $ret_user['user'];
+
 
     // Switch on page
     
     switch ($page) {
+    case 'playlists':
+
+        // search for everything (gets all playlists)
+        $ret_playlists = $playlistManager->searchPlaylists('', 'title');
+
+        // if not okay -> show message and return to index
+        if ($ret_playlists['status'] != 'ok') {
+
+            $sessionManager->put('message', "Kunne ikke laste alle videoer.. " . $ret_playlists['message']);
+            header("Location: ./");
+            exit();
+
+        }
+
+
+        $twig_arguments['playlist_result'] = $ret_playlists['playlists'];
+        $twig_file_to_render = 'showAllPlaylists.twig';
+
+        break;
+    case 'playlist':
+
+
+        $playlist = $sessionManager->get('playlistToShow', true);
+
+
+        if ($playlist != null) {
+
+
+            // figure out if user is subscribed
+            $ret_subscribed = $playlistManager->isSubscribed($_SESSION['uid'], $playlist->pid);
+
+            if ($ret_subscribed['status'] != 'ok') {
+
+                // fail
+                $sessionManager->put('message', "Kunne ikke laste abonent-info : " . $ret_subscribed['message']);
+                header("Location: ./");
+                exit();
+
+            }
+
+            $twig_arguments['subscribed'] = $ret_subscribed['subscribed'];
+
+
+
+            // figure out if user is maintainer
+            $isMaintainer = false;
+
+            foreach ($playlist->maintainers as $maintainer) {
+                if ($maintainer->uid == $_SESSION['uid']) {
+                    $isMaintainer = true;
+                }
+            }
+
+            $twig_arguments['isMaintainer'] = $isMaintainer;
+
+
+
+            // show playlist
+            $twig_arguments['playlist'] = $playlist;
+            $twig_file_to_render = 'playlist.twig';
+        } else {
+
+            $sessionManager->put('message', "Couldn't show playlist");
+            header("Location: ./");
+            exit();
+
+        }
+
+
+
+        break;
     case 'editPlaylist':
         if ($_SESSION['privilege_level'] < 1) {
-            $sessionManager->put('message', "You aren't allowed to do that!");
+            $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
+            $sessionManager->put('messageStatus', "warning");
 
             // reload page (surpass twig system)
             header("Location: ./");
             exit();
         }
+
+        $pid = $sessionManager->get('playlistToEdit');
+
+
+        if ($pid == null) {
+
+            $sessionManager->put('message', "Kunne ikke laste admin side for spilleliste");
+            header("Location: ./");
+            exit();
+        }
+
         
-        $ret = $playlistManager->getPlaylist(2);
+        $ret = $playlistManager->getPlaylist($pid);
 
         $twig_file_to_render = 'editPlaylist.twig';
         $twig_arguments['playlist'] = $ret['playlist'];
@@ -132,7 +227,8 @@ if ($page == 'register') {
         if ($_SESSION['privilege_level'] > 0) {
             $twig_file_to_render = 'createPlaylist.twig';
         } else {
-            $sessionManager->put('message', "You aren't allowed to do that!");
+            $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
+            $sessionManager->put('messageStatus', "warning");
 
             // reload page (surpass twig system)
             header("Location: ./");
@@ -143,7 +239,8 @@ if ($page == 'register') {
         if ($_SESSION['privilege_level'] > 0) {
             $twig_file_to_render = 'upload.twig';
         } else {
-            $sessionManager->put('message', "You aren't allowed to do that!");
+            $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
+            $sessionManager->put('messageStatus', "warning");
 
             // reload page (surpass twig system)
             header("Location: ./");
@@ -153,7 +250,8 @@ if ($page == 'register') {
     case 'admin':
 
         if ($_SESSION['privilege_level'] < 2) {
-            $sessionManager->put('message', "You aren't allowed to do that!");
+            $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
+            $sessionManager->put('messageStatus', "warning");
 
             // reload page (surpass twig system)
             header("Location: ./");
@@ -178,7 +276,29 @@ if ($page == 'register') {
         break;
     case 'videos':
         if ($param1 == "") {                    // Just page parameter.
-            $twig_file_to_render = 'showVideoForm.twig';
+            $searchAfter['title'] = true;
+            $result = $videoManager->search("",$searchAfter);         // If we search with an empty string we should get all videos.
+            if ($result['status'] == 'ok') {
+
+                // Get lecturers firstname and lastname for every hit.
+                for($i=0;$i < count($result['result']); $i++) {
+                    $res = $userManager->getUser($result['result'][$i]['video']->uid);
+                    if ($res['status'] == 'ok') {
+                        $result['result'][$i]['lecturer']['firstname'] = $res['user']->firstname;
+                        $result['result'][$i]['lecturer']['lastname'] = $res['user']->lastname;
+                    }
+                }
+
+                $twig_file_to_render = 'showAllVideos.twig';
+                $twig_arguments['result'] = $result['result'];
+            }
+            else {
+                // If error go to index (which most likely was the place they come from with an error-message).
+                $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
+                $sessionManager->put('messageStatus', "info");
+                header('Location: ../');
+            }
+            
         }
         else if ($param1 != "" && $param2 == "") {                                  // A parameter.
             $video = $videoManager->get($param1);
@@ -187,17 +307,20 @@ if ($page == 'register') {
             $userRating = $videoManager->getUserRating(htmlspecialchars($_SESSION['uid']),$video['video']->vid);      // Check user has rated, and eventually get that rate.
             if($video['status'] == 'ok') {
                 $twig_file_to_render = 'showVideo.twig';
-                $twig_arguments = array('video' => $video['video'],
-                'comments' => $comments['comments'],
-                'teacher' => $userManager->getUser($video['video']->uid),   // Publishing user info.
-                'userId' => htmlspecialchars($_SESSION['uid']),              // ID for the user who watch.
-                'rating' => $rating,
-                'userRating' => $userRating
-                );            
+                $twig_arguments['video'] = $video['video'];
+                $twig_arguments['comments'] = $comments['comments'];
+                $twig_arguments['teacher'] = $userManager->getUser($video['video']->uid);   // Publishing user info.
+                $twig_arguments['rating'] = $rating;
+                $twig_arguments['userRating'] = $userRating;
+                $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who watch the video.          
+                $twig_arguments['toRoot'] = '/..';
             }
             else {
-                $twig_file_to_render = 'debug.twig';
-                $twig_arguments['message'] = 'Error: ' . $video['errorMessage'];
+                $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
+                $sessionManager->put('messageStatus', "info");
+                $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
+                $sessionManager->put('messageStatus', "info");
+                header('Location: ../../');
             }
         }
         else {
@@ -205,23 +328,42 @@ if ($page == 'register') {
             if($video['status'] == 'ok') {
                 if($video['video']->uid == htmlspecialchars($_SESSION['uid'])) {
                     $twig_file_to_render = 'editVideo.twig';
-                    $twig_arguments = array('video' => $video['video'],
-                    'userId' => htmlspecialchars($_SESSION['uid']),              // ID for the user who edit.
-                    );
+                    $twig_arguments['video'] = $video['video'];
+                    $twig_arguments['toRoot'] = '/../..';
                 }
             }
         }
         break;
     case 'search':
         if ($param1 == "result") {                    // Result shuld be retrived.
-            $result = $sessionManager->get("searchResult", true);
-            if($result != null) {
+
+
+
+            $video_result = $sessionManager->get("searchResult", true);
+            $playlist_result = $sessionManager->get("playlistResult", true);
+
+            if($video_result != null || $playlist_result != null) {
+
+                 // Get lecturers firstname and lastname for every hit.
+                 for($i=0;$i < count($result)-1; $i++) {
+                    $res = $userManager->getUser($result[$i]['video']->uid);
+                    if ($res['status'] == 'ok') {
+                        $result[$i]['lecturer']['firstname'] = $res['user']->firstname;
+                        $result[$i]['lecturer']['lastname'] = $res['user']->lastname;
+                    }
+                }
+
                 $twig_file_to_render = 'showSearch.twig';
                 //print_r($result);
-                $twig_arguments = array('result' => $result);
+
+                $twig_arguments['video_result'] = $video_result;
+                $twig_arguments['playlist_result'] = $playlist_result;
+                $twig_arguments['searchText'] = $sessionManager->get('searchText');
             }
             else {
-                 // Go to search-page without parameters
+                 // Go to search-page with error-message
+                $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
+                $sessionManager->put('messageStatus', "info");
                 header('Location: ../search');
             }
         }
@@ -229,7 +371,7 @@ if ($page == 'register') {
             $twig_file_to_render = 'advancedSearch.twig';
         }
         else {                                         // Some unexpected input, reset so we get correct sending of searchForm
-            // Go to search-page without parameters
+            // Go to search-page..
             header('Location: ../search');
         }
         break;
@@ -241,7 +383,8 @@ if ($page == 'register') {
         $twig_file_to_render = 'login.twig';
 
         // put msg
-        $sessionManager->put("message", "Logged out");
+        $sessionManager->put("message", "Du er nå logget ut");
+        $sessionManager->put('messageStatus', "info");
 
         // reload page (surpass twig system)
         header("Location: ./");
@@ -256,5 +399,4 @@ if ($page == 'register') {
 // Render page
 echo $twig->render($twig_file_to_render, $twig_arguments);
 
-// clean the session manager
-$sessionManager->clean();
+$sessionManager->remove('message');

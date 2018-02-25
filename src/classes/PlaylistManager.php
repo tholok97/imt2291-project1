@@ -46,7 +46,7 @@ VALUES (:title, :description, :thumbnail)
 
             $stmt->bindParam(':title', $title);
             $stmt->bindParam(':description', $description);
-            $stmt->bindParam(':thumbnail', $thumbnail);
+            $stmt->bindValue(':thumbnail', getThumbnail($thumbnail));
 
             if ($stmt->execute()) {
 
@@ -376,10 +376,9 @@ WHERE pid=:pid
      * @param $pid
      * @param $title
      * @param $description
-     * @param $thumbnail
      * @return assoc array with fields: status, message
      */
-    public function updatePlaylist($pid, $title, $description, $thumbnail) {
+    public function updatePlaylist($pid, $title, $description) {
 
         // prepare ret
         $ret['status'] = 'fail';
@@ -389,16 +388,14 @@ WHERE pid=:pid
 
             $stmt = $this->dbh->prepare('
 UPDATE playlist
-SET title=:title, description=:description, thumbnail=:thumbnail
+SET title=:title, description=:description
 WHERE pid=:pid
             ');
-
 
 
             $stmt->bindParam(':pid', $pid);
             $stmt->bindParam(':title', $title);
             $stmt->bindParam(':description', $description);
-            $stmt->bindParam(':thumbnail', $thumbnail);
 
             if ($stmt->execute()) {
                 if ($stmt->rowCount()) {
@@ -804,6 +801,196 @@ ORDER BY position
         $ret['status'] = 'ok';
 
         return $ret;
+    }
+
+    /**
+     * Returns list of search results given search string and stuff to search for
+     * @param $searchfor string to search for
+     * @param $searchwhere either description or title
+     * @return assoc array with fields: status, message, playlists (array of playlist objects)
+     */
+    public function searchPlaylists($searchfor, $searchwhere) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['playlists'] = array();
+
+        // Can't use PDO prepared statements for field, so have to do 
+        // anti-hack test manually
+        if ($searchwhere != 'title' && $searchwhere != 'description') {
+            $ret['messsage'] = 'Invalid field specified';
+            return $ret;
+        }
+
+        // try and search
+        try {
+
+            $stmt = $this->dbh->prepare("
+SELECT *
+FROM playlist
+WHERE $searchwhere LIKE :search
+            ");
+
+            $stmt->bindValue(':search', '%' . $searchfor . '%');
+
+            if ($stmt->execute()) {
+                foreach ($stmt->fetchAll() as $row) {
+
+                    // build statement objects
+                    $ret_getplaylist = $this->getPlaylist($row['pid']);
+
+                    if ($ret_getplaylist['status'] == 'fail') {
+                        $ret['message'] = "Couldn't bould playlist from pid in search : " . $ret_getplaylist['message'];
+                        return $ret;
+                    }
+
+                    array_push($ret['playlists'], $ret_getplaylist['playlist']);
+
+                }
+                $ret['status'] = 'ok';
+            } else {
+                $ret['message'] = "Statement didn't execute right";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+
+        return $ret;
+        
+    }
+
+    /**
+     * Search for searchstring in title and/or description
+     * @param $searchfor
+     * @param $searchwhere array out of title, description
+     * @return assoc array with fields: status, message, playlists (array of playlist objects)
+     */
+    public function searchPlaylistsMultipleFields($searchfor, $searchwheres) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['playlists'] = array();
+
+        // if no fields given just return ok
+        if (count($searchwheres) == 0) {
+            $ret['status'] = 'ok';
+            return $ret;
+        }
+
+        // for each searchwhere in searchwheres -> search for searchfor
+        foreach ($searchwheres as $searchwhere) {
+
+            $ret_search = $this->searchPlaylists($searchfor, $searchwhere);
+
+            if ($ret_search['status'] != 'ok') {
+                $ret['message'] = "Couldn't do search for " . $searchfor . ". Error message: " . $searchwhere;
+                return $ret;
+            }
+
+
+            $ret['playlists'] = array_unique(
+                array_merge(
+                    $ret['playlists'], 
+                    $ret_search['playlists']
+                ), SORT_REGULAR);
+
+
+        }
+
+        // if got this far -> ok
+        $ret['status'] = 'ok';
+
+        return $ret;
+    }
+
+    /**
+     * Register a user as a subscriber to a playlist in the system
+     * @param $user
+     * @param $pid
+     * @return assoc array with fields status, message
+     */
+    public function subscribeUserToPlaylist($uid, $pid) {
+        
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+
+        try {
+            
+            $stmt = $this->dbh->prepare('
+INSERT INTO subscribes_to (uid, pid)
+VALUES (:uid, :pid)
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                $ret['status'] = 'ok';
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        return $ret;
+    }
+
+    /**
+     * is user subscribed to playlist?
+     * @param $uid
+     * @param $pid
+     * @return assoc array with fields: status, message, subscribed ('true' / 'false')
+     */
+    public function isSubscribed($uid, $pid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['subscribed'] = null;
+
+
+        try {
+            
+            $stmt = $this->dbh->prepare('
+SELECT *
+FROM subscribes_to
+WHERE uid=:uid AND pid=:pid
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                $ret['status'] = 'ok';
+
+                if ($stmt->rowCount() == 1) {
+                    $ret['subscribed'] = 'true';
+                } else {
+                    $ret['subscribed'] = 'false';
+                }
+
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+
+        return $ret;
+
     }
 
 }

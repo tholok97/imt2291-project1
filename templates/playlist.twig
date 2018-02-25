@@ -1,29 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-    <ul>
-        <li><a href="./admin">Admin page</a></li>
-        <li><a href="./videos">Videos page</a></li>
-        <li><a href="./">Index page</a></li>
-        <li><a href="./upload">Upload page</a></li>
-        <li><a href="./search">Search page</a></li>
-        <li><a href="./logout">Logout</a></li>
-    </ul>
-    <h1>Playlist page</h1>
-    <h2>{{playlist.name}}</h2> 
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <!-- Latest compiled and minified Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    </head>
+    <body>
+        {% include 'navbar.twig' %}
+        <div class="container">
+            {% if message != "" %}
+            <p style="border:1px solid black">{{message}}</p>
+            {% endif %}
+            <h1>Playlist page</h1>
+            <h2>Title: {{playlist.title}}</h2> 
 
-    <h3>Maintainers: </h3>
-    <h3></h3>
-    <h3></h3>
+            <!-- subscribe button -->
+            {% if subscribed == 'false' %}
+            <form action="./src/subscribeToHandler.php" method="post">
+                <input type="hidden" name="uid" value="{{user.uid}}">
+                <input type="hidden" name="pid" value="{{playlist.pid}}">
+                <input type="submit" name="submit" value="Abonner på denne spillelisten">
+            </form>
 
-    {% for video in playlist %}
+            {% else %}
 
-    <p>{{video.title}}</p>
+            <i>Du abonnerer på denne spillelisten</i>
 
-    {% endfor  %}
-</body>
+            {% endif %}
+
+
+            <!-- edit button -->
+            {% if isMaintainer %}
+            <form action="./src/editPlaylistHandler.php" method="post">
+                <input type="hidden" name="pid" value="{{playlist.pid}}">
+                <input type="submit" name="submit" value="Administrer denne spillelisten">
+            </form>
+            {% endif %}
+
+
+
+
+            <h3>Maintainers: </h3>
+            <ul>
+                {% for maintainer in playlist.maintainers %}
+                <li>{{maintainer.firstname}}</li>
+                {% endfor %}
+            </ul>
+
+
+            <h3>Videos:</h3>
+            <ul>
+                {% for video in playlist.videos %}
+                <li>{{video.title}}</li>
+                {% endfor  %}
+            </ul>
+        </div>
+    </body>
 </html>

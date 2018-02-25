@@ -5,18 +5,20 @@
     <title></title>
 </head>
 <body>
-    {% if message != "" %}
-    <p style="border:1px solid black">{{message}}</p>
-    {% endif %}
-    <a href="./login">Login here</a>
-    <h1>Register page</h1>
-    <form action="src/registerFormHandler.php" method="post">
-        <label for="username">username: </label><input name="username" type="text"/><br/>
-        <label for="firstname">firstname: </label><input name="firstname" type="text"/><br/>
-        <label for="lastname">lastname: </label><input name="lastname" type="text"/><br/>
-        <label for="password">password: </label><input name="password" type="password"/><br/>
-        <label for="privilege_level">I am a lecturer: </label><input name="wants_lecturer" type="checkbox"/><br/>
-        <input type="submit" value="Register!">
-    </form>
+    <div class="container">
+        {% if message != "" %}
+            <div class="alert alert-{{messageStatus}}">{{message}}</div>
+        {% endif %}
+        <a href="./login">Login here</a>
+        <h1>Registrer deg her</h1>
+        <form action="src/registerFormHandler.php" method="post">
+            <label for="username">username: </label><input name="username" type="text"/><br/>
+            <label for="firstname">firstname: </label><input name="firstname" type="text"/><br/>
+            <label for="lastname">lastname: </label><input name="lastname" type="text"/><br/>
+            <label for="password">password: </label><input name="password" type="password"/><br/>
+            <label for="privilege_level">I am a lecturer: </label><input name="wants_lecturer" type="checkbox"/><br/>
+            <input type="submit" value="Register!">
+        </form>
+    </div>
 </body>
 </html>

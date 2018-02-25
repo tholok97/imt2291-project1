@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
-    {% if message != "" %}
-    <p style="border:1px solid black">{{message}}</p>
-    {% endif %}
-    <a href="./register">Register here</a>
-    <h1>Login page</h1>
-    <form action="src/loginFormHandler.php" method="post">
-        <label for="username">username: </label><input name="username" type="text"/><br/>
-        <label for="password">password: </label><input name="password" type="password"/><br/>
-        <input name="submit" type="submit"/>
-    </form>
+    <div class="container">
+        {% if message != "" %}
+            <div class="alert alert-{{messageStatus}}">{{message}}</div>
+        {% endif %}
+        <a href="./register">Registrer her</a>
+        <h1>Login page</h1>
+        <form action="src/loginFormHandler.php" method="post">
+            <label for="username">username: </label><input name="username" type="text"/><br/>
+            <label for="password">password: </label><input name="password" type="password"/><br/>
+            <input name="submit" type="submit"/>
+        </form>
+    </div>
 </body>
 </html>

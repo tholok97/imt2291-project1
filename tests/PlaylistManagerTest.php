@@ -31,9 +31,7 @@ class PlaylistManagerTest extends TestCase {
         $this->playlistManager = new PlaylistManager(DB::getDBConnection());
 
         // setup thumbnail
-        if (!$this->thumbnail = file_get_contents(Config::TEST_THUMBNAIL_PATH)) {
-            $this->fail("Couldn't load test thumbnail");
-        }
+        $this->thumbnail['tmp_name'] = Config::TEST_THUMBNAIL_PATH;
 
 
 
@@ -44,6 +42,9 @@ class PlaylistManagerTest extends TestCase {
     }
 
     protected function teardown() {
+        if (!$this->dbh->query('DELETE FROM subscribes_to')) {
+            $this->fail("Couldn't clean up database..");
+        }
         if (!$this->dbh->query('DELETE FROM in_playlist')) {
             $this->fail("Couldn't clean up database..");
         }
@@ -530,7 +531,7 @@ WHERE pid=:pid
 
 
         // assert not okay to update invalid pid
-        $res = $this->playlistManager->updatePlaylist(-1, $testtitle, $testdescription, $this->thumbnail);
+        $res = $this->playlistManager->updatePlaylist(-1, $testtitle, $testdescription);
         $this->assertEquals(
             'fail',
             $res['status'],
@@ -540,7 +541,7 @@ WHERE pid=:pid
 
 
         // try and update
-        $res = $this->playlistManager->updatePlaylist($res_add['pid'], $testtitle, $testdescription, $this->thumbnail);
+        $res = $this->playlistManager->updatePlaylist($res_add['pid'], $testtitle, $testdescription);
 
 
         // assert ok
@@ -892,5 +893,278 @@ WHERE vid=$testvid2 AND pid=$testpid
             "Position of vid2 after swap should be 1"
         );
     }
+
+    /**
+     * @depends testAddPlaylist
+     */
+    public function testSearchPlaylist() {
+
+        
+        // playlists to test with
+        
+        $testplaylists[0]['title'] = "the title";
+        $testplaylists[0]['description'] = "the description";
+
+        $testplaylists[1]['title'] = "apple";
+        $testplaylists[1]['description'] = "orange";
+
+        $testplaylists[2]['title'] = "the tit";
+        $testplaylists[2]['description'] = "the des";
+
+        // insert them
+        for ($i = 0; $i < count($testplaylists); ++$i) {
+            $res = $this->playlistManager->addPlaylist(
+                $testplaylists[$i]['title'], 
+                $testplaylists[$i]['description'], 
+                $this->thumbnail
+            );
+            $testplaylists[$i]['pid'] = $res['pid'];
+        }
+
+
+        // assert that valid search is okay
+        $res = $this->playlistManager->searchPlaylists('string', 'title');
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Searching for valid thing should be okay"
+        );
+
+        // assert that invalid search field is fail
+        $res = $this->playlistManager->searchPlaylists('string', 'notarealfield');
+        $this->assertEquals(
+            'fail',
+            $res['status'],
+            "Searching in invalid field should fail"
+        );
+
+        
+        // assert correct amount of stuff returned from search in title
+        $res = $this->playlistManager->searchPlaylists('the', 'title');
+        $this->assertEquals(
+            2,
+            count($res['playlists']),
+            "Number of playlists in searchresults should be 2 "
+        );
+
+        // assert correct amount of stuff returned from search in description
+        $res = $this->playlistManager->searchPlaylists('des', 'description');
+        $this->assertEquals(
+            2,
+            count($res['playlists']),
+            "Number of playlists in searchresults should be 2 "
+        );
+
+
+
+
+
+    }
+
+    /**
+     * @depends testAddPlaylist
+     */
+    public function testSearchPlaylistMultipleFields() {
+
+        
+        // playlists to test with
+        
+        $testplaylists[0]['title'] = "the title";
+        $testplaylists[0]['description'] = "the description";
+
+        $testplaylists[1]['title'] = "apple";
+        $testplaylists[1]['description'] = "the orange";
+
+        $testplaylists[2]['title'] = "the tit";
+        $testplaylists[2]['description'] = "des";
+
+        // insert them
+        for ($i = 0; $i < count($testplaylists); ++$i) {
+            $res = $this->playlistManager->addPlaylist(
+                $testplaylists[$i]['title'], 
+                $testplaylists[$i]['description'], 
+                $this->thumbnail
+            );
+            $testplaylists[$i]['pid'] = $res['pid'];
+        }
+
+
+        // assert that valid search is okay
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('string', ['title']);
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Searching for valid thing should be okay"
+        );
+
+        // assert that invalid search field is fail
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('string', ['notarealfield']);
+        $this->assertEquals(
+            'fail',
+            $res['status'],
+            "Searching in invalid field should fail"
+        );
+
+        
+        // assert correct amount of stuff returned from search
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('the', ['title', 'description']);
+        $this->assertEquals(
+            3,
+            count($res['playlists']),
+            "Number of playlists in searchresults should be 3 "
+        );
+
+        // assert correct amount of stuff returned from search
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('des', ['description']);
+        $this->assertEquals(
+            2,
+            count($res['playlists']),
+            "Number of playlists in searchresults should be 2 "
+        );
+
+        // assert correct amount of stuff returned from search in nothing is 0
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('des', array());
+        $this->assertEquals(
+            0,
+            count($res['playlists']),
+            "Should be 0 (didn't search anywhere)"
+        );
+
+        // assert correct amount of stuff returned from search for everything returns everything
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('', ['title', 'description']);
+        $this->assertEquals(
+            3,
+            count($res['playlists']),
+            "Search for everything should return everything"
+        );
+
+    }
+
+
+    public function testSubscribeUserToPlaylist() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
+
+
+
+        // assert that subscribing invalid user fails
+        $ret = $this->playlistManager->subscribeUserToPlaylist(-1, $testpid);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Subscribing invalid user should fail"
+        );
+        
+        // assert that subscribing to invalid playlist fails
+        $ret = $this->playlistManager->subscribeUserToPlaylist($testuid, -1);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Subscribing to invalid playlist should fail"
+        );
+
+
+
+        // assert that subscribing valid user is okay
+        $ret = $this->playlistManager->subscribeUserToPlaylist($testuid, $testpid);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Subscribing valid user to valid playlist should be okay"
+        );
+
+        // assert that subscription was registered correctly in db
+
+        $stmt = $this->dbh->prepare('
+SELECT *
+FROM subscribes_to
+WHERE uid=:uid AND pid=:pid
+        ');
+
+        $stmt->bindParam(':uid', $testuid);
+        $stmt->bindParam(':pid', $testpid);
+
+        $stmt->execute();
+
+        $this->assertEquals(
+            1,
+            $stmt->rowCount(),
+            "Select should select exactly one entry"
+        );
+        
+
+    }
+
+    /**
+     * @depends testSubscribeUserToPlaylist
+     */
+    public function testIsSubscribed() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser 1
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid1 = $this->dbh->lastInsertId();
+
+        // add testuser 2
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid2 = $this->dbh->lastInsertId();
+
+
+        // subscribe user 
+        $this->playlistManager->subscribeUserToPlaylist($testuid1, $testpid);
+
+
+
+
+
+        // assert that checking for subscription on valid user and playlist is ok
+        $ret = $this->playlistManager->isSubscribed($testuid1, $testpid);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Valid check should be okay"
+        );
+
+
+        // assert that result is correct
+        $this->assertEquals(
+            'true',
+            $ret['subscribed'],
+            "This user should be subscribed"
+        );
+
+        // assert that result for non-subscribed user is correct
+        $ret = $this->playlistManager->isSubscribed($testuid2, $testpid);
+        $this->assertEquals(
+            'false',
+            $ret['subscribed'],
+            "This user should not be subscribed"
+        );
+
+    }
+
+
 
 }

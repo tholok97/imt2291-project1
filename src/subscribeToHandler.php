@@ -13,16 +13,21 @@ $sessionManager = new SessionManager();
 // add playlist
 $playlistManager = new PlaylistManager(DB::getDBConnection());
 
-$ret_remove = $playlistManager->removeMaintainerFromPlaylist($_POST['uid'], $_POST['pid']);
+$ret_subscribe = $playlistManager->subscribeUserToPlaylist(
+    $_POST['uid'],
+    $_POST['pid']
+);
 
 
-if ($ret_remove['status'] != 'ok') {
-    $sessionManager->put('message', "Couldn't remove maintainer");
-    $sessionManager->put('messageStatus', "danger");
-    header('Location: ../editPlaylist');
+if ($ret_subscribe['status'] == 'fail') {
+    $sessionManager->put('message', "Kunne ikke abonnere på spilleliste : " . $ret_subscribe['message']);
+    header('Location: ../playlist');
     exit();
 }
 
 
-header('Location: ../editPlaylist');
+$sessionManager->put('message', "Abonnert på spilleliste!");
+
+
+header('Location: ../playlist');
 exit();

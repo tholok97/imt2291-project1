@@ -17,7 +17,8 @@ $ret_swap = $playlistManager->swapPositionsInPlaylist($_POST['position1'], $_POS
 
 
 if ($ret_swap['status'] == 'fail') {
-    $sessionManager->put('message', "Couldn't swap videos");
+    $sessionManager->put('message', "Kunne ikke bytte plass på videoer");
+    $sessionManager->put('messageStatus', "danger");
     header('Location: ../editPlaylist');
     exit();
 }
