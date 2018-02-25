@@ -376,10 +376,9 @@ WHERE pid=:pid
      * @param $pid
      * @param $title
      * @param $description
-     * @param $thumbnail
      * @return assoc array with fields: status, message
      */
-    public function updatePlaylist($pid, $title, $description, $thumbnail) {
+    public function updatePlaylist($pid, $title, $description) {
 
         // prepare ret
         $ret['status'] = 'fail';
@@ -389,16 +388,14 @@ WHERE pid=:pid
 
             $stmt = $this->dbh->prepare('
 UPDATE playlist
-SET title=:title, description=:description, thumbnail=:thumbnail
+SET title=:title, description=:description
 WHERE pid=:pid
             ');
-
 
 
             $stmt->bindParam(':pid', $pid);
             $stmt->bindParam(':title', $title);
             $stmt->bindParam(':description', $description);
-            $stmt->bindValue(':thumbnail', getThumbnail($thumbnail));
 
             if ($stmt->execute()) {
                 if ($stmt->rowCount()) {

@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
+    {% include 'navbar.twig' %}
     <div class='container'>
         {% if message != "" %}
             <class class="alert alert-{{messageStatus}}">{{message}}</class>

@@ -12,7 +12,7 @@
             <div class="alert alert-{{messageStatus}}">{{message}}</div>
       {% endif %}
       <h1>{{video.title}}</h1>
-      {% if user.user.uid == teacher.user.uid %}
+      {% if user.uid == teacher.user.uid %}
         <a href="{{video.vid}}/edit" class="btn btn-info">Rediger</a>
       {% endif %}
       <div class="row">
@@ -52,7 +52,7 @@
                 <input type="radio" name="rating" value="3" /> 3 stjerner
                 <input type="radio" name="rating" value="4" /> 4 stjerner
                 <input type="radio" name="rating" value="5" /> 5 stjerner
-                <input type='hidden' name='uid' value='{{user.user.uid}}'></input>
+                <input type='hidden' name='uid' value='{{user.uid}}'></input>
                 <input type='hidden' name='vid' value='{{video.vid}}'></input><br />
                 <input type='submit' name='submit' value="Ranger"/><br /><br/>
               </form>
@@ -66,7 +66,7 @@
             <h4>Ny kommentar:</h4>
             <form action='../src/commentFormHandler.php' method="post">
               <textarea id='text' name='text' cols="50" rows="5"></textarea>
-              <input type='hidden' name='uid' value='{{user.user.uid}}'></input>
+              <input type='hidden' name='uid' value='{{user.uid}}'></input>
               <input type='hidden' name='vid' value='{{video.vid}}'></input><br />
               <input type='submit' name='submit' value='Kommenter'></input><br/><br/>
             </form>
