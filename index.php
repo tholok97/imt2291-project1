@@ -87,7 +87,7 @@ $param2 = htmlspecialchars(@$_GET['param2']);
 
 
 
-$ret_user = $userManager->getUser($_SESSION['uid']);
+$ret_user = @$userManager->getUser($_SESSION['uid']);
 
 
 // The ye old huge if-else of stuff..
