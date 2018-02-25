@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
+    {% include 'navbar.twig' %}
     <div class='container'>
+        {% if message != "" %}
+            <div class="alert alert-{{messageStatus}}">{{message}}</div>
+        {% endif %}
         <h1>Endre spilleliste</h1>
 
         <h2>Endre metainfo</h2>

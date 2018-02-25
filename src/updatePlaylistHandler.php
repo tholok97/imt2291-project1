@@ -24,6 +24,9 @@ if ($ret_update['status'] == 'fail') {
     exit();
 }
 
+$sessionManager->put('message', "Oppdaterte spilleliste");
+$sessionManager->put('messageStatus', "success");
+
 
 header('Location: ../editPlaylist');
 exit();
