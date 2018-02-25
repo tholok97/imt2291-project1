@@ -3,37 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
+    {% include 'navbar.twig' %}
+    <div class="container">
     {% if message != "" %}
     <p style="border:1px solid black">{{message}}</p>
     {% endif %}
-    <ul>
-        <li><a href="./admin">Admin page</a></li>
-        <li><a href="./videos">Videos page</a></li>
-        <li><a href="./">Index page</a></li>
-        <li><a href="./upload">Upload page</a></li>
-        <li><a href="./logout">Logout</a></li>
-    </ul>
-    <h1>Admin page</h1>
+    <h1>Admin</h1>
 
-    <!-- if error occurred -> show message -->
-    {% if wantsMessage != '' %}
-    <h2>{{wantsMessage}}</h2>
-    {% endif %}
+        <!-- if error occurred -> show message -->
+        {% if wantsMessage != '' %}
+        <h2>{{wantsMessage}}</h2>
+        {% endif %}
 
-    <!-- for each want, show -->
-    {% for request in wantsPrivilege %}
+        <!-- for each want, show -->
+        {% for request in wantsPrivilege %}
 
-    <b>{{request.user.username}}</b> wants privilege {{request.wouldLike}} 
-    <form method="post" action="src/privilegeRequestHandler.php">
-        <input type="hidden" name="uid" value="{{request.user.uid}}"/>
-        <input type="hidden" name="privilege_level" value="{{request.wouldLike}}"/>
-        <input type="submit" value="Grant" />
-    </form>
-    
-    <br>
+        <b>{{request.user.username}}</b> wants privilege {{request.wouldLike}} 
+        <form method="post" action="src/privilegeRequestHandler.php">
+            <input type="hidden" name="uid" value="{{request.user.uid}}"/>
+            <input type="hidden" name="privilege_level" value="{{request.wouldLike}}"/>
+            <input type="submit" value="Grant" />
+        </form>
+        
+        <br>
 
-    {% endfor %}
+        {% endfor %}
+    </div>
 </body>
 </html>
