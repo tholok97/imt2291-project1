@@ -89,8 +89,7 @@ if ($page == 'register') {
 
     // If page is unset show index page, if it is set load correct page based on it
     $twig_file_to_render = 'index.twig';
-    $twig_arguments = array('user' => $userManager->getUser(htmlspecialchars($_SESSION['uid']))    //User who is looking on the site.
-    );
+    $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
 
 } else {
 
@@ -99,13 +98,11 @@ if ($page == 'register') {
     switch ($page) {
     case 'upload':
         $twig_file_to_render = 'upload.twig';
-        $twig_arguments = array('user' => $userManager->getUser(htmlspecialchars($_SESSION['uid']))    //User who is looking on the site.
-        );
+        $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
         break;
     case 'admin':
         $twig_file_to_render = 'admin.twig';
-        $twig_arguments = array('user' => $userManager->getUser(htmlspecialchars($_SESSION['uid']))    //User who is looking on the site.
-        );
+        $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
 
         // get info
         $ret_wants = buildWantsPrivilege($userManager);
@@ -113,13 +110,11 @@ if ($page == 'register') {
         // if went fine -> show wants
         // if didn't go fine -> show error
         if ($ret_wants['status'] == 'ok') {
-            $twig_arguments = array(
-                'wantsPrivilege' => $ret_wants['wantsPrivilege'],
-                'wantsMessage' => $ret_wants['message']
-            );
+            $twig_arguments['wantsPrivilege'] = $ret_wants['wantsPrivilege'];
+            $twig_arguments['wantsMessage'] = $ret_wants['message'];
         } else {
-            $twig_arguments = array('wantsMessage' => "Error getting privilege requests: " . 
-                $ret_wants['message']);
+            $twig_arguments['wantsMessage'] = "Error med å få privilegium-forespørsler: " . 
+                $ret_wants['message'];
         }
 
         break;
@@ -137,8 +132,8 @@ if ($page == 'register') {
                     }
                 }
                 $twig_file_to_render = 'showAllVideos.twig';
-            $twig_arguments = array('user' => $userManager->getUser(htmlspecialchars($_SESSION['uid'])),    //User who is looking on the site.
-                                    'result' => $result['result']);
+                $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
+                $twig_arguments['result'] = $result['result'];
             }
             else {
                 // If error go to index (which most likely was the place they come from with an error-message).
@@ -153,17 +148,17 @@ if ($page == 'register') {
             $userRating = $videoManager->getUserRating(htmlspecialchars($_SESSION['uid']),$video['video']->vid);      // Check user has rated, and eventually get that rate.
             if($video['status'] == 'ok') {
                 $twig_file_to_render = 'showVideo.twig';
-                $twig_arguments = array('video' => $video['video'],
-                'comments' => $comments['comments'],
-                'teacher' => $userManager->getUser($video['video']->uid),   // Publishing user info.
-                'rating' => $rating,
-                'userRating' => $userRating,
-                'user' => $userManager->getUser(htmlspecialchars($_SESSION['uid']))    //User who watch the video.
-                );            
+                $twig_arguments['video'] = $video['video'];
+                $twig_arguments['comments'] = $comments['comments'];
+                $twig_arguments['teacher'] = $userManager->getUser($video['video']->uid);   // Publishing user info.
+                $twig_arguments['rating'] = $rating;
+                $twig_arguments['userRating'] = $userRating;
+                $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who watch the video.          
+                $twig_arguments['toRoot'] = '/..';
             }
             else {
                 $twig_file_to_render = 'debug.twig';
-                $twig_arguments = array('message' => 'Error: ' . $video['errorMessage']);
+                $twig_arguments['message'] = 'Error: ' . $video['errorMessage'];
             }
         }
         else {
@@ -171,9 +166,9 @@ if ($page == 'register') {
             if($video['status'] == 'ok') {
                 if($video['video']->uid == htmlspecialchars($_SESSION['uid'])) {
                     $twig_file_to_render = 'editVideo.twig';
-                    $twig_arguments = array('video' => $video['video'],
-                    'user' => $userManager->getUser(htmlspecialchars($_SESSION['uid']))    //User who edit the video.
-                    );
+                    $twig_arguments['video'] = $video['video'];
+                    $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who edit the video.
+                    $twig_arguments['toRoot'] = '/../..';
                 }
             }
         }
@@ -192,10 +187,9 @@ if ($page == 'register') {
                 }
                 $twig_file_to_render = 'showSearch.twig';
                 //print_r($result);
-                $twig_arguments = array('result' => $result,
-                'user' => $userManager->getUser(htmlspecialchars($_SESSION['uid'])),    //User who is looking on the site.
-                'toRoot' => '/..'
-            );
+                $twig_arguments['result'] = $result;
+                $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
+                $twig_arguments['toRoot'] = '/..';
             }
             else {
                  // Go to search-page without parameters
@@ -204,8 +198,7 @@ if ($page == 'register') {
         }
         else if($param1 == "") {                       // Only page parameter, show search-site
             $twig_file_to_render = 'advancedSearch.twig';
-            $twig_arguments = array('user' => $userManager->getUser(htmlspecialchars($_SESSION['uid']))    //User who is looking on the site.
-            );
+            $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
         }
         else {                                         // Some unexpected input, reset so we get correct sending of searchForm
             // Go to search-page without parameters

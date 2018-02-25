@@ -34,7 +34,7 @@
           {% endif %}
           {% if user.user.privilege_level >= 1 %}
             <li class="nav-item">
-                <a class="nav-link" href=".{{toRoot}}/playlists/add">Lag ny spilleliste</a>
+                <a class="nav-link" href=".{{toRoot}}/createPlaylist">Lag ny spilleliste</a>
             </li>
           {% endif %}
           
@@ -52,7 +52,7 @@
             <a class="nav-link" href="#">{{user.user.firstname}} {{user.user.lastname}}, {{userPrivelegeText}}</a>
           </li>
         </ul>
-        <form class="form-inline mt-2 mt-md-0" action="./src/searchFormHandler.php" method="post">
+        <form class="form-inline mt-2 mt-md-0" action=".{{toRoot}}/src/searchFormHandler.php" method="post">
           <input name='searchText' class="form-control mr-sm-2" type="text" placeholder="Søk" aria-label="Search">
           <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>

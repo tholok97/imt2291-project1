@@ -360,7 +360,7 @@ class VideoManagerTest extends TestCase {
 
     }
 
-    function testUpdate() {
+    function testUpdateAndGet() {
         // make test user (is needed to upload a video)
         $user = new User(
             'testuser', 
@@ -420,6 +420,22 @@ class VideoManagerTest extends TestCase {
             'Getting title not the same as the title sent in under upload: ' . $ret['errorMessage']
         );
 
+        //Checking getAllUserVideos also here:
+        $ret = $this->videoManager->getAllUserVideos($uid);
+        
+        // If status ok
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            'Getting all user videos not ok: ' . $ret['errorMessage']
+        );
+
+        // If at least got 1 video returned and that is the one we uploaded.
+        $this->assertEquals(
+            $title,
+            $ret['videos'][0]['video']->title,
+            'Getting title not the same as the title sent in under upload when getting all user videos: ' . $ret['errorMessage']
+        );
         $newTitle = "Testvideo updated";
 
         $ret = $this->videoManager->update($vid, $uid,$newTitle, $description, $topic, $course_code);

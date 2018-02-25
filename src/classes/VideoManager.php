@@ -157,6 +157,51 @@ class VideoManager {
     }
 
     /**
+     * Returns all videos the user has uploaded.
+     * 
+     * @param int The user-id to the user who we shall get videos from.
+     * 
+     * @return array[] Returns an associative array with the fields 'status' and 'errorMessage' (if error) and a 'videos'-field with the result of get() if no error.
+     */
+    public function getAllUserVideos($uid) {
+        $ret['status'] = 'fail';
+        $ret['errorMessage'] = null;
+
+        $uid = htmlspecialchars($uid);  // Check that someone does not hack you.
+
+        // Check if a numeric id is more than 0.
+        if (!is_numeric($uid) || $uid <= 0) {
+            $ret['errorMessage'] = 'Fikk ingen korrekt bruker-id';
+            return $ret;
+        }
+
+        // Check if connection to database was successfully established.
+        if ($this->db == null) {
+            $ret['errorMessage'] = 'Kunne ikke koble til databasen.';
+            return $ret;
+        }
+
+        try {
+            $sth = $this->db->prepare('SELECT * FROM video WHERE uid = :uid');
+            $sth->bindParam(':uid', $uid);
+            $sth->execute();
+
+            $i = 0;
+            // While-loop will get every video via get()-function.
+            while($row = $sth->fetch(PDO::FETCH_ASSOC))
+            {
+                $ret['status'] = 'ok';
+                $ret['videos'][$i] = $this->get(htmlspecialchars($row['vid']), false);
+                $i++;
+            }
+        } catch (PDOException $ex) {
+            $ret['errorMessage'] = "Problemer med å bruke databasen, prøv igjen senere eller kontakt administrator.";//$ex->getMessage();
+        }
+        return $ret;
+    }
+
+
+    /**
      * Edit video-info.
      * 
      * @param int The id to the video to edit.
