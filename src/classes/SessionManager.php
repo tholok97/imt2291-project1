@@ -16,6 +16,7 @@ class SessionManager {
      * Store a named object in the session
      * @param $name
      * @param $object
+     * @param $serialize
      * @return void
      */
     public function put($name, $object, $serialize = false) {
@@ -28,6 +29,7 @@ class SessionManager {
     /**
      * Get a named object from the session
      * @param $name
+     * @param $unserialize
      * @return the object or null if error
      */
     public function get($name, $unserialize = false) {
@@ -48,6 +50,15 @@ class SessionManager {
      */
     public function clean() {
         unset($_SESSION[$this->sessionVariableName]);
+    }
+
+    /**
+     * Print contents of session manager storage
+     * FOR DEBUG
+     * @return void
+     */
+    public function print() {
+        print_r($_SESSION[$this->sessionVariableName]);
     }
 
 }

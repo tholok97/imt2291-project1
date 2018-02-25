@@ -52,7 +52,10 @@
                             <p class="card-text">
                                 {{playlist.description}}
                             </p>
-                            <a href="../playlist/{{playlist.pid}}" class="btn btn-primary">Gå til spilleliste</a>
+                            <form action="../src/showPlaylistHandler.php" method="post">
+                                <input type="hidden" name="pid" value="{{playlist.pid}}">
+                                <input type="submit" name="submit" value="Gå til spilleliste" class="btn btn-primary">
+                            </form>
                         </div>
                     </div>    
                 </div>

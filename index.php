@@ -49,6 +49,7 @@ if ($msg != null) {
 }
 
 
+
 // prepare playlistManager
 $playlistManager = new PlaylistManager(DB::getDBConnection());
 
@@ -64,10 +65,6 @@ $userManager = new UserManager(DB::getDBConnection());
  */
 $videoManager = new VideoManager(DB::getDBConnection());
 
-/**
- * Used to use video-content
- */
-$sessionManager = new SessionManager();
 
 
 
@@ -113,6 +110,26 @@ if ($page == 'register') {
     // Switch on page
     
     switch ($page) {
+    case 'playlist':
+
+        $playlist = $sessionManager->get('playlistToShow', true);
+
+        if ($playlist != null) {
+
+            // show playlist
+            $twig_arguments['playlist'] = $playlist;
+            $twig_file_to_render = 'playlist.twig';
+        } else {
+
+            $sessionManager->put('message', "Couldn't show playlist");
+            header("Location: ./");
+            exit();
+
+        }
+
+
+
+        break;
     case 'editPlaylist':
         if ($_SESSION['privilege_level'] < 1) {
             $sessionManager->put('message', "You aren't allowed to do that!");
