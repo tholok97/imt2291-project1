@@ -9,8 +9,24 @@
     <body>
         {% include 'navbar.twig' %}
         <div class="container">
+            {% if message != "" %}
+            <p style="border:1px solid black">{{message}}</p>
+            {% endif %}
             <h1>Playlist page</h1>
             <h2>Title: {{playlist.title}}</h2> 
+
+            {% if subscribed == 'false' %}
+            <form action="./src/subscribeToHandler.php" method="post">
+                <input type="hidden" name="uid" value="{{user.uid}}">
+                <input type="hidden" name="pid" value="{{playlist.pid}}">
+                <input type="submit" name="submit" value="Abonner på denne spillelisten">
+            </form>
+
+            {% else %}
+
+            <i>Du abonnerer på denne spillelisten</i>
+
+            {% endif %}
 
             <h3>Maintainers: </h3>
             <ul>

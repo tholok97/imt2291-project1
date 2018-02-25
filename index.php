@@ -82,6 +82,9 @@ $param2 = htmlspecialchars(@$_GET['param2']);
 
 
 
+$ret_user = $userManager->getUser($_SESSION['uid']);
+
+
 // The ye old huge if-else of stuff..
 
 if ($page == 'register') {
@@ -106,7 +109,16 @@ if ($page == 'register') {
     $twig_arguments['privilege_level'] = $_SESSION['privilege_level'];
     $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
 
+} else if ($ret_user['status'] != 'ok') {
+
+        $twig_file_to_render = 'internalerror.twig';
+        $twig_arguments['message'] = "Kunne ikke laste bruker : " . $ret_user['message'];
+
 } else {
+
+
+    $twig_arguments['user'] = $ret_user['user'];
+
 
     // Switch on page
     
@@ -118,9 +130,11 @@ if ($page == 'register') {
 
         // if not okay -> show message and return to index
         if ($ret_playlists['status'] != 'ok') {
+
             $sessionManager->put('message', "Kunne ikke laste alle videoer.. " . $ret_playlists['message']);
             header("Location: ./");
             exit();
+
         }
 
 
@@ -130,9 +144,27 @@ if ($page == 'register') {
         break;
     case 'playlist':
 
+
         $playlist = $sessionManager->get('playlistToShow', true);
 
+
         if ($playlist != null) {
+
+
+            // figure out if user is subscribed
+            $ret_subscribed = $playlistManager->isSubscribed($_SESSION['uid'], $playlist->pid);
+
+            if ($ret_subscribed['status'] != 'ok') {
+
+                // fail
+                $sessionManager->put('message', "Kunne ikke laste abonent-info : " . $ret_subscribed['message']);
+                header("Location: ./");
+                exit();
+
+            }
+
+            $twig_arguments['subscribed'] = $ret_subscribed['subscribed'];
+
 
             // show playlist
             $twig_arguments['playlist'] = $playlist;

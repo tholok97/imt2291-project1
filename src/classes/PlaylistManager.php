@@ -947,6 +947,55 @@ VALUES (:uid, :pid)
         return $ret;
     }
 
+    /**
+     * is user subscribed to playlist?
+     * @param $uid
+     * @param $pid
+     * @return assoc array with fields: status, message, subscribed ('true' / 'false')
+     */
+    public function isSubscribed($uid, $pid) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['subscribed'] = null;
+
+
+        try {
+            
+            $stmt = $this->dbh->prepare('
+SELECT *
+FROM subscribes_to
+WHERE uid=:uid AND pid=:pid
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                $ret['status'] = 'ok';
+
+                if ($stmt->rowCount() == 1) {
+                    $ret['subscribed'] = 'true';
+                } else {
+                    $ret['subscribed'] = 'false';
+                }
+
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+
+        return $ret;
+
+    }
+
 }
 
 /*

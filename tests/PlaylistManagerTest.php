@@ -1106,6 +1106,65 @@ WHERE uid=:uid AND pid=:pid
 
     }
 
+    /**
+     * @depends testSubscribeUserToPlaylist
+     */
+    public function testIsSubscribed() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser 1
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid1 = $this->dbh->lastInsertId();
+
+        // add testuser 2
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid2 = $this->dbh->lastInsertId();
+
+
+        // subscribe user 
+        $this->playlistManager->subscribeUserToPlaylist($testuid1, $testpid);
+
+
+
+
+
+        // assert that checking for subscription on valid user and playlist is ok
+        $ret = $this->playlistManager->isSubscribed($testuid1, $testpid);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Valid check should be okay"
+        );
+
+
+        // assert that result is correct
+        $this->assertEquals(
+            'true',
+            $ret['subscribed'],
+            "This user should be subscribed"
+        );
+
+        // assert that result for non-subscribed user is correct
+        $ret = $this->playlistManager->isSubscribed($testuid2, $testpid);
+        $this->assertEquals(
+            'false',
+            $ret['subscribed'],
+            "This user should not be subscribed"
+        );
+
+    }
+
 
 
 }
