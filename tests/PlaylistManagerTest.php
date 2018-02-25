@@ -531,7 +531,7 @@ WHERE pid=:pid
 
 
         // assert not okay to update invalid pid
-        $res = $this->playlistManager->updatePlaylist(-1, $testtitle, $testdescription, $this->thumbnail);
+        $res = $this->playlistManager->updatePlaylist(-1, $testtitle, $testdescription);
         $this->assertEquals(
             'fail',
             $res['status'],
@@ -541,7 +541,7 @@ WHERE pid=:pid
 
 
         // try and update
-        $res = $this->playlistManager->updatePlaylist($res_add['pid'], $testtitle, $testdescription, $this->thumbnail);
+        $res = $this->playlistManager->updatePlaylist($res_add['pid'], $testtitle, $testdescription);
 
 
         // assert ok

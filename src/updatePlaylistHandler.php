@@ -13,7 +13,8 @@ $sessionManager = new SessionManager();
 // add playlist
 $playlistManager = new PlaylistManager(DB::getDBConnection());
 
-$ret_update = $playlistManager->updatePlaylist($_POST['pid'], $_POST['title'], $_POST['description'], '');
+// don't update thumbnail
+$ret_update = $playlistManager->updatePlaylist($_POST['pid'], $_POST['title'], $_POST['description']);
 
 
 

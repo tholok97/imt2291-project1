@@ -67,10 +67,6 @@ $userManager = new UserManager(DB::getDBConnection());
  */
 $videoManager = new VideoManager(DB::getDBConnection());
 
-if (isset($_SESSION['uid'])) {
-    $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
-}
-
 
 
 // page stores parameter passed by GET. Contains an indication of what 
@@ -109,10 +105,11 @@ if ($page == 'register') {
 
 } else if (!isset($_GET['page'])) {
 
+    $twig_arguments['user'] = $ret_user['user'];
+
     // If page is unset show index page, if it is set load correct page based on it
     $twig_file_to_render = 'index.twig';
     $twig_arguments['privilege_level'] = $_SESSION['privilege_level'];
-    $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
     
     $myVideos = $videoManager->getAllUserVideos(htmlspecialchars($_SESSION['uid']));
     if ($myVideos['status'] = 'ok') {
@@ -267,7 +264,6 @@ if ($page == 'register') {
         }
 
         $twig_file_to_render = 'admin.twig';
-        $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
 
         // get info
         $ret_wants = buildWantsPrivilege($userManager);
@@ -288,6 +284,7 @@ if ($page == 'register') {
             $searchAfter['title'] = true;
             $result = $videoManager->search("",$searchAfter);         // If we search with an empty string we should get all videos.
             if ($result['status'] == 'ok') {
+
                 // Get lecturers firstname and lastname for every hit.
                 for($i=0;$i < count($result['result']); $i++) {
                     $res = $userManager->getUser($result['result'][$i]['video']->uid);
@@ -296,8 +293,8 @@ if ($page == 'register') {
                         $result['result'][$i]['lecturer']['lastname'] = $res['user']->lastname;
                     }
                 }
+
                 $twig_file_to_render = 'showAllVideos.twig';
-                $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
                 $twig_arguments['result'] = $result['result'];
             }
             else {
@@ -337,7 +334,6 @@ if ($page == 'register') {
                 if($video['video']->uid == htmlspecialchars($_SESSION['uid'])) {
                     $twig_file_to_render = 'editVideo.twig';
                     $twig_arguments['video'] = $video['video'];
-                    $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who edit the video.
                     $twig_arguments['toRoot'] = '/../..';
                 }
             }
@@ -366,7 +362,6 @@ if ($page == 'register') {
                 //print_r($result);
 
                 $twig_arguments['video_result'] = $video_result;
-                $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
                 $twig_arguments['playlist_result'] = $playlist_result;
                 $twig_arguments['searchText'] = $sessionManager->get('searchText');
             }
@@ -379,7 +374,6 @@ if ($page == 'register') {
         }
         else if($param1 == "") {                       // Only page parameter, show search-site
             $twig_file_to_render = 'advancedSearch.twig';
-            $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
         }
         else {                                         // Some unexpected input, reset so we get correct sending of searchForm
             // Go to search-page..
