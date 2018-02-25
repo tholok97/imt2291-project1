@@ -111,6 +111,23 @@ if ($page == 'register') {
     // Switch on page
     
     switch ($page) {
+    case 'playlists':
+
+        // search for everything (gets all playlists)
+        $ret_playlists = $playlistManager->searchPlaylists('', 'title');
+
+        // if not okay -> show message and return to index
+        if ($ret_playlists['status'] != 'ok') {
+            $sessionManager->put('message', "Kunne ikke laste alle videoer.. " . $ret_playlists['message']);
+            header("Location: ./");
+            exit();
+        }
+
+
+        $twig_arguments['playlist_result'] = $ret_playlists['playlists'];
+        $twig_file_to_render = 'showAllPlaylists.twig';
+
+        break;
     case 'playlist':
 
         $playlist = $sessionManager->get('playlistToShow', true);

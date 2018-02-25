@@ -1,36 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-    <!-- Latest compiled and minified Bootstrap CSS -->
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <!-- Latest compiled and minified Bootstrap CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-</head>
-<body>
-    <ul>
-        <li><a href="./admin">Admin page</a></li>
-        <li><a href="./videos">Videos page</a></li>
-        <li><a href="./">Index page</a></li>
-        <li><a href="./upload">Upload page</a></li>
-        <li><a href="./search">Search page</a></li>
-        <li><a href="./logout">Logout</a></li>
-    </ul>
-    <h1>Playlist page</h1>
-    <h2>Title: {{playlist.title}}</h2> 
+    </head>
+    <body>
+        {% include 'navbar.twig' %}
+        <div class="container">
+            <h1>Playlist page</h1>
+            <h2>Title: {{playlist.title}}</h2> 
 
-    <h3>Maintainers: </h3>
-    <ul>
-        {% for maintainer in playlist.maintainers %}
-        <li>{{maintainer.firstname}}</li>
-        {% endfor %}
-    </ul>
+            <h3>Maintainers: </h3>
+            <ul>
+                {% for maintainer in playlist.maintainers %}
+                <li>{{maintainer.firstname}}</li>
+                {% endfor %}
+            </ul>
 
 
-    <h3>Videos:</h3>
-    <ul>
-        {% for video in playlist.videos %}
-        <li>{{video.title}}</li>
-        {% endfor  %}
-    </ul>
-</body>
+            <h3>Videos:</h3>
+            <ul>
+                {% for video in playlist.videos %}
+                <li>{{video.title}}</li>
+                {% endfor  %}
+            </ul>
+        </div>
+    </body>
 </html>

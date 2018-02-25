@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Search result</title>
+        <!-- Latest compiled and minified Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    </head>
+    <body>
+        {% include 'navbar.twig' %}
+        <div class="container">
+
+            <h1>Alle spillelister</h1>
+
+            <div class="row">
+
+                {% for playlist in playlist_result %}
+
+                <div class="col-sm-4">
+                    <div class="card">
+                        <img class="card-img-top" src="src/getPlaylistThumbnail.php?pid={{playlist.pid}}" alt="Card image" style="width:100%">
+                        <div class="card-body">
+                            <h4 class="card-title">{{playlist.title}}</h4>
+                            <p class="card-text">
+                                <b>Beskrivelse: </b>{{playlist.description}}
+                                <br>
+                                <b>Antall videoer: </b>{{playlist.videos|length}}
+                            </p>
+                            <form action="../src/showPlaylistHandler.php" method="post">
+                                <input type="hidden" name="pid" value="{{playlist.pid}}">
+                                <input type="submit" name="submit" value="Gå til spilleliste" class="btn btn-primary">
+                            </form>
+                        </div>
+                    </div>    
+                </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+    </body>
+</html>
