@@ -22,11 +22,13 @@ $res = $VideoManager->upload(
 // if success -> go to index
 // if not -> reload page
 if ($res['status'] == 'ok') {
-    $sessionManager->put("message", "Successfully uploaded video");
+    $sessionManager->put("message", "Video lastet opp");
+    $sessionManager->put('messageStatus', "success");
     header('Location: ../');
     exit();
 } else {
-    $sessionManager->put("message", "Couldn't upload video");
+    $sessionManager->put("message", "Kunne ikke laste opp video");
+    $sessionManager->put('messageStatus', "danger");
     header('Location: ../upload');
     exit();
 }

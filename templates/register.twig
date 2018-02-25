@@ -7,7 +7,7 @@
 <body>
     <div class="container">
         {% if message != "" %}
-        <p style="border:1px solid black">{{message}}</p>
+            <div class="alert alert-{{messageStatus}}">{{message}}</div>
         {% endif %}
         <a href="./login">Login here</a>
         <h1>Registrer deg her</h1>

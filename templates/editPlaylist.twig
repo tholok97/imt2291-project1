@@ -5,68 +5,58 @@
     <title></title>
 </head>
 <body>
-    {% if message != "" %}
-    <p style="border:1px solid black">{{message}}</p>
-    {% endif %}
-    <ul>
-        <li><a href="./admin">Admin page</a></li>
-        <li><a href="./videos">Videos page</a></li>
-        <li><a href="./">Index page</a></li>
-        <li><a href="./upload">Upload page</a></li>
-        <li><a href="./search">Search page</a></li>
-        <li><a href="./logout">Logout</a></li>
-    </ul>
-    <h1>Edit playlist page</h1>
+    <div class='container'>
+        <h1>Endre spilleliste</h1>
 
-    <h2>Edit metainfo</h2>
-    <!--currently can't alter thumbnail..-->
-    <form action="./src/updatePlaylistHandler.php" method="post">
-        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-        <label for="title">title: </label><input name="title" type="text" value="{{playlist.title}}"/><br/>
-        <label for="description">description: </label><input name="description" type="text" value="{{playlist.description}}"/><br/>
-        <input type="submit" name='submit'/>
-    </form>
+        <h2>Endre metainfo</h2>
+        <!--currently can't alter thumbnail..-->
+        <form action="./src/updatePlaylistHandler.php" method="post">
+            <input type="hidden" name="pid" value="{{playlist.pid}}"/>
+            <label for="title">title: </label><input name="title" type="text" value="{{playlist.title}}"/><br/>
+            <label for="description">description: </label><input name="description" type="text" value="{{playlist.description}}"/><br/>
+            <input type="submit" name='submit'/>
+        </form>
 
-    <h2>Edit videos</h2>
+        <h2>Endre videoer</h2>
 
-    <i>Adding videos happpens on the particular video's page..</i>
+        <i>Legge til videoer skjer på den spesifikke videoens side..</i>
 
-    <h3>Reorder videos</h3>
-    <form action="./src/swapVideosHandler.php" method="post">
-        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-        <label for="position1">Position of first video to swap: </label><input name="position1" type="text"/><br/>
-        <label for="position2">Position of second video to swap: </label><input name="position2" type="text"/><br/>
-        <input type="submit" name="submit" value="reorder"/>
-    </form>
+        <h3>Endre rekkefølge på videoer</h3>
+        <form action="./src/swapVideosHandler.php" method="post">
+            <input type="hidden" name="pid" value="{{playlist.pid}}"/>
+            <label for="position1">Position of first video to swap: </label><input name="position1" type="text"/><br/>
+            <label for="position2">Position of second video to swap: </label><input name="position2" type="text"/><br/>
+            <input type="submit" name="submit" value="reorder"/>
+        </form>
 
-    <h3>Remove video</h3>
-    {% for video in playlist.videos%}
-    <form action="./src/removeVideoFromPlaylistHandler.php" method="post">
-        <input type="hidden" name="vid" value="{{video.vid}}"/>
-        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-        <label for="submit">{{video.position}} - {{video.title}} - </label><input type="submit" name="submit" value="remove"/>
-    </form>
-    <br>
-    {% endfor %}
+        <h3>Slett video</h3>
+        {% for video in playlist.videos%}
+        <form action="./src/removeVideoFromPlaylistHandler.php" method="post">
+            <input type="hidden" name="vid" value="{{video.vid}}"/>
+            <input type="hidden" name="pid" value="{{playlist.pid}}"/>
+            <label for="submit">{{video.position}} - {{video.title}} - </label><input type="submit" name="submit" value="remove"/>
+        </form>
+        <br>
+        {% endfor %}
 
-    <h2>Edit maintainers</h2>
+        <h2>Edit maintainers</h2>
 
-    <h3>Add maintainer</h3>
-    <form action="./src/addMaintainerHandler.php" method="post">
-        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-        <label for="username: "></label><input type="text" name="username"/>
-        <input type="submit" name="submit" value="add"/>
-    </form>
+        <h3>Add maintainer</h3>
+        <form action="./src/addMaintainerHandler.php" method="post">
+            <input type="hidden" name="pid" value="{{playlist.pid}}"/>
+            <label for="username: "></label><input type="text" name="username"/>
+            <input type="submit" name="submit" value="add"/>
+        </form>
 
 
-    <h3>Remove maintainer</h3>
-    {% for maintainer in playlist.maintainers %}
-    <form action="./src/removeMaintainerHandler.php" method="post">
-        <input type="hidden" name="uid" value="{{maintainer.uid}}"/>
-        <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-        <label for="submit">{{maintainer.username}} - </label><input type="submit" name="submit" value="remove"/>
-    </form>
-    {% endfor %}
-
+        <h3>Remove maintainer</h3>
+        {% for maintainer in playlist.maintainers %}
+        <form action="./src/removeMaintainerHandler.php" method="post">
+            <input type="hidden" name="uid" value="{{maintainer.uid}}"/>
+            <input type="hidden" name="pid" value="{{playlist.pid}}"/>
+            <label for="submit">{{maintainer.username}} - </label><input type="submit" name="submit" value="remove"/>
+        </form>
+        {% endfor %}
+    </div>
 </body>
 </html>

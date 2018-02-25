@@ -6,10 +6,10 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     </head>
     <body style='text-align: center;'>
-    {% if message != "" %}
-    <p style="border:1px solid black">{{message}}</p>
-    {% endif %}
         <div class="container">
+            {% if message != "" %}
+                <div class="alert alert-{{messageStatus}}">{{message}}</div>
+            {% endif %}
             <form action='src/videoFormHandler.php' method='post'>
                 <label for="id">Video id</label> <input type='number' name='id'></input><input type='submit' name='submit' value='Se video'></input>
             </form>

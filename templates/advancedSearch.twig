@@ -6,10 +6,10 @@
     </head>
     <body style='text-align: center;'>
         {% include 'navbar.twig' %}
-        {% if message != "" %}
-            <p style="border:1px solid black">{{message}}</p>
-        {% endif %}
         <div class='container'>
+            {% if message != "" %}
+                <div class="alert alert-{{messageStatus}}">{{message}}</div>
+            {% endif %}
             <h1>Avansert søk</h1>
             <form action="src/searchFormHandler.php" method="post">
                 <label for="searchText">Søk:</label> <input type="text" name="searchText" id="searchText">

@@ -8,6 +8,9 @@
     <body>
         {% include 'navbar.twig' %}
         <div class="container">
+            {% if message != "" %}
+                <div class="alert alert-{{messageStatus}}">{{message}}</div>
+            {% endif %}
         <h1 style='text-align: center;'>Alle videoer</h1>
         <div class="row">
             {% for video in result %}
@@ -16,7 +19,7 @@
                         <img class="card-img-top" src="./src/getVideoThumbnail.php?vid={{video.video.vid}}" alt="Card image" style="width:100%">
                                 <div class="card-body">
                                 <h4 class="card-title">{{video.video.title}}</h4>
-                                <p class="card-text"><b>Lastet opp av:</b> {{video.video.lecturer.firstname}} {{video.lecturer.lastname}}<br /><b>Tid lastet opp:</b> {{video.video.timestamp}}<br /><b>Emnekode:</b> {{video.video.course_code}}<br /><b>Emne:</b> {{video.video.topic}}</p>
+                                <p class="card-text"><b>Lastet opp av:</b> {{video.lecturer.firstname}} {{video.lecturer.lastname}}<br /><b>Tid lastet opp:</b> {{video.video.timestamp}}<br /><b>Emnekode:</b> {{video.video.course_code}}<br /><b>Emne:</b> {{video.video.topic}}</p>
                                 <a href="./videos/{{video.video.vid}}" class="btn btn-primary">Se video</a>
                             </div>
                         </div>    

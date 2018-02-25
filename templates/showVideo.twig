@@ -8,8 +8,11 @@
     <body style='text-align: center;'>
       {% include 'navbar.twig' %}
       <div class="container">
+      {% if message != "" %}
+            <div class="alert alert-{{messageStatus}}">{{message}}</div>
+      {% endif %}
       <h1>{{video.title}}</h1>
-      {% if user.uid == teacher.user.uid %}
+      {% if user.user.uid == teacher.user.uid %}
         <a href="{{video.vid}}/edit" class="btn btn-info">Rediger</a>
       {% endif %}
       <div class="row">
