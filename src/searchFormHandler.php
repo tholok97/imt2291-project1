@@ -4,19 +4,25 @@ session_start();
 
 require_once dirname(__FILE__) . '/classes/VideoManager.php';
 require_once dirname(__FILE__) . '/classes/SessionManager.php';
+require_once dirname(__FILE__) . '/classes/PlaylistManager.php';
 
 $VideoManager = new VideoManager(DB::getDBConnection());
 $SessionManager = new SessionManager();
+$playlistManager = new PlaylistManager(DB::getDBConnection());
 
 $searchAfter;
 $advanced = false;          // Is it advanced search (find out if any box is marked);
 
+$searchAfterInPlaylist = array();
+
 if (isset($_POST['titleBox'])) {
     $searchAfter['title'] = true;
+    array_push($searchAfterInPlaylist, 'title');
     $advanced = true;
 }
 if (isset($_POST['descriptionBox'])) {
     $searchAfter['description'] = true;
+    array_push($searchAfterInPlaylist, 'description');
     $advanced = true;
 }
 if (isset($_POST['topicBox'])) {
@@ -43,11 +49,15 @@ if (!$advanced) {
     $searchAfter['course_code'] = true;
 }
 
-$result = $VideoManager->search(htmlspecialchars($_POST['searchText']), $searchAfter);
+$video_result = $VideoManager->search(htmlspecialchars($_POST['searchText']), $searchAfter);
+$playlist_result = $playlistManager->searchPlaylistsMultipleFields($_POST['searchText'], $searchAfterInPlaylist);
 
-if ($result['status'] == 'ok') {
+if ($video_result['status'] == 'ok' && $playlist_result['status'] == 'ok') {
 
-    $SessionManager->put("searchResult",$result['result'], true);
+    $SessionManager->put("searchResult",$video_result['result'], true);
+    $SessionManager->put("playlistResult",$playlist_result['playlists'], true);
+
+    $SessionManager->put("searchText", $_POST['searchText']);
     
     // Go to result-page
     header('Location: ../search/result');

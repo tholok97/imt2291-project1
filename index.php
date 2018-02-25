@@ -51,6 +51,7 @@ if ($msg != null && $msgStatus != null) {
 }
 
 
+
 // prepare playlistManager
 $playlistManager = new PlaylistManager(DB::getDBConnection());
 
@@ -115,6 +116,43 @@ if ($page == 'register') {
     // Switch on page
     
     switch ($page) {
+    case 'playlists':
+
+        // search for everything (gets all playlists)
+        $ret_playlists = $playlistManager->searchPlaylists('', 'title');
+
+        // if not okay -> show message and return to index
+        if ($ret_playlists['status'] != 'ok') {
+            $sessionManager->put('message', "Kunne ikke laste alle videoer.. " . $ret_playlists['message']);
+            header("Location: ./");
+            exit();
+        }
+
+
+        $twig_arguments['playlist_result'] = $ret_playlists['playlists'];
+        $twig_file_to_render = 'showAllPlaylists.twig';
+
+        break;
+    case 'playlist':
+
+        $playlist = $sessionManager->get('playlistToShow', true);
+
+        if ($playlist != null) {
+
+            // show playlist
+            $twig_arguments['playlist'] = $playlist;
+            $twig_file_to_render = 'playlist.twig';
+        } else {
+
+            $sessionManager->put('message', "Couldn't show playlist");
+            header("Location: ./");
+            exit();
+
+        }
+
+
+
+        break;
     case 'editPlaylist':
         if ($_SESSION['privilege_level'] < 1) {
             $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
@@ -245,8 +283,14 @@ if ($page == 'register') {
         break;
     case 'search':
         if ($param1 == "result") {                    // Result shuld be retrived.
-            $result = $sessionManager->get("searchResult", true);
-            if($result != null) {
+
+
+
+            $video_result = $sessionManager->get("searchResult", true);
+            $playlist_result = $sessionManager->get("playlistResult", true);
+
+            if($video_result != null || $playlist_result != null) {
+
                  // Get lecturers firstname and lastname for every hit.
                  for($i=0;$i < count($result)-1; $i++) {
                     $res = $userManager->getUser($result[$i]['video']->uid);
@@ -255,16 +299,24 @@ if ($page == 'register') {
                         $result[$i]['lecturer']['lastname'] = $res['user']->lastname;
                     }
                 }
+
                 $twig_file_to_render = 'showSearch.twig';
                 //print_r($result);
-                $twig_arguments['result'] = $result;
+
+                $twig_arguments['video_result'] = $video_result;
                 $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
-                $twig_arguments['toRoot'] = '/..';
+                $twig_arguments['playlist_result'] = $playlist_result;
+                $twig_arguments['searchText'] = $sessionManager->get('searchText');
             }
             else {
+<<<<<<< HEAD
                  // Go to search-page with error-message
                 $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
                 $sessionManager->put('messageStatus', "info");
+=======
+                
+                 // Go to search-page without parameters
+>>>>>>> a51bcfb82f177c57128a305354b1ab6c2921b6f8
                 header('Location: ../search');
             }
         }
@@ -301,5 +353,4 @@ if ($page == 'register') {
 // Render page
 echo $twig->render($twig_file_to_render, $twig_arguments);
 
-// clean the session manager
-$sessionManager->clean();
+$sessionManager->remove('message');
