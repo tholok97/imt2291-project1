@@ -6,25 +6,20 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     </head>
     <body>
-        {% if message != "" %}
-        <p style="border:1px solid black">{{message}}</p>
-        {% endif %}
-        <ul>
-            <li><a href="./admin">Admin page</a></li>
-            <li><a href="./videos">Videos page</a></li>
-            <li><a href="./">Index page</a></li>
-            <li><a href="./upload">Upload page</a></li>
-            <li><a href="./logout">Logout</a></li>
-        </ul>
+        {% include 'navbar.twig' %}
         <div class="container">
-        <div class="row">
-            {% for video in result %}
-                <div class="col-sm-4">
-                    <div class="card">
-                        <img class="card-img-top" src="../src/getVideoThumbnail.php?vid={{video.video.vid}}" alt="Card image" style="width:100%">
-                                <div class="card-body">
+            {% if message != "" %}
+            <p style="border:1px solid black">{{message}}</p>
+            {% endif %}
+            <h1 style='text-align: center;'>Søkeresultater</h1>
+            <div class="row">
+                {% for video in result %}
+                    <div class="col-sm-4">
+                        <div class="card">
+                            <img class="card-img-top" src="../src/getVideoThumbnail.php?vid={{video.video.vid}}" alt="Card image" style="width:100%">
+                            <div class="card-body">
                                 <h4 class="card-title">{{video.video.title}}</h4>
-                                <p class="card-text"><b>Tid lastet opp:</b> {{video.video.timestamp}}<br /><b>Emnekode:</b> {{video.video.course_code}}<br /><b>Emne:</b> {{video.video.topic}}</p>
+                                <p class="card-text"><b>Lastet opp av:</b> {{video.lecturer.firstname}} {{video.lecturer.lastname}}<br /><b>Tid lastet opp:</b> {{video.video.timestamp}}<br /><b>Emnekode:</b> {{video.video.course_code}}<br /><b>Emne:</b> {{video.video.topic}}</p>
                                 <a href="../videos/{{video.video.vid}}" class="btn btn-primary">Se video</a>
                             </div>
                         </div>    
