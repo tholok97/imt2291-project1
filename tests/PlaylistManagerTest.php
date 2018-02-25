@@ -31,9 +31,7 @@ class PlaylistManagerTest extends TestCase {
         $this->playlistManager = new PlaylistManager(DB::getDBConnection());
 
         // setup thumbnail
-        if (!$this->thumbnail = file_get_contents(Config::TEST_THUMBNAIL_PATH)) {
-            $this->fail("Couldn't load test thumbnail");
-        }
+        $this->thumbnail['tmp_name'] = Config::TEST_THUMBNAIL_PATH;
 
 
 
@@ -1037,10 +1035,74 @@ WHERE vid=$testvid2 AND pid=$testpid
             "Search for everything should return everything"
         );
 
+    }
+
+
+    public function testSubscribeUserToPlaylist() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid = $this->dbh->lastInsertId();
 
 
 
+        // assert that subscribing invalid user fails
+        $ret = $this->playlistManager->subscribeUserToPlaylist(-1, $testpid);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Subscribing invalid user should fail"
+        );
+        
+        // assert that subscribing to invalid playlist fails
+        $ret = $this->playlistManager->subscribeUserToPlaylist($testuid, -1);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Subscribing to invalid playlist should fail"
+        );
+
+
+
+        // assert that subscribing valid user is okay
+        $ret = $this->playlistManager->subscribeUserToPlaylist($testuid, $testpid);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Subscribing valid user to valid playlist should be okay"
+        );
+
+        // assert that subscription was registered correctly in db
+
+        $stmt = $this->dbh->prepare('
+SELECT *
+FROM subscribes_to
+WHERE uid=:uid AND pid=:pid
+        ');
+
+        $stmt->bindParam(':uid', $testuid);
+        $stmt->bindParam(':pid', $testpid);
+
+        $stmt->execute();
+
+        $this->assertEquals(
+            1,
+            $stmt->rowCount(),
+            "Select should select exactly one entry"
+        );
+        
 
     }
+
+
 
 }

@@ -46,7 +46,7 @@ VALUES (:title, :description, :thumbnail)
 
             $stmt->bindParam(':title', $title);
             $stmt->bindParam(':description', $description);
-            $stmt->bindParam(':thumbnail', getThumbnail($thumbnail));
+            $stmt->bindValue(':thumbnail', getThumbnail($thumbnail));
 
             if ($stmt->execute()) {
 
@@ -398,7 +398,7 @@ WHERE pid=:pid
             $stmt->bindParam(':pid', $pid);
             $stmt->bindParam(':title', $title);
             $stmt->bindParam(':description', $description);
-            $stmt->bindParam(':thumbnail', $thumbnail);
+            $stmt->bindValue(':thumbnail', getThumbnail($thumbnail));
 
             if ($stmt->execute()) {
                 if ($stmt->rowCount()) {
@@ -906,6 +906,23 @@ WHERE $searchwhere LIKE :search
 
         // if got this far -> ok
         $ret['status'] = 'ok';
+
+        return $ret;
+    }
+
+    /**
+     * Register a user as a subscriber to a playlist in the system
+     * @param $user
+     * @param $pid
+     * @return assoc array with fields status, message
+     */
+    public function subscribeUserToPlaylist() {
+        
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+
+        // TODO
 
         return $ret;
     }
