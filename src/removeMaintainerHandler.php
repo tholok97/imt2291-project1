@@ -18,6 +18,7 @@ $ret_remove = $playlistManager->removeMaintainerFromPlaylist($_POST['uid'], $_PO
 
 if ($ret_remove['status'] != 'ok') {
     $sessionManager->put('message', "Couldn't remove maintainer");
+    $sessionManager->put('messageStatus', "danger");
     header('Location: ../editPlaylist');
     exit();
 }

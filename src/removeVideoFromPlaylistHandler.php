@@ -17,7 +17,8 @@ $ret_remove= $playlistManager->removeVideoFromPlaylist($_POST['vid'], $_POST['pi
 
 
 if ($ret_update['status'] == 'fail') {
-    $sessionManager->put('message', "Couldn't remove video");
+    $sessionManager->put('message', "Kunne ikke slette video");
+    $sessionManager->put('messageStatus', "danger");
     header('Location: ../editPlaylist');
     exit();
 }

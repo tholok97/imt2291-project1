@@ -44,8 +44,10 @@ $sessionManager = new SessionManager();
 
 // try and retrieve message
 $msg = $sessionManager->get("message");
-if ($msg != null) {
+$msgStatus = $sessionManager->get("messageStatus"); //If not null it should be either 'success', 'warning' or any other of bootstraps alerts (see https://www.w3schools.com/bootstrap4/bootstrap_alerts.asp)
+if ($msg != null && $msgStatus != null) {
     $twig_arguments["message"] = $msg;
+    $twig_arguments["messageStatus"] = $msgStatus;
 }
 
 
@@ -64,10 +66,9 @@ $userManager = new UserManager(DB::getDBConnection());
  */
 $videoManager = new VideoManager(DB::getDBConnection());
 
-/**
- * Used to use video-content
- */
-$sessionManager = new SessionManager();
+if (isset($_SESSION['uid'])) {
+    $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
+}
 
 
 
@@ -116,7 +117,8 @@ if ($page == 'register') {
     switch ($page) {
     case 'editPlaylist':
         if ($_SESSION['privilege_level'] < 1) {
-            $sessionManager->put('message', "You aren't allowed to do that!");
+            $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
+            $sessionManager->put('messageStatus', "warning");
 
             // reload page (surpass twig system)
             header("Location: ./");
@@ -133,7 +135,8 @@ if ($page == 'register') {
         if ($_SESSION['privilege_level'] > 0) {
             $twig_file_to_render = 'createPlaylist.twig';
         } else {
-            $sessionManager->put('message', "You aren't allowed to do that!");
+            $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
+            $sessionManager->put('messageStatus', "warning");
 
             // reload page (surpass twig system)
             header("Location: ./");
@@ -143,9 +146,9 @@ if ($page == 'register') {
     case 'upload':
         if ($_SESSION['privilege_level'] > 0) {
             $twig_file_to_render = 'upload.twig';
-            $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
         } else {
-            $sessionManager->put('message', "You aren't allowed to do that!");
+            $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
+            $sessionManager->put('messageStatus', "warning");
 
             // reload page (surpass twig system)
             header("Location: ./");
@@ -155,7 +158,8 @@ if ($page == 'register') {
     case 'admin':
 
         if ($_SESSION['privilege_level'] < 2) {
-            $sessionManager->put('message', "You aren't allowed to do that!");
+            $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
+            $sessionManager->put('messageStatus', "warning");
 
             // reload page (surpass twig system)
             header("Location: ./");
@@ -198,6 +202,8 @@ if ($page == 'register') {
             }
             else {
                 // If error go to index (which most likely was the place they come from with an error-message).
+                $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
+                $sessionManager->put('messageStatus', "info");
                 header('Location: ../');
             }
             
@@ -218,8 +224,11 @@ if ($page == 'register') {
                 $twig_arguments['toRoot'] = '/..';
             }
             else {
-                $twig_file_to_render = 'debug.twig';
-                $twig_arguments['message'] = 'Error: ' . $video['errorMessage'];
+                $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
+                $sessionManager->put('messageStatus', "info");
+                $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
+                $sessionManager->put('messageStatus', "info");
+                header('Location: ../../');
             }
         }
         else {
@@ -253,7 +262,9 @@ if ($page == 'register') {
                 $twig_arguments['toRoot'] = '/..';
             }
             else {
-                 // Go to search-page without parameters
+                 // Go to search-page with error-message
+                $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
+                $sessionManager->put('messageStatus', "info");
                 header('Location: ../search');
             }
         }
@@ -262,7 +273,7 @@ if ($page == 'register') {
             $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
         }
         else {                                         // Some unexpected input, reset so we get correct sending of searchForm
-            // Go to search-page without parameters
+            // Go to search-page..
             header('Location: ../search');
         }
         break;
@@ -274,7 +285,8 @@ if ($page == 'register') {
         $twig_file_to_render = 'login.twig';
 
         // put msg
-        $sessionManager->put("message", "Logged out");
+        $sessionManager->put("message", "Du er nå logget ut");
+        $sessionManager->put('messageStatus', "info");
 
         // reload page (surpass twig system)
         header("Location: ./");

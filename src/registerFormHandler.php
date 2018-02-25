@@ -36,12 +36,14 @@ if ($ret['status'] == 'ok') {
 
     // TODO: currently ignores it if registering privilege fails....
 
-    $sessionManager->put("message", "Successfully registered!");
+    $sessionManager->put("message", "Du har nå vellykket blitt registrert!");
+    $sessionManager->put('messageStatus', "success");
     header('Location: ../');
     exit();
 } else {
 
-    $sessionManager->put("message", "Couldn't register..");
+    $sessionManager->put("message", "Kunne ikke registrere..");
+    $sessionManager->put('messageStatus', "danger");
     header('Location: ../register');
     exit();
 }

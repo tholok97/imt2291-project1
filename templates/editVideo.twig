@@ -9,6 +9,9 @@
 <body>
     {% include 'navbar.twig' %}
     <div class="container">
+        {% if message != "" %}
+            <div class="alert alert-{{messageStatus}}">{{message}}</div>
+        {% endif %}
         <h1>Rediger video</h1>
         <form action="../../src/editVideoFormHandler.php" method="post" enctype="multipart/form-data">
             <label for="title">Tittel:</label> <input type="text" name="title" id="title" value="{{video.title}}" /><br />

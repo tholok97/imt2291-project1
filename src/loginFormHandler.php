@@ -12,7 +12,8 @@ $userManager = new UserManager(DB::getDBConnection());
 $ret = $userManager->login($_POST['username'], $_POST['password']);
 
 if ($ret['status'] == 'fail') {
-    $sessionManager->put("message", "Couldn't login");
+    $sessionManager->put("message", "Kunne ikke logge inn");
+    $sessionManager->put('messageStatus', "danger");
     header('Location: ../');
     exit();
 }
@@ -22,7 +23,8 @@ $uid = $ret['uid'];
 $ret = $userManager->getUser($uid);
 
 if ($ret['status'] == 'fail') {
-    $sessionManager->put("message", "Couldn't login");
+    $sessionManager->put("message", "Kunne ikke logge inn");
+    $sessionManager->put('messageStatus', "danger");
     header('Location: ../');
     exit();
 }
@@ -31,6 +33,7 @@ $_SESSION['uid'] = $uid;
 $_SESSION['privilege_level'] = $ret['user']->privilege_level;
 
 
-$sessionManager->put("message", "Successfully logged in :D");
+$sessionManager->put("message", "Du er nå logget inn :D");
+$sessionManager->put('messageStatus', "success");
 header('Location: ../');
 exit();
