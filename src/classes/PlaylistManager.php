@@ -865,6 +865,51 @@ WHERE $searchwhere LIKE :search
         
     }
 
+    /**
+     * Search for searchstring in title and/or description
+     * @param $searchfor
+     * @param $searchwhere array out of title, description
+     * @return assoc array with fields: status, message, playlists (array of playlist objects)
+     */
+    public function searchPlaylistsMultipleFields($searchfor, $searchwheres) {
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['playlists'] = array();
+
+        // if no fields given just return ok
+        if (count($searchwheres) == 0) {
+            $ret['status'] = 'ok';
+            return $ret;
+        }
+
+        // for each searchwhere in searchwheres -> search for searchfor
+        foreach ($searchwheres as $searchwhere) {
+
+            $ret_search = $this->searchPlaylists($searchfor, $searchwhere);
+
+            if ($ret_search['status'] != 'ok') {
+                $ret['message'] = "Couldn't do search for " . $searchfor . ". Error message: " . $searchwhere;
+                return $ret;
+            }
+
+
+            $ret['playlists'] = array_unique(
+                array_merge(
+                    $ret['playlists'], 
+                    $ret_search['playlists']
+                ), SORT_REGULAR);
+
+
+        }
+
+        // if got this far -> ok
+        $ret['status'] = 'ok';
+
+        return $ret;
+    }
+
 }
 
 /*

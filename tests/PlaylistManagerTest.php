@@ -960,4 +960,87 @@ WHERE vid=$testvid2 AND pid=$testpid
 
     }
 
+    /**
+     * @depends testAddPlaylist
+     */
+    public function testSearchPlaylistMultipleFields() {
+
+        
+        // playlists to test with
+        
+        $testplaylists[0]['title'] = "the title";
+        $testplaylists[0]['description'] = "the description";
+
+        $testplaylists[1]['title'] = "apple";
+        $testplaylists[1]['description'] = "the orange";
+
+        $testplaylists[2]['title'] = "the tit";
+        $testplaylists[2]['description'] = "des";
+
+        // insert them
+        for ($i = 0; $i < count($testplaylists); ++$i) {
+            $res = $this->playlistManager->addPlaylist(
+                $testplaylists[$i]['title'], 
+                $testplaylists[$i]['description'], 
+                $this->thumbnail
+            );
+            $testplaylists[$i]['pid'] = $res['pid'];
+        }
+
+
+        // assert that valid search is okay
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('string', ['title']);
+        $this->assertEquals(
+            'ok',
+            $res['status'],
+            "Searching for valid thing should be okay"
+        );
+
+        // assert that invalid search field is fail
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('string', ['notarealfield']);
+        $this->assertEquals(
+            'fail',
+            $res['status'],
+            "Searching in invalid field should fail"
+        );
+
+        
+        // assert correct amount of stuff returned from search
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('the', ['title', 'description']);
+        $this->assertEquals(
+            3,
+            count($res['playlists']),
+            "Number of playlists in searchresults should be 3 "
+        );
+
+        // assert correct amount of stuff returned from search
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('des', ['description']);
+        $this->assertEquals(
+            2,
+            count($res['playlists']),
+            "Number of playlists in searchresults should be 2 "
+        );
+
+        // assert correct amount of stuff returned from search in nothing is 0
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('des', array());
+        $this->assertEquals(
+            0,
+            count($res['playlists']),
+            "Should be 0 (didn't search anywhere)"
+        );
+
+        // assert correct amount of stuff returned from search for everything returns everything
+        $res = $this->playlistManager->searchPlaylistsMultipleFields('', ['title', 'description']);
+        $this->assertEquals(
+            3,
+            count($res['playlists']),
+            "Search for everything should return everything"
+        );
+
+
+
+
+
+    }
+
 }
