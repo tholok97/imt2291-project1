@@ -42,6 +42,9 @@ class PlaylistManagerTest extends TestCase {
     }
 
     protected function teardown() {
+        if (!$this->dbh->query('DELETE FROM subscribes_to')) {
+            $this->fail("Couldn't clean up database..");
+        }
         if (!$this->dbh->query('DELETE FROM in_playlist')) {
             $this->fail("Couldn't clean up database..");
         }

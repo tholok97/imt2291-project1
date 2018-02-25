@@ -916,13 +916,33 @@ WHERE $searchwhere LIKE :search
      * @param $pid
      * @return assoc array with fields status, message
      */
-    public function subscribeUserToPlaylist() {
+    public function subscribeUserToPlaylist($uid, $pid) {
         
         // prepare ret
         $ret['status'] = 'fail';
         $ret['message'] = "";
 
-        // TODO
+        try {
+            
+            $stmt = $this->dbh->prepare('
+INSERT INTO subscribes_to (uid, pid)
+VALUES (:uid, :pid)
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+            $stmt->bindParam(':pid', $pid);
+
+            if ($stmt->execute()) {
+
+                $ret['status'] = 'ok';
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
 
         return $ret;
     }
