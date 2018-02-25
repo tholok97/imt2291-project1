@@ -214,13 +214,22 @@ if ($page == 'register') {
         break;
     case 'search':
         if ($param1 == "result") {                    // Result shuld be retrived.
-            $result = $sessionManager->get("searchResult", true);
-            if($result != null) {
+
+
+
+            $video_result = $sessionManager->get("searchResult", true);
+            $playlist_result = $sessionManager->get("playlistResult", true);
+
+            if($video_result != null || $playlist_result != null) {
+
                 $twig_file_to_render = 'showSearch.twig';
                 //print_r($result);
-                $twig_arguments = array('result' => $result);
+
+                $twig_arguments['video_result'] = $video_result;
+                $twig_arguments['playlist_result'] = $playlist_result;
             }
             else {
+                
                  // Go to search-page without parameters
                 header('Location: ../search');
             }

@@ -46,7 +46,7 @@ VALUES (:title, :description, :thumbnail)
 
             $stmt->bindParam(':title', $title);
             $stmt->bindParam(':description', $description);
-            $stmt->bindParam(':thumbnail', $thumbnail);
+            $stmt->bindParam(':thumbnail', getThumbnail($thumbnail));
 
             if ($stmt->execute()) {
 
