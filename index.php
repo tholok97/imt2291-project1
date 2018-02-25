@@ -309,14 +309,9 @@ if ($page == 'register') {
                 $twig_arguments['searchText'] = $sessionManager->get('searchText');
             }
             else {
-<<<<<<< HEAD
                  // Go to search-page with error-message
                 $sessionManager->put('message', "Det oppstod et problem, vennligst prøv igjen senere.");
                 $sessionManager->put('messageStatus', "info");
-=======
-                
-                 // Go to search-page without parameters
->>>>>>> a51bcfb82f177c57128a305354b1ab6c2921b6f8
                 header('Location: ../search');
             }
         }
