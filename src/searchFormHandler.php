@@ -56,6 +56,8 @@ if ($video_result['status'] == 'ok' && $playlist_result['status'] == 'ok') {
 
     $SessionManager->put("searchResult",$video_result['result'], true);
     $SessionManager->put("playlistResult",$playlist_result['playlists'], true);
+
+    $SessionManager->put("searchText", $_POST['searchText']);
     
     // Go to result-page
     header('Location: ../search/result');

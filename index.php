@@ -276,6 +276,7 @@ if ($page == 'register') {
                 $twig_arguments['video_result'] = $video_result;
                 $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
                 $twig_arguments['playlist_result'] = $playlist_result;
+                $twig_arguments['searchText'] = $sessionManager->get('searchText');
             }
             else {
                 

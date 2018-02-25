@@ -8,8 +8,15 @@
     <body>
         {% include 'navbar.twig' %}
         <div class="container">
+
+            <h1>Søkeresultat for "{{searchText}}"</h1>
+            <br>
+            <br>
+            <br>
+
             <!-- video results -->
-            <h2>Video results:</h2>
+            <h2>Videoresultater</h2>
+            <br>
             <div class="row">
                 {% for video in video_result %}
                 <div class="col-sm-4">
@@ -17,7 +24,7 @@
                         <img class="card-img-top" src="../src/getVideoThumbnail.php?vid={{video.video.vid}}" alt="Card image" style="width:100%">
                         <div class="card-body">
                             <h4 class="card-title">{{video.video.title}}</h4>
-                            <p class="card-text"><b>Lastet opp av:</b> {{video.lecturer.firstname}} {{video.lecturer.lastname}}<br /><b><p class="card-text"><b>Tid lastet opp:</b> {{video.video.timestamp}}<br /><b>Emnekode:</b> {{video.video.course_code}}<br /><b>Emne:</b> {{video.video.topic}}</p>
+                            <p class="card-text"><b>Lastet opp av:</b> {{video.lecturer.firstname}} {{video.lecturer.lastname}}<br /><b>Tid lastet opp:</b> {{video.video.timestamp}}<br /><b>Emnekode:</b> {{video.video.course_code}}<br /><b>Emne:</b> {{video.video.topic}}</p>
                             <a href="../videos/{{video.video.vid}}" class="btn btn-primary">Se video</a>
                         </div>
                     </div>    
@@ -30,7 +37,8 @@
             <br>
 
             <!-- playlist results -->
-            <h2>Playlist results:</h2>
+            <h2>Spillelisteresultater</h2>
+            <br>
             <div class="row">
 
                 {% for playlist in playlist_result %}
@@ -41,7 +49,9 @@
                         <div class="card-body">
                             <h4 class="card-title">{{playlist.title}}</h4>
                             <p class="card-text">
-                                {{playlist.description}}
+                                <b>Beskrivelse: </b>{{playlist.description}}
+                                <br>
+                                <b>Antall videoer: </b>{{playlist.videos|length}}
                             </p>
                             <form action="../src/showPlaylistHandler.php" method="post">
                                 <input type="hidden" name="pid" value="{{playlist.pid}}">
