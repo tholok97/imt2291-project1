@@ -113,6 +113,11 @@ if ($page == 'register') {
     $twig_file_to_render = 'index.twig';
     $twig_arguments['privilege_level'] = $_SESSION['privilege_level'];
     $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who is looking on the site.
+    
+    $myVideos = $videoManager->getAllUserVideos(htmlspecialchars($_SESSION['uid']));
+    if ($myVideos['status'] = 'ok') {
+        $twig_arguments['myVideos'] = $myVideos['videos'];
+    }
 
 } else if ($ret_user['status'] != 'ok') {
 
