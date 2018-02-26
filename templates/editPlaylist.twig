@@ -9,58 +9,67 @@
 <body>
     {% include 'navbar.twig' %}
     <div class='container'>
+
         {% if message != "" %}
             <div class="alert alert-{{messageStatus}}">{{message}}</div>
         {% endif %}
-        <h1>Endre spilleliste</h1>
 
+        <h1>Endre spilleliste: "{{playlist.title}}"</h1>
+
+        <br><br>
         <h2>Endre metainfo</h2>
         <!--currently can't alter thumbnail..-->
         <form action="./src/updatePlaylistHandler.php" method="post">
             <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-            <label for="title">title: </label><input name="title" type="text" value="{{playlist.title}}"/><br/>
-            <label for="description">description: </label><input name="description" type="text" value="{{playlist.description}}"/><br/>
-            <input type="submit" name='submit'/>
+            <label for="tittel">title: </label><input name="title" type="text" value="{{playlist.title}}"/><br/>
+            <label for="beskrivelse">description: </label><input name="description" type="text" value="{{playlist.description}}"/><br/>
+            <input type="submit" name='submit' value="endre"/>
         </form>
 
+        <br><br>
         <h2>Endre videoer</h2>
 
         <i>Legge til videoer skjer på den spesifikke videoens side..</i>
 
-        <h3>Endre rekkefølge på videoer</h3>
+        <br><br>
+        <h3>Bytt posisjonen til to videoer:</h3>
         <form action="./src/swapVideosHandler.php" method="post">
             <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-            <label for="position1">Position of first video to swap: </label><input name="position1" type="text"/><br/>
-            <label for="position2">Position of second video to swap: </label><input name="position2" type="text"/><br/>
-            <input type="submit" name="submit" value="reorder"/>
+            <label for="position1">Posisjon til første video å bytte</label><input name="position1" type="text"/><br/>
+            <label for="position2">Posisjon til andre video å bytte</label><input name="position2" type="text"/><br/>
+            <input type="submit" name="submit" value="bytt"/>
         </form>
 
+        <br>
         <h3>Slett video</h3>
         {% for video in playlist.videos%}
         <form action="./src/removeVideoFromPlaylistHandler.php" method="post">
             <input type="hidden" name="vid" value="{{video.vid}}"/>
             <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-            <label for="submit">{{video.position}} - {{video.title}} - </label><input type="submit" name="submit" value="remove"/>
+            <label for="submit">{{video.position}} - {{video.title}} - </label><input type="submit" name="submit" value="slett"/>
         </form>
         <br>
         {% endfor %}
 
-        <h2>Edit maintainers</h2>
+        <br><br>
+        <h2>Administeringsvalg</h2>
 
-        <h3>Add maintainer</h3>
+        <br>
+        <h3>Legg til administrator til spilleliste</h3>
         <form action="./src/addMaintainerHandler.php" method="post">
             <input type="hidden" name="pid" value="{{playlist.pid}}"/>
             <label for="username: "></label><input type="text" name="username"/>
-            <input type="submit" name="submit" value="add"/>
+            <input type="submit" name="submit" value="legg til"/>
         </form>
 
 
-        <h3>Remove maintainer</h3>
+        <br>
+        <h3>Fjern administrator fra spilleliste</h3>
         {% for maintainer in playlist.maintainers %}
         <form action="./src/removeMaintainerHandler.php" method="post">
             <input type="hidden" name="uid" value="{{maintainer.uid}}"/>
             <input type="hidden" name="pid" value="{{playlist.pid}}"/>
-            <label for="submit">{{maintainer.username}} - </label><input type="submit" name="submit" value="remove"/>
+            <label for="submit">{{maintainer.username}} - </label><input type="submit" name="submit" value="slett"/>
         </form>
         {% endfor %}
     </div>
