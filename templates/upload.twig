@@ -10,8 +10,8 @@
     {% include 'navbar.twig' %}
     <div class='container'>
         {% if message != "" %}
-            <p style="border:1px solid black">{{message}}</p>
-        {% endif %}
+                <div class="alert alert-{{messageStatus}}">{{message}}</div>
+            {% endif %}
         <h1>Last opp video</h1>
         <form action="./src/uploadFormHandler.php" method="post" enctype="multipart/form-data">
             <label for="pickFile">Velg en fil (anbefaler en MP4 fil med h.264-video og MP3- eller AAC-lyd for best kompabilitet): </label><input type="file" name="fileToUpload" id="pickFile"><br>
