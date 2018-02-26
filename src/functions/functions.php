@@ -68,7 +68,7 @@ function buildWantsPrivilege($userManager) {
 
         // message if empty
         if (count($ret['wantsPrivilege']) == 0) {
-            $ret['message'] = "No privilege requests...";
+            $ret['message'] = "Ingen har forespurt å få høyere privilegium..";
         }
 
 
@@ -76,7 +76,7 @@ function buildWantsPrivilege($userManager) {
         $ret['status'] = 'ok';
 
     } else {
-        $ret['message'] = 'There was an error fetching privilege requests: ' . 
+        $ret['message'] = 'Feil ved henting av forespørsler : ' . 
             $ret_wants['message'];
     }
 
