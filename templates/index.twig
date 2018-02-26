@@ -17,7 +17,7 @@
         Student stuff:
         * subscriptions
         -->
-        <h1>Spillelister jeg abonnerer på:</h1>
+        <h1>Spillelister du abonnerer på:</h1>
 
         {% if mySubscriptions|length == 0 %}
         <i>Du abonnerer ikke på noen spillelister</i>
@@ -60,7 +60,7 @@
     {% if user.privilege_level > 0 %}
 
     <br><br><br>
-    <h1>Videoer jeg har lastet opp:</h1>
+    <h1>Videoer du har lastet opp:</h1>
 
     {% if myVideos|length == 0 %}
     <i>Du har ikke lastet opp noen videoer</i>
@@ -79,6 +79,41 @@
             </div>    
         </div>
         {% endfor %}
+    </div>
+
+
+
+    <br><br><br>
+    <h1>Spillelister du administerer:</h1>
+
+    {% if myVideos|length == 0 %}
+    <i>Du administerer ingen spillelister</i>
+    {% endif %}
+
+    <div class="row">
+
+        {% for playlist in myPlaylists %}
+
+        <div class="col-sm-4">
+            <div class="card">
+                <img class="card-img-top" src="src/getPlaylistThumbnail.php?pid={{playlist.pid}}" alt="Card image" style="width:100%">
+                <div class="card-body">
+                    <h4 class="card-title">{{playlist.title}}</h4>
+                    <p class="card-text">
+                        <b>Beskrivelse: </b>{{playlist.description}}
+                        <br>
+                        <b>Antall videoer: </b>{{playlist.videos|length}}
+                    </p>
+                    <form action="src/showPlaylistHandler.php" method="post">
+                        <input type="hidden" name="pid" value="{{playlist.pid}}">
+                        <input type="submit" name="submit" value="Gå til spilleliste" class="btn btn-primary">
+                    </form>
+                </div>
+            </div>    
+        </div>
+
+        {% endfor %}
+
     </div>
 
     {% endif %}

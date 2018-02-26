@@ -121,6 +121,11 @@ if ($page == 'register') {
         $twig_arguments['mySubscriptions'] = $mySubscriptions['playlists'];
     }
 
+    $myPlaylists = $playlistManager->getPlaylistsUserMaintains(htmlspecialchars($_SESSION['uid']));
+    if ($myPlaylists['status'] = 'ok') {
+        $twig_arguments['myPlaylists'] = $myPlaylists['playlists'];
+    }
+
 
 
 } else if ($ret_user['status'] != 'ok') {
