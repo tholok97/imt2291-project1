@@ -9,11 +9,13 @@
     <body>
         {% include 'navbar.twig' %}
         <div class="container">
+
             {% if message != "" %}
             <p style="border:1px solid black">{{message}}</p>
             {% endif %}
-            <h1>Playlist page</h1>
-            <h2>Title: {{playlist.title}}</h2> 
+
+
+            <h1>Spilleliste: {{playlist.title}}</h1>
 
             <!-- subscribe button -->
             {% if subscribed == 'false' %}
@@ -41,20 +43,31 @@
 
 
 
-            <h3>Maintainers: </h3>
+            <br><br><br>
+            <h3>Administratorer: </h3>
             <ul>
                 {% for maintainer in playlist.maintainers %}
-                <li>{{maintainer.firstname}}</li>
+                <li>{{maintainer.firstname}} {{maintainer.lastname}}</li>
                 {% endfor %}
             </ul>
 
 
-            <h3>Videos:</h3>
-            <ul>
+            <br><br><br>
+            <h3>Videoer:</h3>
+            <div class="row">
                 {% for video in playlist.videos %}
-                <li>{{video.title}}</li>
-                {% endfor  %}
-            </ul>
+                <div class="col-sm-4">
+                    <div class="card">
+                        <img class="card-img-top" src="./src/getVideoThumbnail.php?vid={{video.vid}}" alt="Card image" style="width:100%">
+                        <div class="card-body">
+                            <h4 class="card-title">{{video.title}}</h4>
+                            <p class="card-text"><b>Lastet opp av:</b> {{video.lecturer.firstname}} {{video.lecturer.lastname}}<br /><b>Tid lastet opp:</b> {{video.timestamp}}<br /><b>Emnekode:</b> {{video.course_code}}<br /><b>Emne:</b> {{video.topic}}</p>
+                            <a href="./videos/{{video.vid}}" class="btn btn-primary">Se video</a>
+                        </div>
+                    </div>    
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </body>
 </html>
