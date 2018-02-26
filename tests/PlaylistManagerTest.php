@@ -1165,6 +1165,69 @@ VALUES ('','','','',0)
 
     }
 
+    public function testGetSubscribedPlaylists() {
+
+        // add test playlist
+        $testtitle = "Sometitle";
+        $testdescription = "somedescription";
+        $res_addplaylist = $this->playlistManager->addPlaylist($testtitle, $testdescription, $this->thumbnail);
+        $testpid = $res_addplaylist['pid'];
+
+        // add testuser 1
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid1 = $this->dbh->lastInsertId();
+
+        // add testuser 2
+        $this->dbh->query("
+INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+VALUES ('','','','',0)
+        ");
+        $testuid2 = $this->dbh->lastInsertId();
+
+
+        // subscribe user 
+        $this->playlistManager->subscribeUserToPlaylist($testuid1, $testpid);
+
+
+
+
+
+        // assert that checking for subscription is okay
+        $ret = $this->playlistManager->getSubscribedPlaylists($testuid1);
+        $this->assertEquals(
+            'ok',
+            $ret['status'],
+            "Checking for subscription should be okay : " . $ret['message']
+        );
+
+        // assert that one result was returned
+        $this->assertEquals(
+            1,
+            count($ret['playlists']),
+            "One playlist should be returned as subscribed"
+        );
+
+        // assert that correctly subscribed
+        $this->assertEquals(
+            $testtitle,
+            $ret['playlists'][0]->title,
+            "User should be subscribed to this playlist (isn't)"
+        );
+
+
+
+        // assert that other user not subscribed
+        $ret = $this->playlistManager->getSubscribedPlaylists($testuid2);
+        $this->assertEquals(
+            0,
+            count($ret['playlists']),
+            "This user shouldn't be subscribed to any playlists"
+        );
+    }
+
 
 
 }

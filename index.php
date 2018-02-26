@@ -109,12 +109,14 @@ if ($page == 'register') {
 
     // If page is unset show index page, if it is set load correct page based on it
     $twig_file_to_render = 'index.twig';
-    $twig_arguments['privilege_level'] = $_SESSION['privilege_level'];
+    
     
     $myVideos = $videoManager->getAllUserVideos(htmlspecialchars($_SESSION['uid']));
     if ($myVideos['status'] = 'ok') {
         $twig_arguments['myVideos'] = $myVideos['videos'];
     }
+
+
 
 } else if ($ret_user['status'] != 'ok') {
 
