@@ -1047,6 +1047,63 @@ WHERE uid=:uid
         return $ret;
     }
 
+
+
+
+    /**
+     * return playlists a user is a maintainer of
+     * @param $uid
+     * @return assoc array of fields: status, message, playlists
+     */
+    public function getPlaylistsUserMaintains($uid) {
+
+
+        // prepare ret
+        $ret['status'] = 'fail';
+        $ret['message'] = "";
+        $ret['playlists'] = array();
+
+        try {
+            
+            $stmt = $this->dbh->prepare('
+SELECT pid
+FROM maintains
+WHERE uid=:uid
+            ');
+
+            $stmt->bindParam(':uid', $uid);
+
+            if ($stmt->execute()) {
+
+
+                // for each pid subscribed to, add playlist to ret
+                foreach ($stmt->fetchAll() as $row) {
+
+                    // get playlist with pid
+                    $ret_get = $this->getPlaylist($row['pid']);
+
+                    if ($ret_get['status'] != 'ok') {
+                        $ret['message'] = "Couldn't get maintainers playlist : " . $ret_get['message'];
+                        return $ret;
+                    }
+
+                    array_push($ret['playlists'], $ret_get['playlist']);
+                }
+
+            } else {
+                $ret['message'] = "Statement didn't execute correclty";
+            }
+
+        } catch (PDOException $ex) {
+            $ret['message'] = $ex->getMessage();
+        }
+
+        // if got this far -> ok
+        $ret['status'] = 'ok';
+
+        return $ret;
+    }
+
 }
 
 /*
