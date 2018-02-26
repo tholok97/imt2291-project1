@@ -109,7 +109,19 @@ if ($page == 'register') {
 
     // If page is unset show index page, if it is set load correct page based on it
     $twig_file_to_render = 'index.twig';
-    $twig_arguments['privilege_level'] = $_SESSION['privilege_level'];
+    
+    
+    $myVideos = $videoManager->getAllUserVideos(htmlspecialchars($_SESSION['uid']));
+    if ($myVideos['status'] = 'ok') {
+        $twig_arguments['myVideos'] = $myVideos['videos'];
+    }
+
+    $mySubscriptions = $playlistManager->getSubscribedPlaylists(htmlspecialchars($_SESSION['uid']));
+    if ($mySubscriptions['status'] = 'ok') {
+        $twig_arguments['mySubscriptions'] = $mySubscriptions['playlists'];
+    }
+
+
 
 } else if ($ret_user['status'] != 'ok') {
 
@@ -312,7 +324,7 @@ if ($page == 'register') {
                 $twig_arguments['teacher'] = $userManager->getUser($video['video']->uid);   // Publishing user info.
                 $twig_arguments['rating'] = $rating;
                 $twig_arguments['userRating'] = $userRating;
-                $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who watch the video.          
+                //$twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who watch the video.          
                 $twig_arguments['toRoot'] = '/..';
             }
             else {

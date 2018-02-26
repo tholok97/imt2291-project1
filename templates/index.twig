@@ -12,27 +12,72 @@
         {% if message != "" %}
             <div class="alert alert-{{messageStatus}}">{{message}}</div>
         {% endif %}
-        <h1>Index page!</h1>
+
         <!--
         Student stuff:
         * subscriptions
         -->
-        <h2>Student stuff</h2>
-        <!--
-        Lecturer stuff:
-        * own playlists
-        * own videos
-        -->
-        {% if privilege_level > 0 %}
-        <h2>Lecturer stuff</h2>
-        {% endif %}
-        <!--
-        Admin stuff
-        * privilege requests?
-        -->
-        {% if privilege_level > 1 %}
-        <h2>Admin stuff</h2>
-        {% endif %}
+        <h1>Spillelister jeg abonnerer på:</h1>
+
+        <div class="row">
+
+            {% for playlist in mySubscriptions %}
+
+            <div class="col-sm-4">
+                <div class="card">
+                    <img class="card-img-top" src="src/getPlaylistThumbnail.php?pid={{playlist.pid}}" alt="Card image" style="width:100%">
+                    <div class="card-body">
+                        <h4 class="card-title">{{playlist.title}}</h4>
+                        <p class="card-text">
+                            <b>Beskrivelse: </b>{{playlist.description}}
+                            <br>
+                            <b>Antall videoer: </b>{{playlist.videos|length}}
+                        </p>
+                        <form action="src/showPlaylistHandler.php" method="post">
+                            <input type="hidden" name="pid" value="{{playlist.pid}}">
+                            <input type="submit" name="submit" value="Gå til spilleliste" class="btn btn-primary">
+                        </form>
+                    </div>
+                </div>    
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+
+
+    <!--
+    Lecturer stuff:
+    * own playlists
+    * own videos
+    -->
+    {% if user.privilege_level > 0 %}
+
+    <br><br><br>
+    <h1>Videoer jeg har lastet opp:</h1>
+    <div class="row">
+        {% for video in myVideos %}
+        <div class="col-sm-4">
+            <div class="card">
+                <img class="card-img-top" src="./src/getVideoThumbnail.php?vid={{video.video.vid}}" alt="Card image" style="width:100%">
+                <div class="card-body">
+                    <h4 class="card-title">{{video.video.title}}</h4>
+                    <p class="card-text"><b>Tid lastet opp:</b> {{video.video.timestamp}}<br /><b>Emnekode:</b> {{video.video.course_code}}<br /><b>Emne:</b> {{video.video.topic}}</p>
+                    <a href="./videos/{{video.video.vid}}" class="btn btn-primary">Se video</a>
+                </div>
+            </div>    
+        </div>
+        {% endfor %}
     </div>
+
+    {% endif %}
+
+
+
+
+
+</div>
 </body>
 </html>
