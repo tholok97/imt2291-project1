@@ -35,7 +35,7 @@ if ($ret['status'] == 'fail') {
 
 
 // if everything fine -> admin page
-$sessionManager->put("message", "Successfully granted privilege");
+$sessionManager->put("message", "Ga privlilegium til bruker");
 $sessionManager->put('messageStatus', "success");
 header('Location: ../admin');
 exit();

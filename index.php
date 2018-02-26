@@ -286,7 +286,7 @@ if ($page == 'register') {
             $twig_arguments['wantsPrivilege'] = $ret_wants['wantsPrivilege'];
             $twig_arguments['wantsMessage'] = $ret_wants['message'];
         } else {
-            $twig_arguments['wantsMessage'] = "Error getting privilege requests: " . 
+            $twig_arguments['wantsMessage'] = "Feil ved henting av forespørsler : " . 
                 $ret_wants['message'];
         }
 
