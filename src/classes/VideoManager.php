@@ -182,7 +182,7 @@ class VideoManager {
         }
 
         try {
-            $sth = $this->db->prepare('SELECT * FROM video WHERE uid = :uid');
+            $sth = $this->db->prepare('SELECT * FROM video WHERE uid = :uid ORDER BY vid DESC');
             $sth->bindParam(':uid', $uid);
             $sth->execute();
 
@@ -531,6 +531,7 @@ class VideoManager {
                         $sql = $sql . " uid LIKE " . $userLastnameSearchRet['uids'][$i];
                     }
                 }
+                $sql = $sql . " ORDER BY vid DESC";
            }
            else {
             $ret['errorMessage'] = 'Ingen valg er satt, kan derfor ikke gi noen resultater.';

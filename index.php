@@ -317,7 +317,7 @@ if ($page == 'register') {
                 $twig_arguments['teacher'] = $userManager->getUser($video['video']->uid);   // Publishing user info.
                 $twig_arguments['rating'] = $rating;
                 $twig_arguments['userRating'] = $userRating;
-                $twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who watch the video.          
+                //$twig_arguments['user'] = $userManager->getUser(htmlspecialchars($_SESSION['uid']));    //User who watch the video.          
                 $twig_arguments['toRoot'] = '/..';
             }
             else {
