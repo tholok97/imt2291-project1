@@ -84,6 +84,12 @@ class UserManager {
         $ret['message'] = '';
         $ret['uid'] = null;
 
+        // if non-email (if doesn't contain @) -> early fail
+        if (strpos($user->username, '@') === false) {
+            $ret['message'] = "Invalid username supplied (must be email (must contain @))";
+            return $ret;
+        }
+
         // try and insert
         try {
 

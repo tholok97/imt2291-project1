@@ -100,7 +100,7 @@ class UserManagerTest extends TestCase {
 
         // make test user
         $user = new User(
-            'testuser', 
+            'testuser@thing.com', 
             'firstname', 
             'secondname', 
             2
@@ -116,13 +116,26 @@ class UserManagerTest extends TestCase {
             "Couldn't add valid user :" . $ret['message']
         );
 
-        // assert that adding same user again doesn't work goes well
+        // assert that adding same user again doesn't go well
         $ret = $this->userManager->addUser($user, $password);
         $this->assertEquals(
             'fail',
             $ret['status'],
             "shouldn't be able to add user twice (duplicate username)"
         );
+
+
+        // assert that adding user with non-email username fails
+        $user->username = 'notanemail';
+        $ret = $this->userManager->addUser($user, $password);
+        $this->assertEquals(
+            'fail',
+            $ret['status'],
+            "Shouldnt' be able to add user with non-email username"
+        );
+
+
+        // add test for user actually inserted in db???
     }
 
     public function testIsValidUser() {
@@ -512,7 +525,7 @@ class UserManagerTest extends TestCase {
     public function testGetWantsPrivilege() {
 
         $testuser = new User(
-            'test1',
+            'test1@koko',
             'test2',
             'test3',
             0
@@ -550,7 +563,7 @@ class UserManagerTest extends TestCase {
     public function testUpdateUser() {
         
         $testuser = new User(
-            'test1',
+            'test1@koko',
             'test2',
             'test3',
             0
@@ -604,7 +617,7 @@ class UserManagerTest extends TestCase {
     public function testGrantPrivilege() {
 
         $testuser = new User(
-            'test1',
+            'test1@koko',
             'test2',
             'test3',
             0
@@ -646,11 +659,12 @@ class UserManagerTest extends TestCase {
 
     /**
      * @depends testWantsPrivilegeLevel
+     * @depends testAddUser
      */
     public function testDeletePrivilegeRequest() {
 
         $testuser = new User(
-            'test1',
+            'test1@koko',
             'test2',
             'test3',
             0
