@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container">
         {% if message != "" %}
             <div class="alert alert-{{messageStatus}}">{{message}}</div>
         {% endif %}
-        <a href="./login">Login here</a>
+        <a href="./login">Logg inn her</a>
         <h1>Registrer deg her</h1>
-        <form action="src/registerFormHandler.php" method="post">
-            <label for="username">username: </label><input name="username" type="text"/><br/>
-            <label for="firstname">firstname: </label><input name="firstname" type="text"/><br/>
-            <label for="lastname">lastname: </label><input name="lastname" type="text"/><br/>
-            <label for="password">password: </label><input name="password" type="password"/><br/>
-            <label for="privilege_level">I am a lecturer: </label><input name="wants_lecturer" type="checkbox"/><br/>
-            <input type="submit" value="Register!">
+        <form action="src/registerFormHandler.php" method="post" style="display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto auto auto auto auto">
+            <!-- Secure that it is indeed an email by using the "email" type  -->
+            <label for="username">brukernavn (email): </label><input name="username" type="email"/>
+            <label for="firstname">fornavn: </label><input name="firstname" type="text"/>
+            <label for="lastname">etternavn: </label><input name="lastname" type="text"/>
+            <label for="password">passord: </label><input name="password" type="password"/>
+            <label for="privilege_level">Jeg er foreleser: </label><input name="wants_lecturer" type="checkbox"/>
+            <input type="submit" value="Registrer!">
         </form>
     </div>
 </body>
