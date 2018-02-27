@@ -33,6 +33,7 @@
 * Do the steps above (the first step is unnecessary).
 * The project also needs write access to the `db_data` directory. This is where the database will end up.
 * You need to have `docker` and `docker-compose` installed.
+* You need to install the database somehow.. this is not automatic. `docker exec -it <name-of-db-container> bash` and adding it manually is one alternative.
 * `docker-compose up -d` should now build and run the service. Check `docker-compose.yml` file for details.
 
 ## Test

@@ -12,8 +12,11 @@ class Constants {
     /**
      * File-constants
      */
-    const MAX_FILESIZE_VIDEO = 5000000;  // MAX video-filesize in bytes
-    const MAX_FILESIZE_THUMBNAIL = 61440;   // MAX thumbnail-filesize in bytes
+    // MAX video-filesize in bytes (1G)
+    const MAX_FILESIZE_VIDEO = 1000000000;  
+
+    // MAX thumbnail-filesize in bytes (ca. 16M)
+    const MAX_FILESIZE_THUMBNAIL = 16777215;   
 
 
     /**

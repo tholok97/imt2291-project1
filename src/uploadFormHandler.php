@@ -27,7 +27,7 @@ if ($res['status'] == 'ok') {
     header('Location: ../');
     exit();
 } else {
-    $sessionManager->put("message", "Kunne ikke laste opp video");
+    $sessionManager->put("message", "Kunne ikke laste opp video : " . $res['errorMessage']);
     $sessionManager->put('messageStatus', "danger");
     header('Location: ../upload');
     exit();
