@@ -7,9 +7,6 @@
     <body style='text-align: center;'>
         {% include 'navbar.twig' %}
         <div class='container'>
-            {% if message != "" %}
-                <div class="alert alert-{{messageStatus}}">{{message}}</div>
-            {% endif %}
             <h1>Avansert søk</h1>
             <form action="src/searchFormHandler.php" method="post">
                 <label for="searchText">Søk:</label> <input type="text" name="searchText" id="searchText">
