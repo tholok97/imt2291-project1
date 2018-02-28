@@ -29,9 +29,19 @@ $ret = $userManager->addUser($user, $_POST['password']);
 // if not -> reload page
 if ($ret['status'] == 'ok') {
 
+    $wants_privilege = 0;
+    if ($_POST['privilege'] == 'lecturer') {
+        $wants_privilege = 1;
+    }
+    if ($_POST['privilege'] == 'admin') {
+        $wants_privilege = 2;
+    }
+
+
+
     // if the user wants privilege -> register it in the db 
-    if (isset($_POST['wants_lecturer'])) {
-        $privilege_ret = $userManager->requestPrivilege($ret['uid'], 1);
+    if ($wants_privilege > 0) {
+        $privilege_ret = $userManager->requestPrivilege($ret['uid'], $wants_privilege);
     }
 
     // TODO: currently ignores it if registering privilege fails....
