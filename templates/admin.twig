@@ -19,11 +19,19 @@
         <!-- for each want, show -->
         {% for request in wantsPrivilege %}
 
-        <b>{{request.user.username}}</b> wants privilege {{request.wouldLike}} 
+        <b>{{request.user.username}}</b> vil bli
+        
+        {% if request.wouldLike == 1 %}
+        lærer 
+        {% elseif request.wouldLike == 2 %}
+        admin 
+        {% endif %}
+        
+        
         <form method="post" action="src/privilegeRequestHandler.php">
             <input type="hidden" name="uid" value="{{request.user.uid}}"/>
             <input type="hidden" name="privilege_level" value="{{request.wouldLike}}"/>
-            <input type="submit" value="Grant" />
+            <input type="submit" value="Tillat" />
         </form>
         
         <br>
