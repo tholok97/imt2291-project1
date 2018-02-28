@@ -8,9 +8,6 @@
     <body>
         {% include 'navbar.twig' %}
         <div class="container">
-            {% if message != "" %}
-            <div class="alert alert-{{messageStatus}}">{{message}}</div>
-        {% endif %}
             <h1 style='text-align: center;'>Søkeresultater</h1>
 
             <h1>Søkeresultat for "{{searchText}}"</h1>
