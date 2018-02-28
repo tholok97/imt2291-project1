@@ -52,7 +52,7 @@ class VideoManagerTest extends TestCase {
     public function testComment() {
         // make test user (is needed to upload a video)
         $user = new User(
-            'testuser', 
+            'testuser@e', 
             'firstname', 
             'secondname', 
             2
@@ -68,7 +68,7 @@ class VideoManagerTest extends TestCase {
             "Couldn't add valid user :" . $ret['message']
         );
 
-        $ret = $this->userManager->login("testuser", $password);
+        $ret = $this->userManager->login("testuser@e", $password);
 
         $this->assertEquals(
             'ok',
@@ -118,7 +118,7 @@ class VideoManagerTest extends TestCase {
     public function testRate() {
         // make test user (is needed to upload a video)
         $user = new User(
-            'testuser', 
+            'testuser@e', 
             'firstname', 
             'secondname', 
             2
@@ -134,7 +134,7 @@ class VideoManagerTest extends TestCase {
             "Couldn't add valid user :" . $ret['message']
         );
 
-        $ret = $this->userManager->login("testuser", $password);
+        $ret = $this->userManager->login("testuser@e", $password);
 
         $this->assertEquals(
             'ok',
@@ -146,7 +146,7 @@ class VideoManagerTest extends TestCase {
 
         // make test user 2 (is needed to rate the same video twice)
         $user = new User(
-            'testuser2', 
+            'testuser2@e', 
             'firstname2', 
             'secondname2', 
             0
@@ -162,7 +162,7 @@ class VideoManagerTest extends TestCase {
             "Couldn't add valid user :" . $ret['message']
         );
 
-        $ret = $this->userManager->login("testuser2", $password);
+        $ret = $this->userManager->login("testuser2@e", $password);
 
         $this->assertEquals(
             'ok',
@@ -275,7 +275,7 @@ class VideoManagerTest extends TestCase {
     public function testSearch() {
         // make test user (is needed to upload a video)
         $user = new User(
-            'testuser', 
+            'testuser@e', 
             'firstname', 
             'secondname', 
             2
@@ -291,7 +291,7 @@ class VideoManagerTest extends TestCase {
             "Couldn't add valid user :" . $ret['message']
         );
 
-        $ret = $this->userManager->login("testuser", $password);
+        $ret = $this->userManager->login("testuser@e", $password);
 
         $this->assertEquals(
             'ok',
@@ -363,7 +363,7 @@ class VideoManagerTest extends TestCase {
     function testUpdateAndGet() {
         // make test user (is needed to upload a video)
         $user = new User(
-            'testuser', 
+            'testuser@e', 
             'firstname', 
             'secondname', 
             2
@@ -379,7 +379,7 @@ class VideoManagerTest extends TestCase {
             "Couldn't add valid user :" . $ret['message']
         );
 
-        $ret = $this->userManager->login("testuser", $password);
+        $ret = $this->userManager->login("testuser@e", $password);
 
         $this->assertEquals(
             'ok',
