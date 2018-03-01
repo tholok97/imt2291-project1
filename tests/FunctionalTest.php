@@ -322,6 +322,15 @@ class FunctionalTests extends TestCase {
 
     /**
      * login, add 3 videos and rearrange them (put the last one at the front)
+     *
+     *
+     * -- Some explanation: --
+     *  Our system allows you to reposition videos by swapping the positions of 
+     *  two videos at a time. This is what we're testing here. The UI has 
+     *  you entering in the position of videos to swap, and then you "submit" 
+     *  to swap. 
+     *
+     *
      * @depends testCanLogin
      * @depends testAddVideo
      * @depends testAddPlaylist
@@ -435,7 +444,74 @@ class FunctionalTests extends TestCase {
 
         // REARRANGE VIDEOS
 
-        //....
+
+        // move to admin page for playlist
+        $this->session->visit($this->baseUrl . '/playlists');
+
+        $page = $this->session->getPage();
+
+
+
+
+        // click button that takes us to playlist page
+        $xpath = '//h4[text()[contains(.,"' . $this->testPlaylistTitleString . '")]]/../form';
+        $form = $this->session->getPage()->find('xpath', $this->session->getSelectorsHandler()->selectorToXpath('xpath', $xpath));
+        $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to locate view playlist form');
+        $form->submit();
+
+
+
+
+        $page = $this->session->getPage();
+
+
+
+
+        // move to admin page
+        $form = $page->find('css', '.adminButton');
+        $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to move to admin page for playlist');
+        $form->submit();
+
+
+        $page = $this->session->getPage();
+
+
+
+
+
+        // fill out rearrange form
+        $form = $page->find('css', '.rearrangeForm');
+        $this->assertInstanceOf(NodeElement::Class, $form, '');
+
+        $page->find('css', 'input[name="position1"]')->setValue(1);
+        $page->find('css', 'input[name="position2"]')->setValue(3);
+        // ignore thumbnail completely... set to empty string in db
+
+        $form->submit();
+
+
+
+        $page = $this->session->getPage();
+
+
+
+        // ASSERT THAT VIDEOS ARE NOW REARRANGED
+
+        // assert that somewhere on the screen there is now the text '1 - <thirdtitle>' and '3 - <firsttitle>' 
+        // (because they should be swapped
+
+        // (this "somewhere" is actually the list of videos (where you can delete). 
+        // Open the admin page for a playlist with videos in it to see)
+
+
+        $xpath = '//*[contains(.,"1 - ' . $testvideos[2]['title'] . '")]';
+        $form = $this->session->getPage()->find('xpath', $this->session->getSelectorsHandler()->selectorToXpath('xpath', $xpath));
+        $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to assert that videos were actually swapped');
+
+        $xpath = '//*[contains(.,"3 - ' . $testvideos[0]['title'] . '")]';
+        $form = $this->session->getPage()->find('xpath', $this->session->getSelectorsHandler()->selectorToXpath('xpath', $xpath));
+        $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to assert that videos were actually swapped');
+
 
     }
 
