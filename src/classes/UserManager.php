@@ -34,7 +34,7 @@ class UserManager {
         // prepare ret
         $ret['status'] = 'fail';
         $ret['uid'] = null;
-        $ret['message'] = '';
+        $ret['message'] = 'test';
 
         try {
 

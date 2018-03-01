@@ -5,142 +5,212 @@ use PHPUnit\DbUnit\TestCaseTrait;
 use Behat\Mink\Element\DocumentElement;
 use Behat\Mink\Element\NodeElement;
 
-require_once 'vendor/autoload.php';
-require_once 'classes/DB.php';
-require_once 'classes/User.php';
-/**
- * Class contains all functional tests for this web application.
- *
- */
+require_once dirname(__FILE__) . '/../src/classes/DB.php';
+require_once dirname(__FILE__) . '/../vendor/autoload.php';
+
+
+
 class FunctionalTests extends TestCase {
-  /* Change this to suite your server setup */
-  protected $baseUrl = "http://localhost/imt2291/uke4_lab_losningsforslag/index.php";
-  protected $session;
-  protected $user, $userData;
+    protected $baseUrl = "http://localhost/imt2291-project1/";
+    protected $session;
+    protected $user;
+    protected $userData;
+    protected $dbh;
 
-  /**
-   * Initiates the testing session, this is done before each test.
-   * Starts a new session.
-   */
-  protected function setup() {
-    $driver = new \Behat\Mink\Driver\GoutteDriver();
-    $this->session = new \Behat\Mink\Session($driver);
-    $this->session->start();
-    $db = DB::getDBConnection();
-    $familyName = md5(date('l jS \of F Y h:i:s A'));  // Create random 32 character string
-    $givenName = md5(date('l jS h:i:s A \of F Y '));  // Create random 32 character string
-    $this->userData['givenName'] = $givenName;
-    $this->userData['familyName'] = $familyName;
-    $this->userData['uname'] = $givenName.'@'.$familyName.'.test';
-    $this->userData['pwd'] = 'MittHemmeligePassord';
 
-    $this->user = new User($db);
-  }
+    protected $testusername = "usernameVERYVERYUNIQUESOUNIQUEWOW";
+    protected $testpassword = "passwordDAAAAMNTHATISONEUNIQUEPASSWORD";
+    protected $testuid;
 
-  /**
-   * Check that we get the right initial page (not logged in)
-   */
-  public function testInitialPage() {
-    $this->session->visit($this->baseUrl);
-    $page = $this->session->getPage();
+    protected $testPlaylistTitleString = "playlistTitleOOOOHSOUNIQUEWOWWW";
 
-    $this->assertInstanceOf(
-                           NodeElement::Class,
-                           $page->find('css', 'p'),
-                           'Should have a p tag in this page'
-                         );
-    $this->assertEquals('Ikke logget inn', $page->find('css', 'p')->getText(),
-                        'Wrong text in paragraph');
-  }
 
-  /**
-   * Get default page, submit the login form, check that we get the
-   * logged in page, then reload the page and check that we are still
-   * logged in.
-   */
-  public function testCanLogIn() {
-    // Create user for test
-    $userid = $this->user->addUser($this->userData)['id'];
 
-    // Go to login page
-    $this->session->visit($this->baseUrl);
-    $page = $this->session->getPage();
+    protected function setup() {
 
-    // Logging in
-    $form = $page->find('css', '#login');
-    $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to locate login form');
+        $driver = new \Behat\Mink\Driver\GoutteDriver();
+        $this->session = new \Behat\Mink\Session($driver);
+        $this->session->start();
 
-    $page->find('css', '#loginUname')->setValue($this->userData['uname']);  // Fill inn username
-    $page->find('css', '#loginPwd')->setValue($this->userData['pwd']);      // Fill in password
-    $form->submit();
+        $this->dbh = DB::getDBConnection();
 
-    $page = $this->session->getPage();
+        // assert that it could connect
+        if ($this->dbh == null) {
+            $this->fail("Couldn't make connection to database");
+        }
 
-    // Check that we are logged in
-    $this->assertInstanceOf(
-                           NodeElement::Class,
-                           $page->find('css', '#logout'),
-                           'Unable to locate the logout form, means we are not logged in'
-                         );
 
-    // Reload the page
-    $this->session->visit($this->baseUrl);
-    $page = $this->session->getPage();
+        // INSERT TEST USERS
 
-    // Check that we are still logged in
-    $this->assertInstanceOf(
-                           NodeElement::Class,
-                           $page->find('css', '#logout'),
-                           'Logout form missing, Logged out after reload'
-                         );
 
-    // Remove user when test is done
-    $this->user->deleteUser($userid);
-  }
 
-  /**
-   * Test that we can log out, also that we stay logged out when
-   * page is reloaded.
-   */
-  public function testCanLogOut() {
-    // Create user for test
-    $userid = $this->user->addUser($this->userData)['id'];
+        // generate hash
+        $hash = password_hash($this->testpassword, PASSWORD_DEFAULT);
 
-    $this->session->visit($this->baseUrl);
-    $page = $this->session->getPage();
+        // insert testuser into database
+        $stmt = $this->dbh->prepare('
+            INSERT INTO user (username, firstname, lastname, password_hash, privilege_level)
+            VALUES (:username, "firstname", "lastname", :hash, 2)
+        ');
 
-    // Logg in
-    $form = $page->find('css', '#login');
-    $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to locate login form');
-    $page->find('css', '#loginUname')->setValue($this->userData['uname']);  // Fill inn username
-    $page->find('css', '#loginPwd')->setValue($this->userData['pwd']);      // Fill in password
-    $form->submit();
+        $stmt->bindParam(':username', $this->testusername);
+        $stmt->bindValue(':hash', $hash);
 
-    $page = $this->session->getPage();
 
-    // Logg out
-    $form = $page->find('css', '#logout');
-    $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to locate logout form');
-    $form->submit();
+        if (!$stmt->execute()) {
+            $this->fail("Couldn't insert test user : " . $stmt->errorCode());
+        }
 
-    // Check that we are logged out
-    $this->assertInstanceOf(
-                           NodeElement::Class,
-                           $page->find('css', '#login'),
-                           'Missing login form, means we are still logged in'
-                         );
+        $this->testuid = $this->dbh->lastInsertId();
 
-    // Relaod the page, should still be logged out
-    $this->session->visit($this->baseUrl);
-    $page = $this->session->getPage();
+        if (!password_verify($this->testpassword, $hash)) {
+            $this->fail("Password isn't right..");
+        }
+    }
 
-    $this->assertInstanceOf(
-                           NodeElement::Class,
-                           $page->find('css', '#login'),
-                           'Login form missing after reload, means we are not truly logged out'
-                         );
+    protected function teardown() {
+        if (!$this->dbh->query("DELETE FROM maintains WHERE uid=$this->testuid")) {
+            $this->fail("Couldn't clean up database (maintains)..");
+        }
+        if (!$this->dbh->query("delete from playlist where title='$this->testPlaylistTitleString'")) {
+            $this->fail("couldn't clean up database (playlist)..");
+        }
+        if (!$this->dbh->query("delete from user where uid=$this->testuid")) {
+            $this->fail("couldn't clean up database (user)..");
+        }
+    }
 
-    // Remove user when test is done
-    $this->user->deleteUser($userid);
-  }
+    /**
+     * Test that can load login page and assert that header is "Login page"
+     */
+    public function testInitialPage() {
+
+
+        $this->session->visit($this->baseUrl);
+        $page = $this->session->getPage();
+
+        $this->assertInstanceOf(
+            NodeElement::Class,
+            $page->find('css', 'h1'),
+            'Should have a h1'
+        );
+
+
+        $header = $page->find('css', 'h1');
+        $this->assertEquals(
+            'Login page',
+            $header->getText(),
+            "Header should be 'Login page'"
+        );
+
+    }
+
+    protected function loginToSite() {
+
+        // Go to login page
+        $this->session->visit($this->baseUrl);
+        $page = $this->session->getPage();
+
+
+
+        // Logging in
+        $form = $page->find('css', 'form');
+        $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to locate login form');
+
+        $page->find('css', 'input[name="username"]')->setValue($this->testusername);
+        $page->find('css', 'input[name="password"]')->setValue($this->testpassword);
+        $form->submit();
+
+        $page = $this->session->getPage();
+
+        return $page;
+    }
+
+
+    /**
+     * Test can login
+     */
+    public function testCanLogin() {
+
+
+        $page = $this->loginToSite();
+
+
+        // Check that we are logged in
+        $this->assertInstanceOf(
+            NodeElement::Class,
+            $page->find('css', '.alert-success'),
+            "Unable to find 'Logged in!' msg"
+        );
+
+
+        // Reload the page
+        $this->session->visit($this->baseUrl);
+        $page = $this->session->getPage();
+
+
+        // Check that we are logged in
+        $this->assertEquals(
+            "Spillelister du abonnerer på:",
+            $page->find('css', 'h1')->getText(),
+            "Unable to assert that logged in"
+        );
+
+    }
+
+
+
+    /**
+     * Test if can add playlist through UI
+     * @depends testCanLogin
+     */
+    public function testAddPlaylist() {
+
+
+        // login
+        $page = $this->loginToSite();
+
+
+        // move to createPlaylist
+        $this->session->visit('./createPlaylist');
+
+        $page = $this->session->getPage();
+
+        // Check that we are logged in
+        $this->assertInstanceOf(
+            NodeElement::Class,
+            $page->find('css', 'h1'),
+            "Unable to find header in playlist page"
+        );
+        $this->assertEquals(
+            "Lag spilleliste",
+            $page->find('css', 'h1')->getText(),
+            "h1 should indicate is on create playlist page"
+        );
+
+
+        // FILL OUT FORM
+
+        $form = $page->find('css', '.createPlaylistForm');
+        $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to locate createPlaylist form');
+
+        $page->find('css', 'input[name="title"]')->setValue($this->testPlaylistTitleString);
+        $page->find('css', 'input[name="description"]')->setValue($this->testPlaylistTitleString);
+        // ignore thumbnail completely... set to empty string in db
+
+        $form->submit();
+
+
+        // get page
+        $page = $this->session->getPage();
+
+        // assert success
+        $this->assertInstanceOf(
+            NodeElement::Class,
+            $page->find('css', '.alert-success'),
+            "creating of playlist didn't go well (message not success)"
+        );
+
+    }
+
 }
