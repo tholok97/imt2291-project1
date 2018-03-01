@@ -8,12 +8,31 @@
     <body style='text-align: center;'>
         {% include 'navbar.twig' %}
         <div class="container">
-            
+
 
             <h1>{{video.title}}</h1>
-            {% if user.uid == teacher.user.uid %}
-            <a href="{{video.vid}}/edit" class="btn btn-info">Rediger</a>
+
+            <!-- show add to playlist field for teachers -->
+            {% if user.privilege_level > 0 %}
+            <br> <br> <br>
+            <h4>Legg videoen til i en spilleliste du administrerer</h4>
+            <form action='../src/addToPlaylistHandler.php' method="post">
+                <label for="playlistTitle">Tittel på spilleliste: </label><input type="text" name="playlistTitle">
+                <input type="hidden" name="vid" value="{{video.vid}}">
+                <input type="hidden" name="uid" value="{{user.uid}}">
+                <input type='submit' name='submit' value="Legg til"/><br /><br/>
+            </form>
+            <br>
             {% endif %}
+
+            <!-- show edit button for teachers -->
+            {% if user.uid == teacher.user.uid %}
+            <h4>Rediger video</h4>
+            <a href="{{video.vid}}/edit" class="btn btn-info">Rediger</a>
+            <br> <br> <br>
+            {% endif %}
+
+
             <div class="row">
                 <div class="col-md-12">
                     <video width="768" height="432" poster="../src/getVideoThumbnail.php?vid={{video.vid}}"controls>
