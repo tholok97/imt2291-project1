@@ -11,8 +11,8 @@
     <div class='container'>
         <h1>Last opp video</h1>
         <form action="./src/uploadFormHandler.php" method="post" enctype="multipart/form-data">
-            <label for="pickFile">Velg en fil (anbefaler en MP4 fil med h.264-video og MP3- eller AAC-lyd for best kompabilitet): </label><input type="file" name="fileToUpload" id="pickFile"><br>
-            <label for="pickThumbnail">Velg Thumbnail:</label> <input type="file" name="thumbnail" id="pickThumbnail"><br />
+            <label for="pickFile">Velg en fil (anbefaler en MP4 fil med h.264-video og MP3- eller AAC-lyd for best kompabilitet) (maks {{maxSizeVideo}}GB): </label><input type="file" name="fileToUpload" id="pickFile"><br>
+            <label for="pickThumbnail">Velg Thumbnail (maks {{maxSizeThumbnail}}MB):</label> <input type="file" name="thumbnail" id="pickThumbnail"><br />
             <label for="title">Tittel:</label> <input type="text" name="title" id="title" /><br />
             <label for="descr">Beskrivelse:</label><br /><textarea name="descr" id="descr" cols="100" rows="10"></textarea><br />
             <label for="topic">Tema:</label> <input type="text" name="topic" id="topic" /><br />

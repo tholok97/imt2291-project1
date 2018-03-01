@@ -8,6 +8,7 @@ require_once dirname(__FILE__) . '/src/functions/functions.php';
 require_once dirname(__FILE__) . '/src/classes/VideoManager.php';
 require_once dirname(__FILE__) . '/src/classes/SessionManager.php';
 require_once dirname(__FILE__) . '/src/classes/PlaylistManager.php';
+require_once dirname(__FILE__) . '/src/constants.php';
 /*
  * Entry-point to the entire site. Users are shown the sites they want using 
  * the "page" GET paramter (RewriteRule makes this transparent to the user).
@@ -86,7 +87,7 @@ $param2 = htmlspecialchars(@$_GET['param2']);
 $ret_user = @$userManager->getUser($_SESSION['uid']);
 
 
-// The ye old huge if-else of stuff..
+// ye old huge if-else of stuff..
 
 if ($page == 'register') {
 
@@ -254,6 +255,9 @@ if ($page == 'register') {
         break;
     case 'upload':
         if ($_SESSION['privilege_level'] > 0) {
+            // Max size video in GB, max size thumbnail in MB
+            $twig_arguments['maxSizeVideo'] = round(Constants::MAX_FILESIZE_VIDEO / 1000000000);
+            $twig_arguments['maxSizeThumbnail'] = round(Constants::MAX_FILESIZE_THUMBNAIL / 1000000);
             $twig_file_to_render = 'upload.twig';
         } else {
             $sessionManager->put('message', "Du får ikke lov til å gjøre det!");
