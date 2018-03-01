@@ -10,7 +10,7 @@
     {% include 'navbar.twig' %}
     <div class='container'>
         <h1>Last opp video</h1>
-        <form action="./src/uploadFormHandler.php" method="post" enctype="multipart/form-data">
+        <form class="uploadForm" action="./src/uploadFormHandler.php" method="post" enctype="multipart/form-data">
             <label for="pickFile">Velg en fil (anbefaler en MP4 fil med h.264-video og MP3- eller AAC-lyd for best kompabilitet): </label><input type="file" name="fileToUpload" id="pickFile"><br>
             <label for="pickThumbnail">Velg Thumbnail:</label> <input type="file" name="thumbnail" id="pickThumbnail"><br />
             <label for="title">Tittel:</label> <input type="text" name="title" id="title" /><br />

@@ -3,16 +3,19 @@ require_once dirname(__FILE__) . '/../src/classes/DB.php';
 require_once dirname(__FILE__) . '/../src/classes/VideoManager.php';
 require_once dirname(__FILE__) . '/../src/classes/Video.php';
 
-function uploadVideoTestdata($title, $description, $uid, $topic, $course_code) {
+function uploadVideoTestdata($title, $description, $uid, $topic, $course_code, $db = null) {
     $ret['status'] = 'fail';
     $ret['vid'] = null;
     $ret['errorMessage'] = null;
         
-    $db = DB::getDBConnection(
-        Config::DB_TEST_DSN, 
-        Config::DB_TEST_USER,
-        Config::DB_TEST_PASSWORD
-    );
+    // if db isn't specified to be otherwise -> default to be test db
+    if ($db == null) {
+        $db = DB::getDBConnection(
+            Config::DB_TEST_DSN, 
+            Config::DB_TEST_USER,
+            Config::DB_TEST_PASSWORD
+        );
+    }
 
     // Check if connection to database was successfully established.
     if ($db == null) {

@@ -7,6 +7,7 @@ use Behat\Mink\Element\NodeElement;
 
 require_once dirname(__FILE__) . '/../src/classes/DB.php';
 require_once dirname(__FILE__) . '/../vendor/autoload.php';
+require_once dirname(__FILE__) . '/testFunctions.php';
 
 
 
@@ -69,6 +70,9 @@ class FunctionalTests extends TestCase {
     }
 
     protected function teardown() {
+        if (!$this->dbh->query("DELETE FROM video WHERE uid=$this->testuid")) {
+            $this->fail("Couldn't clean up database (maintains)..");
+        }
         if (!$this->dbh->query("DELETE FROM maintains WHERE uid=$this->testuid")) {
             $this->fail("Couldn't clean up database (maintains)..");
         }
@@ -210,6 +214,89 @@ class FunctionalTests extends TestCase {
             $page->find('css', '.alert-success'),
             "creating of playlist didn't go well (message not success)"
         );
+
+    }
+
+
+    /**
+     * @depends testCanLogin
+     */
+    public function testAddVideo() {
+
+        $page = $this->loginToSite();
+
+
+        $page = $this->session->visit('./upload');
+
+        $page = $this->session->getPage();
+
+
+
+        /*
+         * Assert that form is there, but don't try and add through it. 
+         * Difficult to get video to work. 
+         * Instead add directly through VideoManager class below
+         */
+
+        $form = $page->find('css', '.uploadForm');
+        $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to locate createPlaylist form');
+
+        $this->assertInstanceOf(NodeElement::Class, $page->find('css', 'input[name="title"]'), "title field not found");
+        $this->assertInstanceOf(NodeElement::Class, $page->find('css', 'textarea[name="descr"]'), "descr field not found");
+        $this->assertInstanceOf(NodeElement::Class, $page->find('css', 'input[name="topic"]'), "topic field not found");
+        $this->assertInstanceOf(NodeElement::Class, $page->find('css', 'input[name="course"]'), "course field not found");
+        $this->assertInstanceOf(NodeElement::Class, $page->find('css', 'input[name="submit"]'), "submit button not found");
+
+
+
+
+
+        // testvideos
+        $testvideos[0]['title'] = "title1";
+        $testvideos[1]['title'] = "title2";
+        $testvideos[2]['title'] = "title3";
+
+
+
+
+        // add directly through video manager class (Using function provided
+        // by Yngve)
+
+        for ($i = 0; $i < count($testvideos); ++$i) {
+
+            $ret = uploadVideoTestdata($testvideos[$i]['title'], "This is a test video", $this->testuid, "Testvideos", "IMT2263", $this->dbh);
+            
+            $this->assertEquals(
+                'ok',
+                $ret['status'],
+                'Uploading video not ok: ' . $ret['errorMessage']
+            );
+
+            $testvideos[$i]['vid'] = $ret['vid'];
+
+        }
+
+
+
+        // go to all videos page and assert that videos are here
+
+        $this->session->visit('./videos');
+        $page = $this->session->getPage();
+
+
+
+        // assert that every test video is present in "all videos"
+
+        foreach ($testvideos as $testvideo) {
+            $xpath = '//h4/text()[contains(.,' . $testvideo['title'] . ')]';
+
+            $this->assertInstanceOf(
+                NodeElement::Class,
+                $this->session->getPage()->find('xpath', $this->session->getSelectorsHandler()->selectorToXpath('xpath', $xpath)),
+                "Video should be present in list of all videos"
+            );
+
+        }
 
     }
 
