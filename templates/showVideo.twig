@@ -16,7 +16,7 @@
             {% if user.privilege_level > 0 %}
             <br> <br> <br>
             <h4>Legg videoen til i en spilleliste du administrerer</h4>
-            <form action='../src/addToPlaylistHandler.php' method="post">
+            <form class="addToPlaylistForm" action='../src/addToPlaylistHandler.php' method="post">
                 <label for="playlistTitle">Tittel på spilleliste: </label><input type="text" name="playlistTitle">
                 <input type="hidden" name="vid" value="{{video.vid}}">
                 <input type="hidden" name="uid" value="{{user.uid}}">

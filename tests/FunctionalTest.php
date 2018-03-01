@@ -16,12 +16,22 @@ class FunctionalTests extends TestCase {
     protected $session;
     protected $user;
     protected $userData;
-    protected $dbh;
+
+    /**
+     * vids of added videos. used in teardown (to properly teardown 
+     * in_playlist for example)
+     */
+    protected $vidsOfAddedVideos = array();
 
 
     protected $testusername = "usernameVERYVERYUNIQUESOUNIQUEWOW";
     protected $testpassword = "passwordDAAAAMNTHATISONEUNIQUEPASSWORD";
     protected $testuid;
+
+    /**
+     * set when creating playlist. Used in teardown
+     */
+    protected $testpid = -1;
 
     protected $testPlaylistTitleString = "playlistTitleOOOOHSOUNIQUEWOWWW";
 
@@ -70,8 +80,16 @@ class FunctionalTests extends TestCase {
     }
 
     protected function teardown() {
+
+        // remove "in_playlist" entries that reference vids we've created
+        foreach ($this->vidsOfAddedVideos as $vid) {
+            if (!$this->dbh->query("DELETE FROM in_playlist WHERE vid=$vid")) {
+                $this->fail("Couldn't clean up database (in_playlist)..");
+            }
+        }
+
         if (!$this->dbh->query("DELETE FROM video WHERE uid=$this->testuid")) {
-            $this->fail("Couldn't clean up database (maintains)..");
+            $this->fail("Couldn't clean up database (video)..");
         }
         if (!$this->dbh->query("DELETE FROM maintains WHERE uid=$this->testuid")) {
             $this->fail("Couldn't clean up database (maintains)..");
@@ -297,6 +315,127 @@ class FunctionalTests extends TestCase {
             );
 
         }
+
+    }
+
+
+
+    /**
+     * login, add 3 videos and rearrange them (put the last one at the front)
+     * @depends testCanLogin
+     * @depends testAddVideo
+     * @depends testAddPlaylist
+     */
+    public function testAddToPlaylistAndRearrangeVideos() {
+
+
+        $page = $this->loginToSite();
+
+
+        // ADD THE VIDEOS (this is tested in "testAddVideo")
+
+        // testvideos
+        $testvideos[0]['title'] = "title1";
+        $testvideos[1]['title'] = "title2";
+        $testvideos[2]['title'] = "title3";
+
+
+
+
+        // add directly through video manager class (Using function provided
+        // by Yngve)
+
+        for ($i = 0; $i < count($testvideos); ++$i) {
+
+            $ret = uploadVideoTestdata($testvideos[$i]['title'], "This is a test video", $this->testuid, "Testvideos", "IMT2263", $this->dbh);
+            
+            $this->assertEquals(
+                'ok',
+                $ret['status'],
+                'Uploading video not ok: ' . $ret['errorMessage']
+            );
+
+            $testvideos[$i]['vid'] = $ret['vid'];
+
+            array_push($this->vidsOfAddedVideos, $ret['vid']);
+        }
+
+
+
+        // ADD PLAYLIST (this code is tested in "testAddPlaylist")
+
+
+        // move to createPlaylist
+        $this->session->visit('./createPlaylist');
+
+        $page = $this->session->getPage();
+
+        // FILL OUT FORM
+
+        $form = $page->find('css', '.createPlaylistForm');
+        $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to locate createPlaylist form');
+
+        $page->find('css', 'input[name="title"]')->setValue($this->testPlaylistTitleString);
+        $page->find('css', 'input[name="description"]')->setValue($this->testPlaylistTitleString);
+        // ignore thumbnail completely... set to empty string in db
+
+        $form->submit();
+
+
+
+        /*
+         * 3 videos and 1 playlists now exist in the system.
+         */
+
+
+
+        // ADD VIDEOS TO PLAYLIST
+
+
+        // move to each video page and add video to playlist
+
+        foreach ($testvideos as $testvideo) {
+
+            $this->session->visit($this->baseUrl . '/videos/' . $testvideo['vid']);
+
+
+            $page = $this->session->getPage();
+
+
+            // assert that form needed to add to playlist is present
+            $this->assertInstanceOf(
+                NodeElement::Class,
+                $page->find('css', '.addToPlaylistForm'),
+                "add to playlist form field not present"
+            );
+
+
+            // FILL OUT FORM
+            $form = $page->find('css', '.addToPlaylistForm');
+            $this->assertInstanceOf(NodeElement::Class, $form, 'Unable to locate addToPlaylist form');
+
+            $page->find('css', 'input[name="playlistTitle"]')->setValue($this->testPlaylistTitleString);
+            // ignore thumbnail completely... set to empty string in db
+
+            $form->submit();
+
+
+
+            // reload page -> check that alert is success
+            $page = $this->session->getPage();
+            $this->assertInstanceOf(
+                NodeElement::Class,
+                $page->find('css', '.alert-success'),
+                "Adding wasn't a success!? no success message"
+            );
+        }
+
+
+
+
+        // REARRANGE VIDEOS
+
+        //....
 
     }
 
