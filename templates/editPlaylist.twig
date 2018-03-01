@@ -30,7 +30,7 @@
 
         <br><br>
         <h3>Bytt posisjonen til to videoer:</h3>
-        <form action="./src/swapVideosHandler.php" method="post">
+        <form class="rearrangeForm" action="./src/swapVideosHandler.php" method="post">
             <input type="hidden" name="pid" value="{{playlist.pid}}"/>
             <label for="position1">Posisjon til første video å bytte</label><input name="position1" type="text"/><br/>
             <label for="position2">Posisjon til andre video å bytte</label><input name="position2" type="text"/><br/>

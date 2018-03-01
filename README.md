@@ -21,6 +21,7 @@
 				sudo apt install composer
 				sudo apt install php7.0-mbstring
 				sudo apt install php7.0-xml
+                sudo apt-get install php7.0-zip
 	
 * Add a `config.php` file to the root directory of the project. It is used to provide environment-dependant constants. It should look like the file `config_example.php` in docs. One way to make it is to run the command `cp docs/config_example.php config.php`. Alter the `config.php` file to fit your environment.
 * Import the contents of `docs/export_lowercase.sql` into two new databases, one for production and one for testing. (called `imt2291_project1_db` and `imt2291_project1_test` for example)

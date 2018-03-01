@@ -7,6 +7,9 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     </head>
     <body>
+        {% if message != "" %}
+        <div class="alert alert-{{messageStatus}}">{{message}}</div>
+        {% endif %}
         <div class="container">
             {% if message != "" %}
             <div class="alert alert-{{messageStatus}}">{{message}}</div>

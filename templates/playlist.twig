@@ -31,7 +31,7 @@
 
             <!-- edit button -->
             {% if isMaintainer %}
-            <form action="./src/editPlaylistHandler.php" method="post">
+            <form class="adminButton" action="./src/editPlaylistHandler.php" method="post">
                 <input type="hidden" name="pid" value="{{playlist.pid}}">
                 <input type="submit" name="submit" value="Administrer denne spillelisten">
             </form>

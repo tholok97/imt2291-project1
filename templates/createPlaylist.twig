@@ -10,7 +10,7 @@
     {% include 'navbar.twig' %}
     <div class='container'>
         <h1>Lag spilleliste</h1>
-        <form action="./src/createPlaylistHandler.php" method="post" enctype="multipart/form-data">
+        <form class="createPlaylistForm" action="./src/createPlaylistHandler.php" method="post" enctype="multipart/form-data">
             <label for="title">tittel: </label><input name="title" type="text"/><br/>
             <label for="description">beskrivelse: </label><input name="description" type="text"/><br/>
             <label for="thumbnail">thumbnail: </label><input type="file" name="thumbnail"><br />

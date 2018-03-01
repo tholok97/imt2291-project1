@@ -12,7 +12,7 @@ $userManager = new UserManager(DB::getDBConnection());
 $ret = $userManager->login($_POST['username'], $_POST['password']);
 
 if ($ret['status'] == 'fail') {
-    $sessionManager->put("message", "Kunne ikke logge inn");
+    $sessionManager->put("message", "Kunne ikke logge inn ." . $ret['message']);
     $sessionManager->put('messageStatus', "danger");
     header('Location: ../');
     exit();
