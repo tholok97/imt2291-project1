@@ -427,9 +427,24 @@ if ($page == 'register') {
                 $twig_arguments['privileges'] = 'Lærer';
                 break;
             case (2):
-                $twig_arguments['privileges'] = 'admin';
+                $twig_arguments['privileges'] = 'Admin';
                 break;
             }
+            /* Gray out request buttons if wantPrivilege.
+             *
+            $ret_wants = buildWantsPrivilege($userManager)->uid;
+                // get info
+
+            // if went fine -> show want
+            // if didn't go fine -> show error
+            if ($ret_wants['status'] == 'ok') {
+                $twig_arguments['wantsPrivilege'] = $ret_wants['wantsPrivilege']->uid;
+                $twig_arguments['wantsMessage'] = $ret_wants['message'];
+            } else {
+                $twig_arguments['wantsMessage'] = "Feil ved henting av forespørsel : " . 
+                    $ret_wants['message'];
+            }
+             */
             $twig_file_to_render = 'userpage.twig';
         } else {
            // TODO:Error if not valid user id 

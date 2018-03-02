@@ -17,8 +17,15 @@
             <label for="submit"> </label><input type="submit" name="submitAction"value="Rediger min info">
             {% if privileges == "Student" %}
             <label for="submit"> </label><input type="submit" name="submitAction" value="Bli lærer">
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Bli admin">
             {% endif %}
-            <label for="submit"> </label><input type="submit" name="submitAction"value="Slett konto">
+            {% if privileges == "Lærer" %}
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Bli admin">
+            {% endif %}
+            {% if privileges == "Admin" %}
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Se forespørsler">
+            {% endif %}
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Slett konto">
         </form>
     </div>
 </body>

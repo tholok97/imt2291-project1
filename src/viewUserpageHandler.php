@@ -13,18 +13,33 @@ $userManager = new UserManager(DB::getDBConnection());
 $ret = $userManager->getUID($_POST['username']);
 
 
-// TODO: Test whether editUser, requestPrivilege, or deleteUser gets called
 
 switch($_POST['submitAction']) {
 case ("Rediger min info"):
+    header('Location: ../editPersonalInfo');
+    exit();
 case ("Bli lærer"):
     if($ret['status'] == "ok") {
         $return = $userManager->requestPrivilege($ret['uid'], 1);
 
-        //TODO: The stuff..
-        header('Location: ../');
+        header('Location: ../userpage');
         exit();
-    } // TODO: error msg
+    } // TODO: error handling
     break;
+case ("Bli admin"):
+    if($ret['status'] == "ok") {
+        $return = $userManager->requestPrivilege($ret['uid'], 2);
+
+        header('Location: ../userpage');
+        exit();
+    }
 case ("Slett konto"):
+    header('Location: ../deleteAccount');
+    exit();
+case ("Se forespørsler"):
+    header('Location: ../admin');
+    exit();
+default:
+    header('Location: ../userpage');
+    exit();
 }              
