@@ -43,6 +43,17 @@
         <br>
 
         {% endfor %}
+
+
+
+
+
+        <h1>Gjør bruker til admin: </h1>
+
+        <form method="post" action="src/makeAdminHandler.php">
+            <label for="username">Brukernavn: </label><input type="text" name="username">
+            <input type="submit" value="Gjør admin" />
+        </form>
     </div>
 </body>
 </html>
