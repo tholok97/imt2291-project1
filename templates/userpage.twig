@@ -13,12 +13,12 @@
         
             <label for="username">Brukernavn (email): {{username}}</label>  <input type="hidden" name="username" value="{{username}}"><br/>
             <label for="name">Navn: {{firstname}} {{lastname}}</label><br/>
-            <label for="privileges">Rettigheter: {{privileges}}</label><br/>
-            <label for="submit"> </label><input type="submit" value="Rediger min info">
+            <label for="privileges">Tittel: {{privileges}}</label><br/>
+            <label for="submit"> </label><input type="submit" name="submitAction"value="Rediger min info">
             {% if privileges == "Student" %}
-            <label for="submit"> </label><input type="submit" value="Bli lærer">
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Bli lærer">
             {% endif %}
-            <label for="submit"> </label><input type="submit" value="Slett konto">
+            <label for="submit"> </label><input type="submit" name="submitAction"value="Slett konto">
         </form>
     </div>
 </body>

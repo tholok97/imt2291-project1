@@ -15,14 +15,15 @@ $ret = $userManager->getUID($_POST['username']);
 
 // TODO: Test whether editUser, requestPrivilege, or deleteUser gets called
 
-switch($_POST) {
+switch($_POST['submitAction']) {
 case ("Rediger min info"):
 case ("Bli lærer"):
     if($ret['status'] == "ok") {
-        $userManager->requestPrivilege($ret['uid'], 1);
+        $return = $userManager->requestPrivilege($ret['uid'], 1);
 
         //TODO: The stuff..
-
+        header('Location: ../');
+        exit();
     } // TODO: error msg
     break;
 case ("Slett konto"):
