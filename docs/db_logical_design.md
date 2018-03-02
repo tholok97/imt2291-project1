@@ -59,7 +59,7 @@ FOREIGN KEY pid REFERENCES Playlist.pid
 * Only one lecturer uploads a video
 * Multiple lecturers can contribute to the same playlist, in which case they will all have maintenance rights to it
     * Maintenance rights are given when the playlist is created
-* The only thing differentiating the different user types in the db is their privelege level (admin doesn't store more info than a student)
+* The only thing differentiating the different user types in the db is their privilege level (admin doesn't store more info than a student)
     * Privilege level is stored as an int 0, 1 or 2 *(?)*
 * Thumbnails are stored directly in the database as small images
 * 'Emne' is interpreted as 'Course' (:
