@@ -412,6 +412,44 @@ if ($page == 'register') {
         exit();
 
         break;
+    case 'userpage':
+        $res = $userManager->getUser($ret_user['user']->uid);
+        if($res['status'] == 'ok') {
+            $twig_arguments['uid']          = $res['user']->uid;
+            $twig_arguments['username']     = $res['user']->username;
+            $twig_arguments['firstname']    = $res['user']->firstname;
+            $twig_arguments['lastname']     = $res['user']->lastname;
+            switch ($res['user']->privilege_level) {
+            case (0):
+                $twig_arguments['privileges'] = 'Student';
+                break;
+            case (1):
+                $twig_arguments['privileges'] = 'Lærer';
+                break;
+            case (2):
+                $twig_arguments['privileges'] = 'Admin';
+                break;
+            }
+            /* Gray out request buttons if wantPrivilege.
+             *
+            $ret_wants = buildWantsPrivilege($userManager)->uid;
+                // get info
+
+            // if went fine -> show want
+            // if didn't go fine -> show error
+            if ($ret_wants['status'] == 'ok') {
+                $twig_arguments['wantsPrivilege'] = $ret_wants['wantsPrivilege']->uid;
+                $twig_arguments['wantsMessage'] = $ret_wants['message'];
+            } else {
+                $twig_arguments['wantsMessage'] = "Feil ved henting av forespørsel : " . 
+                    $ret_wants['message'];
+            }
+             */
+            $twig_file_to_render = 'userpage.twig';
+        } else {
+           // TODO:Error if not valid user id 
+        }
+        break;
     default:
         $twig_file_to_render = 'notfound.twig';
     }

@@ -8,7 +8,7 @@
 </head>
 <body>
     {% include 'navbar.twig' %}
-    <div class="container">
+    <div class="container" >
     <h1>Administratorvalg</h1>
 
         <!-- if error occurred -> show message -->
@@ -31,7 +31,13 @@
         <form method="post" action="src/privilegeRequestHandler.php">
             <input type="hidden" name="uid" value="{{request.user.uid}}"/>
             <input type="hidden" name="privilege_level" value="{{request.wouldLike}}"/>
-            <input type="submit" value="Tillat" />
+            <input type="submit" name="request" value="Tillat" />
+        </form>
+
+        <form method="post" action="src/privilegeRequestHandler.php">
+            <input type="hidden" name="uid" value="{{request.user.uid}}"/>
+            <input type="hidden" name="privilege_level" value="{{request.wouldLike}}"/>
+            <input type="submit" name="request" value="Avvis" />
         </form>
         
         <br>

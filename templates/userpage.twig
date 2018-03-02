@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Min side</title>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    {% include 'navbar.twig' %}
+    <div class="container">
+        <form method="post" action="src/viewUserpageHandler.php" >
+        
+            <label for="username">Brukernavn (email): {{username}}</label>  <input type="hidden" name="username" value="{{username}}"><br/>
+            <label for="name">Navn: {{firstname}} {{lastname}}</label><br/>
+            <label for="privileges">Tittel: {{privileges}}</label><br/>
+            <label for="submit"> </label><input type="submit" name="submitAction"value="Rediger min info">
+            {% if privileges == "Student" %}
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Bli lærer">
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Bli admin">
+            {% endif %}
+            {% if privileges == "Lærer" %}
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Bli admin">
+            {% endif %}
+            {% if privileges == "Admin" %}
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Se forespørsler">
+            {% endif %}
+            <label for="submit"> </label><input type="submit" name="submitAction" value="Slett konto">
+        </form>
+    </div>
+</body>
+</html>
