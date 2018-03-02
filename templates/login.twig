@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title></title>
+        <title>Logg inn</title>
         <!-- Latest compiled and minified Bootstrap CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     </head>
@@ -13,10 +13,10 @@
         <div class="container">
             <a href="./register">Registrer her</a>
             <h1>Login page</h1>
-            <form action="src/loginFormHandler.php" method="post">
+            <form action="src/loginFormHandler.php" method="post" style="display:grid;grid-template-columns:auto auto auto;grid-template-rows:auto auto auto">
                 <label for="username">username: </label><input name="username" type="text"/><br/>
                 <label for="password">password: </label><input name="password" type="password"/><br/>
-                <input name="submit" type="submit"/>
+                <label for="submit"></label><input name="submit" type="submit"/><br/>
             </form>
         </div>
     </body>

@@ -25,7 +25,7 @@
 * Configure your apache2 php.ini config file to reflect the sizes in `src/constants.php`.
 * Import the contents of `docs/export_lowercase.sql` into two new databases, one for production and one for testing. (called `imt2291_project1_db` and `imt2291_project1_test` for example)
 * The project needs write access to the `uploadedFiles` directory.
-    * **Linux / Mac OS**: `chown -R <apache2-user> uploadedFiles`. (In lampp the user is `daemon`)
+    * **Linux / Mac OS**: `chown -R <apache2-user> uploadedFiles`. (In lampp the user is `daemon` | apache2 default user is www-data)
     * **Windows**: Dunno. Google it
 
 ## To run in docker
