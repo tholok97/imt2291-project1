@@ -413,14 +413,27 @@ if ($page == 'register') {
 
         break;
     case 'userpage':
-        $res = $userManager->getUser($_SESSION->uid);
-        $twig_arguments['uid']          = $res['uid'];
-        $twig_arguments['username']     = $res['user'];
-        $twig_arguments['firstname']    = $res['firstname'];
-        $twig_arguments['lastname']     = $res['lastname'];
-        $twig_arguments['privileges']   = $res['privilege_level'];
-
-        $twig_file_to_render = 'userpage.twig';
+        $res = $userManager->getUser($ret_user['user']->uid);
+        if($res['status'] == 'ok') {
+            $twig_arguments['uid']          = $res['user']->uid;
+            $twig_arguments['username']     = $res['user']->username;
+            $twig_arguments['firstname']    = $res['user']->firstname;
+            $twig_arguments['lastname']     = $res['user']->lastname;
+            switch ($res['user']->privilege_level) {
+            case (0):
+                $twig_arguments['privileges'] = 'Student';
+                break;
+            case (1):
+                $twig_arguments['privileges'] = 'Lærer';
+                break;
+            case (2):
+                $twig_arguments['privileges'] = 'admin';
+                break;
+            }
+            $twig_file_to_render = 'userpage.twig';
+        } else {
+           // TODO:Error if not valid user id 
+        }
         break;
     default:
         $twig_file_to_render = 'notfound.twig';

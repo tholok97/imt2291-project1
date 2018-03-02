@@ -11,12 +11,14 @@
     <div class="container">
         <form method="post" action="src/viewUserpageHandler.php" >
         
-                <label for="username">brukernavn (email): {{username}}</label><br/>
-                <label for="firstname">fornavn: {{firstname}}</label><br/>
-                <label for="lastname">etternavn: {{lastname}}</label><br/>
-                <label for="privileges">Rettigheter: {{privileges}}</label><br/>
-                <label for="submit"> </label><input type="submit" value="Rediger"><br/>
-                <label for="submit"> </label><input type="submit" value="Bli lærer"><br/>
+            <label for="username">Brukernavn (email): {{username}}</label>  <input type="hidden" name="username" value="{{username}}"><br/>
+            <label for="name">Navn: {{firstname}} {{lastname}}</label><br/>
+            <label for="privileges">Rettigheter: {{privileges}}</label><br/>
+            <label for="submit"> </label><input type="submit" value="Rediger min info">
+            {% if privileges == "Student" %}
+            <label for="submit"> </label><input type="submit" value="Bli lærer">
+            {% endif %}
+            <label for="submit"> </label><input type="submit" value="Slett konto">
         </form>
     </div>
 </body>
