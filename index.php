@@ -412,6 +412,16 @@ if ($page == 'register') {
         exit();
 
         break;
+    case 'userpage':
+        $res = $userManager->getUser($_SESSION->uid);
+        $twig_arguments['uid']          = $res['uid'];
+        $twig_arguments['username']     = $res['user'];
+        $twig_arguments['firstname']    = $res['firstname'];
+        $twig_arguments['lastname']     = $res['lastname'];
+        $twig_arguments['privileges']   = $res['privilege_level'];
+
+        $twig_file_to_render = 'userpage.twig';
+        break;
     default:
         $twig_file_to_render = 'notfound.twig';
     }

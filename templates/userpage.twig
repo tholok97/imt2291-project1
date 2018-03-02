@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Min side</title>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    {% include 'navbar.twig' %}
+    <div class="container">
+        <form method="post" action="src/viewUserpageHandler.php" >
+        
+                <label for="username">brukernavn (email): {{username}}</label><br/>
+                <label for="firstname">fornavn: {{firstname}}</label><br/>
+                <label for="lastname">etternavn: {{lastname}}</label><br/>
+                <label for="privileges">Rettigheter: {{privileges}}</label><br/>
+                <label for="submit"> </label><input type="submit" value="Rediger"><br/>
+                <label for="submit"> </label><input type="submit" value="Bli lærer"><br/>
+        </form>
+    </div>
+</body>
+</html>
