@@ -1,6 +1,6 @@
 # Project 1 in imt2291 - Web Technology
 
-* [Note to lecturer](./note_to_lecturer.md)
+* [Note to lecturer](./docs/note_to_lecturer.md)
 * [Øivind's original readme](./docs/original_readme.md)
 * [Link to project description](https://bitbucket.org/okolloen/imt2291-project1-spring2018/wiki/)
 * ~~Project should be running on <http://tyk-www-project1.yngvehestem.no/> (which points to <http://188.166.44.12/>) in docker containers with auto-deployment capabilities.~~ (Turned off)
